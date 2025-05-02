@@ -156,7 +156,52 @@ public class MainFrame extends JFrame implements  ActionListener{
         cardLayout.show(cardPanel, "Main");
     }
 
+    //To log in to the database
+    public void logDatabaseUserInfo(){
+        String user = new String();
+        user = dbLogIn.usertxt.getText();
+        String pass = new String(dbLogIn.passtxt.getPassword());
 
+        System.out.println("User: " + user + " Pass: " + new String(pass));
+    
+        dbLogIn.usertxt.setText("");
+        dbLogIn.passtxt.setText("");
+
+        //change this logic nalang with how to connect to database
+        if(user.equals("User")&&pass.equals("Pass")){
+            cardLayout.show(cardPanel, "Access Database");
+        }else{
+            System.out.println("ANot mali");
+            System.out.println(user);
+            System.out.println(pass);
+        }
+    }
+
+    //To Log in user bank account
+    public void logInUserInfo(){
+        String uid = new String();
+        uid = userLogIn.idtxt.getText();
+        String pin = new String(userLogIn.pintxt.getPassword());
+
+        System.out.println("User: " + uid + " Pass: " + new String(pin));
+
+        userLogIn.idtxt.setText("");
+        userLogIn.pintxt.setText("");
+        
+
+        //change this logic nalang with how to query the uid and pass to crosscheck if an user kay ada database
+        if(uid.equals("User")&&pin.equals("Pass")){
+            cardLayout.show(cardPanel, "Transaction");
+        }else{
+            System.out.println("ANot mali");
+            System.out.println(uid);
+            System.out.println(pin);
+        }
+    }
+
+
+
+    //Create new User
     public void newUserInfo(){
                 //Code para kuhaon an input han user
 
@@ -190,6 +235,7 @@ public class MainFrame extends JFrame implements  ActionListener{
                 newUser.pintxt.setText("");
     }
 
+    //Update new User
     public void updateUserInfo(){
         //Code para kuhaon an input han user
 
@@ -223,47 +269,7 @@ public class MainFrame extends JFrame implements  ActionListener{
         newUser.pintxt.setText("");
     }
 
-    public void logDatabaseUserInfo(){
-        String user = new String();
-        user = dbLogIn.usertxt.getText();
-        String pass = new String(dbLogIn.passtxt.getPassword());
-
-        System.out.println("User: " + user + " Pass: " + new String(pass));
-    
-        dbLogIn.usertxt.setText("");
-        dbLogIn.passtxt.setText("");
-
-        //change this logic nalang with how to connect to database
-        if(user.equals("User")&&pass.equals("Pass")){
-            cardLayout.show(cardPanel, "Access Database");
-        }else{
-            System.out.println("ANot mali");
-            System.out.println(user);
-            System.out.println(pass);
-        }
-    }
-
-    public void logInUserInfo(){
-        String uid = new String();
-        uid = userLogIn.idtxt.getText();
-        String pin = new String(userLogIn.pintxt.getPassword());
-
-        System.out.println("User: " + uid + " Pass: " + new String(pin));
-
-        userLogIn.idtxt.setText("");
-        userLogIn.pintxt.setText("");
-        
-
-        //change this logic nalang with how to query the uid and pass to crosscheck if an user kay ada database
-        if(uid.equals("User")&&pin.equals("Pass")){
-            cardLayout.show(cardPanel, "Transaction");
-        }else{
-            System.out.println("ANot mali");
-            System.out.println(uid);
-            System.out.println(pin);
-        }
-    }
-
+    //ask uid of user to update
     public String updateUID(){
         String uid;
         uid = askUID.uidtxt.getText();
@@ -271,6 +277,18 @@ public class MainFrame extends JFrame implements  ActionListener{
         return uid ;
     }
 
+    //ask uid of user to delete
+    public String deleteUID(){
+        String uid;
+        uid = deleteUser.uidtxt.getText();
+        System.out.println("UID to delete: "+ uid);
+        askUID.uidtxt.setText("");
+        cardLayout.show(cardPanel, "Access Database");
+        return uid ;
+    }
+
+
+    //below functions are for user transaction
     public void amountOfLoan(){
         String loan = loanPanel.input.getText();
         System.out.println(loan);
@@ -362,6 +380,10 @@ public void actionPerformed(ActionEvent e) {
 
         if(e.getSource() ==newUser.exitBtn||e.getSource() ==readUser.exitBtn||e.getSource() ==updateUser.exitBtn||e.getSource()==deleteUser.exitBtn||e.getSource()==askUID.exitBtn){
             cardLayout.show(cardPanel, "Access Database");
+        }
+
+        if(e.getSource()==deleteUser.okBtn){
+            deleteUID();
         }
     }
 

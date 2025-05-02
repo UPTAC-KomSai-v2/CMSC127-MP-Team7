@@ -16,8 +16,8 @@ import javax.swing.SwingUtilities;
 
 public class DeleteUser extends JPanel{
     
-    JLabel uidlbl, cidlbl, didlbl, firstNamelbl, lastNamelbl, balancelbl, loanlbl, pinlbl;
-    public JTextField uidtxt, cidtxt, didtxt, firstNametxt, lastNametxt, balancetxt, loantxt, pintxt;
+    JLabel uidlbl;
+    public JTextField uidtxt;
     public JButton okBtn, exitBtn;
     Dimension size;
     GridBagConstraints gbc;
@@ -25,9 +25,6 @@ public class DeleteUser extends JPanel{
     public DeleteUser(){
         setLayout(new GridBagLayout());
         setBackground(Color.darkGray);
-
-
-
 
         size = new Dimension(150,30);
         uidlbl = new JLabel("User id of user to Delete: ");
