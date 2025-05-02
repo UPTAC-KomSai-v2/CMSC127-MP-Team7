@@ -17,7 +17,7 @@ import javax.swing.SwingUtilities;
 public class AskUID extends JPanel{
     
     JLabel uidlbl, cidlbl, didlbl, firstNamelbl, lastNamelbl, balancelbl, loanlbl, pinlbl;
-    public JTextField uidtxt, cidtxt, didtxt, firstNametxt, lastNametxt, balancetxt, loantxt, pintxt;
+    public JTextField uidtxt;
     public JButton okBtn, exitBtn;
     Dimension size;
     GridBagConstraints gbc;

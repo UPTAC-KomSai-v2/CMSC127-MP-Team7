@@ -1,0 +1,2 @@
+(To access an database na section ig input adi temporarily kay ig c-change pa inen hit backend) "User" Pass: "Pass"
+(To access an user na section ig input adi temporarily kay ig c-change pa inen hit backend) "User" Pass: "Pass"

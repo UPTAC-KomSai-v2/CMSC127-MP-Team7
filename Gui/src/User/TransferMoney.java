@@ -16,7 +16,7 @@ import javax.swing.SwingUtilities;
 public class TransferMoney extends JPanel{
     JLabel uidlbl, moneylbl;
     public JButton okBtn;
-    JTextField uidtxt, moneytxt;
+    public JTextField uidtxt, moneytxt;
     Dimension size;
     GridBagConstraints gbc;
 

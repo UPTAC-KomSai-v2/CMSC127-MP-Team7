@@ -10,7 +10,10 @@ public class Balance extends JPanel {
     GridBagConstraints gbc;
     Dimension size;
 
-    public Balance(String userName, double balance) {
+    public Balance() {
+
+        String userName = "User name";
+        double balance = 1000;
 
         setLayout(new GridBagLayout()); // Allows centering components both ways
         setBackground(Color.DARK_GRAY); // Background of the panel
@@ -61,7 +64,7 @@ public class Balance extends JPanel {
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             frame.setSize(800, 800);
 
-            Balance balancePanel = new Balance("Jake Mondragon", 1500.00);
+            Balance balancePanel = new Balance();
             frame.setContentPane(balancePanel);
 
             frame.setVisible(true);

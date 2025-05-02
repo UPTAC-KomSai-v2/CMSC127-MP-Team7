@@ -37,7 +37,7 @@ public class MainFrame extends JFrame implements  ActionListener{
     AskUID askUID = new AskUID();
     CreateNewUser updateUser = new CreateNewUser();
     DeleteUser deleteUser = new DeleteUser();
-    Balance balance = new Balance("Jake Mondragon", 1500.00);
+    Balance balance = new Balance();
     Amount creditPanel = new Amount();
     Amount loanPanel = new Amount();
     Amount repayPanel = new Amount();
@@ -157,6 +157,176 @@ public class MainFrame extends JFrame implements  ActionListener{
     }
 
 
+    public void newUserInfo(){
+                //Code para kuhaon an input han user
+
+                String uid = newUser.uidtxt.getText();
+                String cid = newUser.cidtxt.getText();
+                String did = newUser.didtxt.getText();
+                String firstName = newUser.firstNametxt.getText();
+                String lastName = newUser.lastNametxt.getText();
+                String balance = newUser.balancetxt.getText();
+                String loan = newUser.loantxt.getText();
+                String pin = newUser.pintxt.getText();
+        
+                System.out.println("uid: "+uid);
+                System.out.println("cid: "+cid);
+                System.out.println("did: "+did);
+                System.out.println("First Name: "+firstName);
+                System.out.println("Last Name: "+lastName);
+                System.out.println("Balance: "+balance);
+                System.out.println("Loan: "+loan);
+                System.out.println("Pin: "+pin);
+        
+                cardLayout.show(cardPanel, "Access Database");
+        
+                newUser.uidtxt.setText("");
+                newUser.cidtxt.setText("");
+                newUser.didtxt.setText("");
+                newUser.firstNametxt.setText("");
+                newUser.lastNametxt.setText("");
+                newUser.balancetxt.setText("");
+                newUser.loantxt.setText("");
+                newUser.pintxt.setText("");
+    }
+
+    public void updateUserInfo(){
+        //Code para kuhaon an input han user
+
+        String uid = newUser.uidtxt.getText();
+        String cid = newUser.cidtxt.getText();
+        String did = newUser.didtxt.getText();
+        String firstName = newUser.firstNametxt.getText();
+        String lastName = newUser.lastNametxt.getText();
+        String balance = newUser.balancetxt.getText();
+        String loan = newUser.loantxt.getText();
+        String pin = newUser.pintxt.getText();
+
+        System.out.println("uid: "+uid);
+        System.out.println("cid: "+cid);
+        System.out.println("did: "+did);
+        System.out.println("First Name: "+firstName);
+        System.out.println("Last Name: "+lastName);
+        System.out.println("Balance: "+balance);
+        System.out.println("Loan: "+loan);
+        System.out.println("Pin: "+pin);
+
+        cardLayout.show(cardPanel, "Access Database");
+
+        newUser.uidtxt.setText("");
+        newUser.cidtxt.setText("");
+        newUser.didtxt.setText("");
+        newUser.firstNametxt.setText("");
+        newUser.lastNametxt.setText("");
+        newUser.balancetxt.setText("");
+        newUser.loantxt.setText("");
+        newUser.pintxt.setText("");
+    }
+
+    public void logDatabaseUserInfo(){
+        String user = new String();
+        user = dbLogIn.usertxt.getText();
+        String pass = new String(dbLogIn.passtxt.getPassword());
+
+        System.out.println("User: " + user + " Pass: " + new String(pass));
+    
+        dbLogIn.usertxt.setText("");
+        dbLogIn.passtxt.setText("");
+
+        //change this logic nalang with how to connect to database
+        if(user.equals("User")&&pass.equals("Pass")){
+            cardLayout.show(cardPanel, "Access Database");
+        }else{
+            System.out.println("ANot mali");
+            System.out.println(user);
+            System.out.println(pass);
+        }
+    }
+
+    public void logInUserInfo(){
+        String uid = new String();
+        uid = userLogIn.idtxt.getText();
+        String pin = new String(userLogIn.pintxt.getPassword());
+
+        System.out.println("User: " + uid + " Pass: " + new String(pin));
+
+        userLogIn.idtxt.setText("");
+        userLogIn.pintxt.setText("");
+        
+
+        //change this logic nalang with how to query the uid and pass to crosscheck if an user kay ada database
+        if(uid.equals("User")&&pin.equals("Pass")){
+            cardLayout.show(cardPanel, "Transaction");
+        }else{
+            System.out.println("ANot mali");
+            System.out.println(uid);
+            System.out.println(pin);
+        }
+    }
+
+    public String updateUID(){
+        String uid;
+        uid = askUID.uidtxt.getText();
+        askUID.uidtxt.setText("");
+        return uid ;
+    }
+
+    public void amountOfLoan(){
+        String loan = loanPanel.input.getText();
+        System.out.println(loan);
+
+        cardLayout.show(cardPanel, "Credit");
+        //do other logic here
+
+        loanPanel.input.setText("");
+    }
+
+
+    public void amountOfRepay(){
+        String repay = repayPanel.input.getText();
+        System.out.println(repay);
+
+        cardLayout.show(cardPanel, "Credit");
+        //do other logic here
+
+        repayPanel.input.setText("");
+    }
+
+    public void amountOfDeposit(){
+        String deposit = creditPanel.input.getText();
+        System.out.println(deposit);
+
+        cardLayout.show(cardPanel, "Credit");
+        //do other logic here
+
+        creditPanel.input.setText("");
+    }
+
+    public void TransferMoneyInfo(){
+        String transfer = transferMoney.moneytxt.getText();
+        String uid = transferMoney.uidtxt.getText();
+        System.out.println("UID: "+uid+" Money: "+transfer);
+
+        cardLayout.show(cardPanel, "Debit");
+        //do other logic here
+
+        transferMoney.moneytxt.setText("");
+        transferMoney.uidtxt.setText("");
+    }
+
+    public void amountOfWithdraw(){
+        String withdraw = withdrawPanel.input.getText();
+        System.out.println(withdraw);
+
+        cardLayout.show(cardPanel, "Debit");
+        //do other logic here
+
+
+        withdrawPanel.input.setText("");
+        
+    }
+
+
 @Override
 public void actionPerformed(ActionEvent e) {
 
@@ -176,23 +346,63 @@ public void actionPerformed(ActionEvent e) {
     }
 
     //Prompt to CRUD operation if database login in success
-    if(e.getSource() == dbLogIn.logInBtn ||e.getSource() ==newUser.okBtn || e.getSource() ==newUser.exitBtn|| e.getSource()==readUser.exitBtn || e.getSource() == updateUser.exitBtn || e.getSource() == updateUser.okBtn || e.getSource()==askUID.exitBtn|| e.getSource() == deleteUser.okBtn || e.getSource()==deleteUser.exitBtn){
-        cardLayout.show(cardPanel, "Access Database");
+    if(e.getSource() == dbLogIn.logInBtn  ||e.getSource()==newUser.okBtn|| e.getSource() ==newUser.exitBtn|| e.getSource()==readUser.exitBtn || e.getSource() == updateUser.exitBtn || e.getSource() == updateUser.okBtn || e.getSource()==askUID.exitBtn|| e.getSource() == deleteUser.okBtn || e.getSource()==deleteUser.exitBtn){
+
+        if(e.getSource() == dbLogIn.logInBtn){
+            logDatabaseUserInfo();
+        }
+
+        if(e.getSource()==newUser.okBtn){
+            newUserInfo();
+        }
+
+        if(e.getSource()==updateUser.okBtn){
+            updateUserInfo();
+        }
+
+        if(e.getSource() ==newUser.exitBtn||e.getSource() ==readUser.exitBtn||e.getSource() ==updateUser.exitBtn||e.getSource()==deleteUser.exitBtn||e.getSource()==askUID.exitBtn){
+            cardLayout.show(cardPanel, "Access Database");
+        }
     }
+
+
 
     //Prompt to proceed transaction if user login is success or if user want to exit from chosen transaction
     if(e.getSource() == userLogIn.okBtn || e.getSource()==debit.exitBtn || e.getSource()== credit.exitBtn || e.getSource()==balance.exitBtn){
-        cardLayout.show(cardPanel, "Transaction");
+
+        if(e.getSource() == userLogIn.okBtn){
+            logInUserInfo();
+        }
+
+        if (e.getSource()==debit.exitBtn||e.getSource()== credit.exitBtn||e.getSource()==balance.exitBtn) {
+            cardLayout.show(cardPanel, "Transaction");
+        }
+
     }
 
     //Prompt for credit transaction if chosen
     if(e.getSource() == transaction.creditBtn || e.getSource() == creditPanel.okBtn ||e.getSource() == loanPanel.okBtn||e.getSource() == repayPanel.okBtn ){
-        cardLayout.show(cardPanel, "Credit");
+        if (e.getSource() == loanPanel.okBtn) {
+            amountOfLoan();
+        }else if (e.getSource() == creditPanel.okBtn) {
+            amountOfDeposit();
+        }else if (e.getSource() == repayPanel.okBtn) {
+            amountOfRepay();
+        }else{
+            cardLayout.show(cardPanel, "Credit");
+        }
     }
 
     //Prompt for debit transaction if chosen
     if(e.getSource() == transaction.debitBtn||e.getSource() == withdrawPanel.okBtn||e.getSource()==transferMoney.okBtn){
-        cardLayout.show(cardPanel, "Debit");
+        if(e.getSource() == withdrawPanel.okBtn){
+            amountOfWithdraw();
+        }else if(e.getSource()==transferMoney.okBtn){
+            TransferMoneyInfo();
+        }else{
+            cardLayout.show(cardPanel, "Debit");
+        }
+        
     }
 
     //Prompt the employee to input details if create account is clicked
@@ -213,6 +423,10 @@ public void actionPerformed(ActionEvent e) {
 
     //Prompt if the employee want to update the info and the user id matches something on the database
     if(e.getSource() == askUID.okBtn){
+        String uid = updateUID();
+        System.out.println(uid);
+        
+        //if uid matches within the database, show the panel
         cardLayout.show(cardPanel, "Update User");
     }
 

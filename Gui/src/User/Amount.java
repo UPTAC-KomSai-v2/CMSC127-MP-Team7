@@ -17,7 +17,7 @@ public class Amount extends JPanel{
     JLabel money;
     GridBagConstraints gbc;
     Dimension size;
-    JTextField input;
+    public JTextField input;
     public JButton okBtn;
 
     public Amount(){

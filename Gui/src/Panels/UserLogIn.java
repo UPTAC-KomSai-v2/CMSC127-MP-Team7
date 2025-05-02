@@ -16,8 +16,8 @@ import javax.swing.SwingUtilities;
 
 public class UserLogIn extends JPanel{
     JLabel idlbl, pinlbl;
-    JTextField idtxt;
-    JPasswordField pintxt;
+    public JTextField idtxt;
+    public JPasswordField pintxt;
     public JButton okBtn;
     Dimension size;
     GridBagConstraints gbc;

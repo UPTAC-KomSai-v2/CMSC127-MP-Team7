@@ -5,6 +5,8 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -14,13 +16,16 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
-public class DataBaseLogIn extends JPanel{
+public class DataBaseLogIn extends JPanel implements ActionListener{
     JLabel userlbl, passlbl;
-    JTextField usertxt;
-    JPasswordField passtxt;
+    public JTextField usertxt;
+    public JPasswordField passtxt;
     public JButton logInBtn;
     Dimension size;
     GridBagConstraints gbc;
+
+    public String user = new String();
+    public char [] pass = new char[30];
 
     public DataBaseLogIn(){
         setLayout(new GridBagLayout());
@@ -83,6 +88,7 @@ public class DataBaseLogIn extends JPanel{
         logInBtn.setBackground(Color.white);
         logInBtn.setHorizontalAlignment(SwingConstants.CENTER);
         logInBtn.setVerticalAlignment(SwingConstants.CENTER);
+        logInBtn.addActionListener(this);
         gbc.anchor = GridBagConstraints.CENTER;
 
         gbc.gridwidth=2;
@@ -91,6 +97,13 @@ public class DataBaseLogIn extends JPanel{
         gbc.anchor=GridBagConstraints.CENTER;
         this.add(logInBtn, gbc);
     }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+
+
+    }
+
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
             JFrame frame = new JFrame("Main Menu Test");
