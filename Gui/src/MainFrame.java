@@ -20,6 +20,8 @@ import java.awt.event.ActionListener;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
+import Connectivity.DBConnect;
+
 
 public class MainFrame extends JFrame implements ActionListener{
     private CardLayout cardLayout;
@@ -43,6 +45,7 @@ public class MainFrame extends JFrame implements ActionListener{
     Amount repayPanel = new Amount();
     Amount withdrawPanel = new Amount();
     TransferMoney transferMoney = new TransferMoney();
+    DBConnect mysqldb;
 
     public MainFrame() {
         setTitle("CardLayout Example");
@@ -154,6 +157,18 @@ public class MainFrame extends JFrame implements ActionListener{
         setVisible(true);
 
         cardLayout.show(cardPanel, "Main");
+    }
+
+    public void connect() {
+        try {
+            String db_url = "jdbc:mysql://localhost:3306";
+            String database = "bank";
+            String dbuser = "bank_admin";
+            String dbpass = "bank123";
+            mysqldb = new DBConnect(dbuser, dbpass, db_url + "/" + database); // just declares this idk
+        } catch (Exception e) {
+            System.exit(0); // just go exit xd
+        }
     }
 
     //To log in to the database
