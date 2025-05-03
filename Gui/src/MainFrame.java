@@ -21,7 +21,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 
-public class MainFrame extends JFrame implements  ActionListener{ 
+public class MainFrame extends JFrame implements ActionListener{ 
     private CardLayout cardLayout;
     private JPanel cardPanel;
 
