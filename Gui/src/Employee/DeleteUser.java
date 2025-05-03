@@ -3,9 +3,12 @@ package Employee;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Graphics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Image;
 import java.awt.Insets;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -21,10 +24,12 @@ public class DeleteUser extends JPanel{
     public JButton okBtn, exitBtn;
     Dimension size;
     GridBagConstraints gbc;
+    Image bg;
 
     public DeleteUser(){
         setLayout(new GridBagLayout());
         setBackground(Color.darkGray);
+        bg = new ImageIcon(getClass().getResource("/Files/bg.png")).getImage();
 
         size = new Dimension(150,30);
         uidlbl = new JLabel("User id of user to Delete: ");
@@ -47,7 +52,7 @@ public class DeleteUser extends JPanel{
         uidtxt = new JTextField();
         uidtxt.setOpaque(true);
         uidtxt.setPreferredSize(size);
-        uidtxt.setBackground(Color.white);
+        uidtxt.setBackground(new Color(22, 180, 161));
 
         gbc.gridx=1;
         this.add(uidtxt, gbc);
@@ -79,6 +84,14 @@ public class DeleteUser extends JPanel{
         add(exitBtn, gbc);
 
 
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        if (bg != null) {
+            g.drawImage(bg, 0, 0, getWidth(), getHeight(), this);
+        }
     }
 
     public static void main(String[] args) {

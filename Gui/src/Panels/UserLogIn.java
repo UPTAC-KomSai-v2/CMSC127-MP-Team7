@@ -2,9 +2,12 @@ package Panels;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Graphics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Image;
 import java.awt.Insets;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -21,11 +24,14 @@ public class UserLogIn extends JPanel{
     public JButton okBtn;
     Dimension size;
     GridBagConstraints gbc;
+    Image bg;
 
     public UserLogIn(){
         setLayout(new GridBagLayout());
         setBackground(Color.darkGray);
         size = new Dimension(80,30);
+
+        bg = new ImageIcon(getClass().getResource("/Files/bg.png")).getImage();
 
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
@@ -35,7 +41,7 @@ public class UserLogIn extends JPanel{
         gbc.anchor = GridBagConstraints.EAST;
 
         
-        idlbl = new JLabel("User Id: ");
+        idlbl = new JLabel("User Id");
         idlbl.setOpaque(true);
         idlbl.setPreferredSize(size);
         idlbl.setBackground(Color.white);
@@ -47,14 +53,14 @@ public class UserLogIn extends JPanel{
         idtxt = new JTextField();
         idtxt.setPreferredSize(size);
         idtxt.setOpaque(true);
-        idtxt.setBackground(Color.white);
+        idtxt.setBackground(new Color(22, 180, 161));
         
         gbc.gridx=1;
         gbc.anchor = GridBagConstraints.WEST;
         this.add(idtxt, gbc);
        
         size = new Dimension(80,30);
-        pinlbl = new JLabel("Pin: ");
+        pinlbl = new JLabel("Pin");
         pinlbl.setOpaque(true);
         pinlbl.setPreferredSize(size);
         pinlbl.setBackground(Color.white);
@@ -70,14 +76,14 @@ public class UserLogIn extends JPanel{
         pintxt = new JPasswordField();
         pintxt.setPreferredSize(size);
         pintxt.setOpaque(true);
-        pintxt.setBackground(Color.white);
+        pintxt.setBackground(new Color(22, 180, 161));
 
         gbc.gridx=1;
         gbc.anchor = GridBagConstraints.WEST;
         this.add(pintxt, gbc);
 
         size = new Dimension(100,30);
-        okBtn = new JButton("ok");
+        okBtn = new JButton("Ok");
         okBtn .setPreferredSize(size);
         okBtn .setOpaque(true);
         okBtn .setBackground(Color.white);
@@ -90,6 +96,14 @@ public class UserLogIn extends JPanel{
         gbc.gridy=2;
         gbc.anchor=GridBagConstraints.CENTER;
         this.add(okBtn , gbc);
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        if (bg != null) {
+            g.drawImage(bg, 0, 0, getWidth(), getHeight(), this);
+        }
     }
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {

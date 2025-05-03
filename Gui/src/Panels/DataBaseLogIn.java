@@ -2,11 +2,12 @@ package Panels;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Graphics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Image;
 import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -15,14 +16,14 @@ import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
-
-public class DataBaseLogIn extends JPanel implements ActionListener{
+public class DataBaseLogIn extends JPanel{
     JLabel userlbl, passlbl;
     public JTextField usertxt;
     public JPasswordField passtxt;
     public JButton logInBtn;
     Dimension size;
     GridBagConstraints gbc;
+    Image bg;
 
     public String user = new String();
     public char [] pass = new char[30];
@@ -32,6 +33,8 @@ public class DataBaseLogIn extends JPanel implements ActionListener{
         setBackground(Color.darkGray);
         size = new Dimension(80,30);
 
+        bg = new ImageIcon(getClass().getResource("/Files/bg.png")).getImage();
+
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
         gbc.gridy = 0;
@@ -40,7 +43,7 @@ public class DataBaseLogIn extends JPanel implements ActionListener{
         gbc.anchor = GridBagConstraints.EAST;
 
         
-        userlbl = new JLabel("Username: ");
+        userlbl = new JLabel("Username");
         userlbl.setOpaque(true);
         userlbl.setPreferredSize(size);
         userlbl.setBackground(Color.white);
@@ -52,14 +55,15 @@ public class DataBaseLogIn extends JPanel implements ActionListener{
         usertxt = new JTextField();
         usertxt.setPreferredSize(size);
         usertxt.setOpaque(true);
-        usertxt.setBackground(Color.white);
+        usertxt.setBackground(new Color(22, 180, 161));
+
         
         gbc.gridx=1;
         gbc.anchor = GridBagConstraints.WEST;
         this.add(usertxt, gbc);
        
         size = new Dimension(80,30);
-        passlbl = new JLabel("Password: ");
+        passlbl = new JLabel("Password");
         passlbl.setOpaque(true);
         passlbl.setPreferredSize(size);
         passlbl.setBackground(Color.white);
@@ -75,7 +79,7 @@ public class DataBaseLogIn extends JPanel implements ActionListener{
         passtxt = new JPasswordField();
         passtxt.setPreferredSize(size);
         passlbl.setOpaque(true);
-        passtxt.setBackground(Color.white);
+        passtxt.setBackground(new Color(22, 180, 161));
 
         gbc.gridx=1;
         gbc.anchor = GridBagConstraints.WEST;
@@ -88,7 +92,6 @@ public class DataBaseLogIn extends JPanel implements ActionListener{
         logInBtn.setBackground(Color.white);
         logInBtn.setHorizontalAlignment(SwingConstants.CENTER);
         logInBtn.setVerticalAlignment(SwingConstants.CENTER);
-        logInBtn.addActionListener(this);
         gbc.anchor = GridBagConstraints.CENTER;
 
         gbc.gridwidth=2;
@@ -99,9 +102,11 @@ public class DataBaseLogIn extends JPanel implements ActionListener{
     }
 
     @Override
-    public void actionPerformed(ActionEvent e) {
-
-
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        if (bg != null) {
+            g.drawImage(bg, 0, 0, getWidth(), getHeight(), this);
+        }
     }
 
     public static void main(String[] args) {

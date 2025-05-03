@@ -1,19 +1,20 @@
 package Employee;
 
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Image;
+import java.awt.Insets;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
-
-import Panels.Debit;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-import javax.swing.JButton;
 
 public class CreateNewUser extends  JPanel{
 
@@ -22,10 +23,12 @@ public class CreateNewUser extends  JPanel{
     public JButton okBtn, exitBtn;
     Dimension size;
     GridBagConstraints gbc;
+    Image bg;
 
     public CreateNewUser(){
         setLayout(new GridBagLayout());
         setBackground(Color.darkGray);
+        bg = new ImageIcon(getClass().getResource("/Files/bg.png")).getImage();
 
 
         size = new Dimension(100,30);
@@ -49,7 +52,7 @@ public class CreateNewUser extends  JPanel{
         uidtxt = new JTextField();
         uidtxt.setOpaque(true);
         uidtxt.setPreferredSize(size);
-        uidtxt.setBackground(Color.white);
+        uidtxt.setBackground(new Color(22, 180, 161));
 
         gbc.gridx=1;
         this.add(uidtxt, gbc);
@@ -70,7 +73,7 @@ public class CreateNewUser extends  JPanel{
         cidtxt = new JTextField();
         cidtxt.setOpaque(true);
         cidtxt.setPreferredSize(size);
-        cidtxt.setBackground(Color.white);
+        cidtxt.setBackground(new Color(22, 180, 161));
 
         gbc.gridx=1;
         this.add(cidtxt, gbc);
@@ -92,7 +95,7 @@ public class CreateNewUser extends  JPanel{
         didtxt = new JTextField();
         didtxt.setOpaque(true);
         didtxt.setPreferredSize(size);
-        didtxt.setBackground(Color.white);
+        didtxt.setBackground(new Color(22, 180, 161));
 
         gbc.gridx=1;
         this.add(didtxt, gbc);
@@ -113,7 +116,7 @@ public class CreateNewUser extends  JPanel{
         firstNametxt = new JTextField();
         firstNametxt.setOpaque(true);
         firstNametxt.setPreferredSize(size);
-        firstNametxt.setBackground(Color.white);
+        firstNametxt.setBackground(new Color(22, 180, 161));
 
         gbc.gridx=1;
         this.add(firstNametxt, gbc);
@@ -134,7 +137,7 @@ public class CreateNewUser extends  JPanel{
         lastNametxt = new JTextField();
         lastNametxt.setOpaque(true);
         lastNametxt.setPreferredSize(size);
-        lastNametxt.setBackground(Color.white);
+        lastNametxt.setBackground(new Color(22, 180, 161));
 
         gbc.gridx=1;
         this.add(lastNametxt, gbc);
@@ -155,7 +158,7 @@ public class CreateNewUser extends  JPanel{
         balancetxt = new JTextField();
         balancetxt.setOpaque(true);
         balancetxt.setPreferredSize(size);
-        balancetxt.setBackground(Color.white);
+        balancetxt.setBackground(new Color(22, 180, 161));
 
         gbc.gridx=1;
         this.add(balancetxt, gbc);
@@ -176,7 +179,7 @@ public class CreateNewUser extends  JPanel{
         loantxt = new JTextField();
         loantxt.setOpaque(true);
         loantxt.setPreferredSize(size);
-        loantxt.setBackground(Color.white);
+        loantxt.setBackground(new Color(22, 180, 161));
 
         gbc.gridx=1;
         this.add(loantxt, gbc);
@@ -197,7 +200,7 @@ public class CreateNewUser extends  JPanel{
         pintxt = new JTextField();
         pintxt.setOpaque(true);
         pintxt.setPreferredSize(size);
-        pintxt.setBackground(Color.white);
+        pintxt.setBackground(new Color(22, 180, 161));
 
         gbc.gridx=1;
         this.add(pintxt, gbc);
@@ -227,8 +230,14 @@ public class CreateNewUser extends  JPanel{
 
         gbc.gridy = 9;
         add(exitBtn, gbc);
+    }
 
-
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        if (bg != null) {
+            g.drawImage(bg, 0, 0, getWidth(), getHeight(), this);
+        }
     }
 
     public static void main(String[] args) {

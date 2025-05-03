@@ -2,9 +2,12 @@ package User;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Graphics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Image;
 import java.awt.Insets;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -19,10 +22,12 @@ public class TransferMoney extends JPanel{
     public JTextField uidtxt, moneytxt;
     Dimension size;
     GridBagConstraints gbc;
+    Image bg;
 
     public TransferMoney(){
         setLayout(new GridBagLayout());
         setBackground(Color.darkGray);
+        bg = new ImageIcon(getClass().getResource("/Files/bg.png")).getImage();
 
         size = new Dimension(200, 30);
         uidlbl = new JLabel("User id of receiver");
@@ -40,7 +45,7 @@ public class TransferMoney extends JPanel{
         add(uidlbl, gbc);
 
         uidtxt = new JTextField();
-        uidtxt.setBackground(Color.white);
+        uidtxt.setBackground(new Color(22, 180, 161));
         uidtxt.setPreferredSize(size);
         uidtxt.setOpaque(true);
         
@@ -61,7 +66,7 @@ public class TransferMoney extends JPanel{
         add(moneylbl, gbc);
 
         moneytxt = new JTextField();
-        moneytxt.setBackground(Color.white);
+        moneytxt.setBackground(new Color(22, 180, 161));
         moneytxt.setPreferredSize(size);
         moneytxt.setOpaque(true);
 
@@ -83,6 +88,14 @@ public class TransferMoney extends JPanel{
         gbc.gridy=2;
         add(okBtn, gbc);
         
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        if (bg != null) {
+            g.drawImage(bg, 0, 0, getWidth(), getHeight(), this);
+        }
     }
 
     public static void main(String[] args) {

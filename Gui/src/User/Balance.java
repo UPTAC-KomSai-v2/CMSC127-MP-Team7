@@ -9,29 +9,30 @@ public class Balance extends JPanel {
     public JButton exitBtn;
     GridBagConstraints gbc;
     Dimension size;
+    Image bg;
 
     public Balance() {
 
         String userName = "User name";
         double balance = 1000;
 
-        setLayout(new GridBagLayout()); // Allows centering components both ways
-        setBackground(Color.DARK_GRAY); // Background of the panel
+        setLayout(new GridBagLayout());
+        setBackground(Color.DARK_GRAY);
+        bg = new ImageIcon(getClass().getResource("/Files/bg.png")).getImage();
 
         balancePane = new JTextPane();
         balancePane.setOpaque(true);
         balancePane.setEditable(false);
         balancePane.setFont(new Font("Arial", Font.PLAIN, 18));
-        balancePane.setBackground(Color.WHITE); // Keep text pane readable
+        balancePane.setBackground(Color.WHITE);
         balancePane.setText("\nUser: " + userName + "\nBalance: ₱" + String.format("%.2f", balance));
 
-        // Center align text horizontally
+        
         StyledDocument doc = balancePane.getStyledDocument();
         SimpleAttributeSet center = new SimpleAttributeSet();
         StyleConstants.setAlignment(center, StyleConstants.ALIGN_CENTER);
         doc.setParagraphAttributes(0, doc.getLength(), center, false);
 
-        // Set preferred size to make the pane visibly centered
         balancePane.setPreferredSize(new Dimension(300, 100));
 
 
@@ -56,6 +57,14 @@ public class Balance extends JPanel {
        add(exitBtn, gbc);
 
 
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        if (bg != null) {
+            g.drawImage(bg, 0, 0, getWidth(), getHeight(), this);
+        }
     }
 
     public static void main(String[] args) {

@@ -1,9 +1,12 @@
 package Panels;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Graphics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Image;
 import java.awt.Insets;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -18,12 +21,14 @@ public class MainMenu extends JPanel{
     JLabel username, pass;
     GridBagConstraints gbc;
     Dimension size;
+    Image bg;
 
     public JButton accessDatabaseBtn, transactionBtn;
 
     public MainMenu(){
         setLayout(new GridBagLayout());
         setBackground(Color.darkGray);
+        bg = new ImageIcon(getClass().getResource("/Files/bg.png")).getImage();
 
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
@@ -49,6 +54,14 @@ public class MainMenu extends JPanel{
         gbc.gridy = 2;
         this.add(transactionBtn, gbc);
 
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        if (bg != null) {
+            g.drawImage(bg, 0, 0, getWidth(), getHeight(), this);
+        }
     }
 
     public static void main(String[] args) {

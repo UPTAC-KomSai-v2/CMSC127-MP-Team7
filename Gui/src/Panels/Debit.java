@@ -2,9 +2,12 @@ package Panels;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Graphics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Image;
 import java.awt.Insets;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -15,10 +18,12 @@ public class Debit extends JPanel{
     public JButton transferMoneyBtn, withdrawBtn, exitBtn;
     Dimension size;
     GridBagConstraints gbc;
+    Image bg;
     
     public Debit(){
         setLayout(new GridBagLayout());
         setBackground(Color.darkGray);
+        bg = new ImageIcon(getClass().getResource("/Files/bg.png")).getImage();
 
         size = new Dimension(200,30);
         transferMoneyBtn = new JButton("Transfer Money");
@@ -54,6 +59,14 @@ public class Debit extends JPanel{
 
         gbc.gridy = 2;
         add(exitBtn, gbc);
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        if (bg != null) {
+            g.drawImage(bg, 0, 0, getWidth(), getHeight(), this);
+        }
     }
 
     public static void main(String[] args) {

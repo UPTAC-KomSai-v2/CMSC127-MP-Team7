@@ -2,9 +2,12 @@ package User;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Graphics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Image;
 import java.awt.Insets;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -19,11 +22,13 @@ public class Amount extends JPanel{
     Dimension size;
     public JTextField input;
     public JButton okBtn;
+    Image bg;
 
     public Amount(){
 
         setLayout(new GridBagLayout());
         setBackground(Color.darkGray);
+        bg = new ImageIcon(getClass().getResource("/Files/bg.png")).getImage();
 
         size = new Dimension(200, 30);
         money = new JLabel("Amount: ");
@@ -42,7 +47,7 @@ public class Amount extends JPanel{
         add(money, gbc);
 
         input = new JTextField();
-        input.setBackground(Color.white);
+        input.setBackground(new Color(22, 180, 161));
         input.setPreferredSize(size);
         input.setOpaque(true);
 
@@ -62,6 +67,14 @@ public class Amount extends JPanel{
         gbc.gridy=2;
         add(okBtn, gbc);
 
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        if (bg != null) {
+            g.drawImage(bg, 0, 0, getWidth(), getHeight(), this);
+        }
     }
 
         public static void main(String[] args) {

@@ -2,9 +2,12 @@ package Employee;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Graphics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Image;
 import java.awt.Insets;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -19,12 +22,14 @@ public class ReadUser extends JPanel {
     public JButton exitBtn;
     GridBagConstraints gbc;
     Dimension size;
+    Image bg;
 
     public ReadUser() {
         setLayout(new GridBagLayout());
         gbc = new GridBagConstraints();
 		setBackground(Color.darkGray);
         size = new Dimension(100, 30); 
+        bg = new ImageIcon(getClass().getResource("/Files/bg.png")).getImage();
 
 		//Change this data nala
 		String[][] data = {
@@ -69,6 +74,14 @@ public class ReadUser extends JPanel {
         gbc.gridwidth = 2;
         gbc.anchor = GridBagConstraints.CENTER;
         add(exitBtn, gbc);
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        if (bg != null) {
+            g.drawImage(bg, 0, 0, getWidth(), getHeight(), this);
+        }
     }
 
     public static void main(String[] args) {

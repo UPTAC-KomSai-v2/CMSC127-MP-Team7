@@ -2,9 +2,12 @@ package Panels;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Graphics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Image;
 import java.awt.Insets;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -15,6 +18,7 @@ public class AccessDataBase extends JPanel{
 
     GridBagConstraints gbc;
     Dimension size;
+    Image bg;
 
     public JButton createUserBtn, readUserBtn, updateUserBtn, deleteUserBtn, exitBtn;
 
@@ -22,6 +26,7 @@ public class AccessDataBase extends JPanel{
 
         setLayout(new GridBagLayout());
         setBackground(Color.darkGray);
+        bg = new ImageIcon(getClass().getResource("/Files/bg.png")).getImage();
 
         createUserBtn = new JButton("Create New Account");
         size = new Dimension(200,30);
@@ -68,6 +73,14 @@ public class AccessDataBase extends JPanel{
 
         gbc.gridy =5;
         this.add(exitBtn, gbc);
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        if (bg != null) {
+            g.drawImage(bg, 0, 0, getWidth(), getHeight(), this);
+        }
     }
     
         public static void main(String[] args) {
