@@ -1,13 +1,13 @@
-DROP TABLE debit_balance;
-DROP TABLE credit_loans;
-DROP TABLE debit_accounts;
-DROP TABLE credit_accounts;
-DROP TABLE bank_users;
+DROP TABLE IF EXISTS debit_balance;
+DROP TABLE IF EXISTS credit_loans;
+DROP TABLE IF EXISTS debit_accounts;
+DROP TABLE IF EXISTS credit_accounts;
+DROP TABLE IF EXISTS bank_users;
 
 CREATE TABLE `bank_users` (
   `user_id` int(11) NOT NULL AUTO_INCREMENT,
-  `name` int(11) NOT NULL,
-  `email` int(11) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `email` varchar(100) NOT NULL,
   PRIMARY KEY (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -27,7 +27,7 @@ CREATE TABLE `debit_accounts` (
   PRIMARY KEY (`debit_id`),
   KEY `pin` (`pin`),
   CONSTRAINT `debit_accounts_ibfk_1` FOREIGN KEY (`pin`) REFERENCES `bank_users` (`user_id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE `credit_loans` (
   `loans_id` int(11) NOT NULL AUTO_INCREMENT,
@@ -36,8 +36,8 @@ CREATE TABLE `credit_loans` (
   PRIMARY KEY (`loans_id`),
   KEY `credit_id` (`credit_id`),
   CONSTRAINT `credit_loans_ibfk_1` FOREIGN KEY (`credit_id`) REFERENCES `credit_accounts` (`credit_id`) ON DELETE CASCADE,
-  CONSTRAINT `CONSTRAINT_1` CHECK (`loan` <= 0)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci; 
+  CONSTRAINT `loans_negative_check` CHECK (`loan` <= 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE `debit_balance` (
   `balance_id` int(11) NOT NULL AUTO_INCREMENT,
@@ -46,5 +46,5 @@ CREATE TABLE `debit_balance` (
   PRIMARY KEY (`balance_id`),
   KEY `debit_id` (`debit_id`),
   CONSTRAINT `debit_balance_ibfk_1` FOREIGN KEY (`debit_id`) REFERENCES `debit_accounts` (`debit_id`) ON DELETE CASCADE,
-  CONSTRAINT `CONSTRAINT_1` CHECK (`balance` >= 0)
+  CONSTRAINT `balance_positive_check` CHECK (`balance` >= 0)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
