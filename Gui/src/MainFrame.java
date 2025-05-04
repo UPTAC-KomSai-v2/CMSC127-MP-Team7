@@ -1,5 +1,4 @@
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.FileReader;
@@ -35,8 +34,6 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
-import Connectivity.DBConnect;
-
 
 public class MainFrame extends JFrame implements ActionListener{
     private CardLayout cardLayout;
@@ -65,7 +62,6 @@ public class MainFrame extends JFrame implements ActionListener{
     Amount repayPanel = new Amount();
     Amount withdrawPanel = new Amount();
     TransferMoney transferMoney = new TransferMoney();
-    DBConnect mysqldb;
 
     private int currCardID;
     private String currAccType;
@@ -107,7 +103,7 @@ public class MainFrame extends JFrame implements ActionListener{
         //Menu Panel for User Transactions: Transaction Panel
         cardPanel.add(transaction, "Transaction");
         transaction.balanceBtn.addActionListener(this);
-        transaction.creditBtn.addActionListener(this);
+        transaction.transferMoneyBtn.addActionListener(this);
         transaction.debitBtn.addActionListener(this);
         transaction.exitBtn.addActionListener(this);
 
@@ -203,18 +199,6 @@ public class MainFrame extends JFrame implements ActionListener{
         cardLayout.show(cardPanel, "Main");
     }
 
-    public void connect() {
-        try {
-            String db_url = "jdbc:mysql://localhost:3306";
-            String database = "bank";
-            String dbuser = "bank_admin";
-            String dbpass = "bank123";
-            mysqldb = new DBConnect(dbuser, dbpass, db_url + "/" + database); // just declares this idk
-        } catch (Exception e) {
-            System.exit(0); // just go exit xd
-        }
-    }
-
     //To log in to the database
     public boolean logDatabaseUserInfo() {
 
@@ -224,15 +208,6 @@ public class MainFrame extends JFrame implements ActionListener{
         
         dbLogIn.usertxt.setText("");
         dbLogIn.passtxt.setText("");
-
-        try {
-            Class.forName("org.mariadb.jdbc.Driver");
-            System.out.println("Connected");
-        }
-        catch (Exception e){
-            System.out.println("Error");
-            System.out.println("driver failed");
-        }
 
         try (BufferedReader br = new BufferedReader(new FileReader("DefaultCredentials.txt"))) {
             String line;
@@ -286,6 +261,8 @@ public class MainFrame extends JFrame implements ActionListener{
             readUser.setConnection(conn);
             updateUser.setConnection(conn);
             deleteUser.setConnection(conn);
+            // set session isolation level here
+            connection.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
             return true;
         } catch (SQLException e) {
             System.out.println("Database connection failed!");
@@ -647,7 +624,7 @@ public class MainFrame extends JFrame implements ActionListener{
         }
 
     //Prompt for credit transaction if chosen
-    if(e.getSource() == transaction.creditBtn || e.getSource() == creditPanel.okBtn ||e.getSource() == loanPanel.okBtn||e.getSource() == repayPanel.okBtn ){
+    if(e.getSource() == transaction.transferMoneyBtn || e.getSource() == creditPanel.okBtn ||e.getSource() == loanPanel.okBtn||e.getSource() == repayPanel.okBtn ){
         if (e.getSource() == loanPanel.okBtn) {
             amountOfLoan();
         }else if (e.getSource() == creditPanel.okBtn) {
