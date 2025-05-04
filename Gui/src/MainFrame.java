@@ -1,4 +1,6 @@
-
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.FileReader;
 import Employee.AccountCreationSelection;
 import Employee.AskUID;
 import Employee.CreateNewCard;
@@ -213,14 +215,53 @@ public class MainFrame extends JFrame implements ActionListener{
     public boolean logDatabaseUserInfo() {
         String user = dbLogIn.usertxt.getText();
         String pass = new String(dbLogIn.passtxt.getPassword());
-    
+
+        String USER = "";
+        String PASS = "";
+        String DB_URL = "";
+        
         dbLogIn.usertxt.setText("");
         dbLogIn.passtxt.setText("");
-    
-        String url = "jdbc:mysql://localhost:3306/bank"; // Update with your database URL
-    
+
         try {
-            Connection conn = DriverManager.getConnection(url, user, pass);
+            Class.forName("org.mariadb.jdbc.Driver");
+            System.out.println("Connected");
+        }
+        catch (Exception e){
+            System.out.println("Error");
+            System.out.println("driver failed");
+        }
+
+        String url = "jdbc:mysql://localhost:3306/bank"; // Update with your database URL
+        try (BufferedReader br = new BufferedReader(new FileReader("DefaultCredentials.txt"))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] parts = line.split(":", 2); // Split into key and value
+                if (parts.length < 2) continue; // Skip malformed lines
+
+                String key = parts[0].trim();
+                String value = parts[1].trim();
+
+                switch (key) {
+                    case "DefaultUser":
+                        USER = value;
+                        break;
+                    case "Defaultpass":
+                        PASS= value;
+                        break;
+                    case "DB_URL":
+                        DB_URL = value;
+                        break;
+                }
+                System.out.println(USER + DB_URL + PASS);
+            }
+        } catch (IOException e) {
+            System.out.println("wtf");
+            e.printStackTrace();
+        }
+
+        try {
+            Connection conn = DriverManager.getConnection(DB_URL, USER, PASS);
             System.out.println("Connected to database successfully!");
             
             if(isTransactionLogin) {
@@ -501,12 +542,16 @@ public class MainFrame extends JFrame implements ActionListener{
     
         //Prompt to enter username and password to access database
         if (e.getSource() == menu.accessDatabaseBtn) {
-            cardLayout.show(cardPanel, "Database Log In");
+            //cardLayout.show(cardPanel, "Database Log In");
+            logDatabaseUserInfo();
+            cardLayout.show(cardPanel, "Access Database");
         }
     
         //Prompt to enter user id and pin to access account
         if (e.getSource() == menu.transactionBtn) {
-            cardLayout.show(cardPanel, "Database Log In");
+            //cardLayout.show(cardPanel, "Database Log In");
+            logDatabaseUserInfo();
+            cardLayout.show(cardPanel, "User Log In");
             isTransactionLogin = true;
         }
     
