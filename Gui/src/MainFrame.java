@@ -158,6 +158,11 @@ public class MainFrame extends JFrame implements ActionListener{
         cardPanel.add(transferMoney, "Transfer Money");
         transferMoney.okBtn.addActionListener(this);
 
+        // For Database Log In back button
+        dbLogIn.backBtn.addActionListener(this);
+
+        // For User Log In back button
+        userLogIn.backBtn.addActionListener(this);
 
         getContentPane().setLayout(new BorderLayout());
         add(cardPanel, BorderLayout.CENTER);
@@ -404,12 +409,16 @@ public class MainFrame extends JFrame implements ActionListener{
     @Override
     public void actionPerformed(ActionEvent e) {
         //Prompt to go back to main if chosen to exit from the transaction or database access
-        if(e.getSource() == transaction.exitBtn || e.getSource() == accessDB.exitBtn){
-            if(e.getSource() == transaction.exitBtn) {
-                closeTransactionConnection();
-            }
-            cardLayout.show(cardPanel, "Main");
+        if(e.getSource() == transaction.exitBtn || e.getSource() == accessDB.exitBtn || 
+       e.getSource() == dbLogIn.backBtn || e.getSource() == userLogIn.backBtn) {
+        if(e.getSource() == transaction.exitBtn || e.getSource() == userLogIn.backBtn) {
+            closeTransactionConnection();
         }
+        if(e.getSource() == dbLogIn.backBtn) {
+            isTransactionLogin = false;
+        }
+        cardLayout.show(cardPanel, "Main");
+    }
     
         //Prompt to enter username and password to access database
         if (e.getSource() == menu.accessDatabaseBtn) {
