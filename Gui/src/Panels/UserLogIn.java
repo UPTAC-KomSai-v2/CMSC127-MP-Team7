@@ -96,6 +96,21 @@ public class UserLogIn extends JPanel{
         gbc.gridy=2;
         gbc.anchor=GridBagConstraints.CENTER;
         this.add(okBtn , gbc);
+
+        size = new Dimension(100,30);
+        backBtn = new JButton("Back");
+        backBtn.setPreferredSize(size);
+        backBtn.setOpaque(true);
+        backBtn.setBackground(Color.white);
+        backBtn.setHorizontalAlignment(SwingConstants.CENTER);
+        backBtn.setVerticalAlignment(SwingConstants.CENTER);
+        gbc.anchor = GridBagConstraints.CENTER;
+
+        gbc.gridwidth=2;
+        gbc.gridx=0;
+        gbc.gridy=3;
+        gbc.anchor=GridBagConstraints.CENTER;
+        this.add(backBtn, gbc);
     }
 
     @Override
