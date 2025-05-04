@@ -63,22 +63,22 @@ CREATE TABLE `double_transactions_credit` (
   CONSTRAINT `double_transactions_credit_ibfk_1` FOREIGN KEY (`credit_id`) REFERENCES `credit_accounts` (`credit_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE `double_transactions_credit` (
+ CREATE TABLE `double_transactions_debit` (
   `transaction_id` int(11) NOT NULL,
-  `credit_id` int(11) NOT NULL,
+  `debit_id` int(11) NOT NULL,
   `amount` int(11) DEFAULT NULL,
-  PRIMARY KEY (`transaction_id`,`credit_id`),
-  KEY `credit_id` (`credit_id`),
-  CONSTRAINT `double_transactions_credit_ibfk_1` FOREIGN KEY (`credit_id`) REFERENCES `credit_accounts` (`credit_id`) ON DELETE CASCADE
+  PRIMARY KEY (`transaction_id`,`debit_id`),
+  KEY `debit_id` (`debit_id`),
+  CONSTRAINT `double_transactions_debit_ibfk_1` FOREIGN KEY (`debit_id`) REFERENCES `debit_accounts` (`debit_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE `single_transactions_debit` (
+CREATE TABLE `single_transactions_credit` (
   `transaction_id` int(11) NOT NULL,
-  `debit_id` int(11) DEFAULT NULL,
+  `credit_id` int(11) DEFAULT NULL,
   `amount` int(11) DEFAULT NULL,
   PRIMARY KEY (`transaction_id`),
-  KEY `debit_id` (`debit_id`),
-  CONSTRAINT `single_transactions_debit_ibfk_1` FOREIGN KEY (`debit_id`) REFERENCES `debit_accounts` (`debit_id`) ON DELETE CASCADE
+  KEY `credit_id` (`credit_id`),
+  CONSTRAINT `single_transactions_credit_ibfk_1` FOREIGN KEY (`credit_id`) REFERENCES `credit_accounts` (`credit_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE `single_transactions_debit` (
