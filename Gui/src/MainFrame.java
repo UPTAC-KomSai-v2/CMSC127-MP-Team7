@@ -116,7 +116,7 @@ public class MainFrame extends JFrame implements ActionListener{
         accountCreationSelection.getNewCardBtn().addActionListener(this);
         accountCreationSelection.getExitBtn().addActionListener(this);
 
-// New card creation panel
+        // New card creation panel
         cardPanel.add(createNewCard, "Create New Card");
         createNewCard.getOkBtn().addActionListener(this);
         createNewCard.getExitBtn().addActionListener(this);
@@ -543,15 +543,18 @@ public class MainFrame extends JFrame implements ActionListener{
     @Override
     public void actionPerformed(ActionEvent e) {
         //Prompt to go back to main if chosen to exit from the transaction or database access
-        if(e.getSource() == transaction.exitBtn || e.getSource() == accessDB.exitBtn || 
-       e.getSource() == dbLogIn.backBtn || e.getSource() == userLogIn.backBtn) {
-        if(e.getSource() == transaction.exitBtn || e.getSource() == userLogIn.backBtn) {
+        if (e.getSource() == transaction.exitBtn || e.getSource() == accessDB.exitBtn || 
+        e.getSource() == dbLogIn.backBtn || e.getSource() == userLogIn.backBtn) {
+        
+        if (e.getSource() == transaction.exitBtn || e.getSource() == userLogIn.backBtn) {
             closeTransactionConnection();
-        }
-        if(e.getSource() == dbLogIn.backBtn) {
+            cardLayout.show(cardPanel, "Database Log In");
+        } else if (e.getSource() == dbLogIn.backBtn) {
             isTransactionLogin = false;
+            cardLayout.show(cardPanel, "Main"); 
+        } else if (e.getSource() == accessDB.exitBtn) {
+            cardLayout.show(cardPanel, "Main"); 
         }
-        cardLayout.show(cardPanel, "Main");
     }
     
         //Prompt to enter username and password to access database
