@@ -21,7 +21,7 @@ public class UserLogIn extends JPanel{
     JLabel idlbl, pinlbl;
     public JTextField idtxt;
     public JPasswordField pintxt;
-    public JButton okBtn;
+    public JButton okBtn, backBtn;
     Dimension size;
     GridBagConstraints gbc;
     Image bg;
