@@ -24,7 +24,7 @@ public class UserLogIn extends JPanel{
     public JButton okBtn, backBtn;
     Dimension size;
     GridBagConstraints gbc;
-    Image bg;
+    Image bg, logo;
 
     public UserLogIn(){
         setLayout(new GridBagLayout());
@@ -32,6 +32,7 @@ public class UserLogIn extends JPanel{
         size = new Dimension(80,30);
 
         bg = new ImageIcon(getClass().getResource("/Files/bg.png")).getImage();
+        logo = new ImageIcon(getClass().getResource("/Files/logo.png")).getImage();
 
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
@@ -130,7 +131,15 @@ public class UserLogIn extends JPanel{
         if (bg != null) {
             g.drawImage(bg, 0, 0, getWidth(), getHeight(), this);
         }
+        if (logo != null) {
+            int logoWidth = 50;
+            int logoHeight = 50;
+            g.drawImage(logo, 10, 10, logoWidth, logoHeight, this);
+        }
+        g.setColor(Color.WHITE);
+        g.fillRect(70, 30, getWidth() - 80, 2);
     }
+
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
             JFrame frame = new JFrame("Main Menu Test");

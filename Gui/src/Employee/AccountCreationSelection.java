@@ -12,7 +12,7 @@ import javax.swing.JButton;
 import javax.swing.JPanel;
 
 public class AccountCreationSelection extends JPanel {
-    private JButton newUserBtn, newCardBtn;
+    private JButton newUserBtn, newCardBtn, exitBtn;
     private Image bg;
 
     public AccountCreationSelection() {
@@ -41,6 +41,13 @@ public class AccountCreationSelection extends JPanel {
         newCardBtn.setOpaque(true);
         newCardBtn.setBackground(Color.white);
         add(newCardBtn, gbc);
+
+        gbc.gridy = 2;
+        exitBtn = new JButton("Back");
+        exitBtn.setPreferredSize(size);
+        exitBtn.setOpaque(true);
+        exitBtn.setBackground(Color.white);
+        add(exitBtn, gbc);
     }
 
     public JButton getNewUserBtn() {
@@ -51,6 +58,10 @@ public class AccountCreationSelection extends JPanel {
         return newCardBtn;
     }
 
+    public JButton getExitBtn() {
+        return exitBtn;
+    }
+    
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);

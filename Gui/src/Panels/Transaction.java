@@ -18,13 +18,14 @@ public class Transaction extends JPanel{
     public JButton balanceBtn, creditBtn, debitBtn, exitBtn;
     Dimension size;
     GridBagConstraints gbc;
-    Image bg;
+    Image bg, logo;
 
     public Transaction(){
         
         setLayout(new GridBagLayout());
         setBackground(Color.darkGray);
         bg = new ImageIcon(getClass().getResource("/Files/bg.png")).getImage();
+        logo = new ImageIcon(getClass().getResource("/Files/logo.png")).getImage();
 
         size = new Dimension(100,30);
         balanceBtn = new JButton("Balance");
@@ -78,6 +79,13 @@ public class Transaction extends JPanel{
         if (bg != null) {
             g.drawImage(bg, 0, 0, getWidth(), getHeight(), this);
         }
+        if (logo != null) {
+            int logoWidth = 50;
+            int logoHeight = 50;
+            g.drawImage(logo, 10, 10, logoWidth, logoHeight, this);
+        }
+        g.setColor(Color.WHITE);
+        g.fillRect(70, 30, getWidth() - 80, 2);
     }
 
 

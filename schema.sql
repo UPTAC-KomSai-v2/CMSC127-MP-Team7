@@ -43,7 +43,8 @@ CREATE TABLE `credit_loans` (
   PRIMARY KEY (`loans_id`),
   KEY `credit_id` (`credit_id`),
   CONSTRAINT `credit_loans_ibfk_1` FOREIGN KEY (`credit_id`) REFERENCES `credit_accounts` (`credit_id`) ON DELETE CASCADE,
-  CONSTRAINT `loans_negative_check` CHECK (`loan` <= 0)
+  CONSTRAINT `loans_negative_check` CHECK (`loan` <= 0),
+  CONSTRAINT `loans_credit_limit_check` CHECK (`loan` >= -50000)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE `debit_balance` (
@@ -217,7 +218,7 @@ VALUES
   (9, 1500),
   (10, 4000);
 
-insert into double_transactions_credit (transaction_id, credit_id, amount)
+INSERT INTO double_transactions_credit (transaction_id, credit_id, amount)
 values
   (1001, 1, 1000),
   (1002, 2, 1500),

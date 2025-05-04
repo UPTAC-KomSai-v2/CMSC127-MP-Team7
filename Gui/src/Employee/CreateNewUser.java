@@ -9,6 +9,7 @@ import java.awt.Image;
 import java.awt.Insets;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -25,6 +26,8 @@ public class CreateNewUser extends JPanel {
     GridBagConstraints gbc;
     Image bg;
     private Connection connection;
+    private boolean isUpdateMode = false;
+    private int currentUserId = -1;
 
     public CreateNewUser() {
         setLayout(new GridBagLayout());
@@ -153,13 +156,15 @@ public class CreateNewUser extends JPanel {
                 return false;
             }
             
-            String fullName = firstNametxt.getText().trim() + " " + lastNametxt.getText().trim();
+            String firstName = firstNametxt.getText().trim();
+            String lastName = lastNametxt.getText().trim();
             String email = emailtxt.getText().trim();
             
-            String sql = "INSERT INTO bank_users (name, email) VALUES (?, ?)";
+            String sql = "INSERT INTO bank_users (first_name, last_name, email) VALUES (?, ?, ?)";
             PreparedStatement stmt = connection.prepareStatement(sql);
-            stmt.setString(1, fullName);
-            stmt.setString(2, email);
+            stmt.setString(1, firstName);
+            stmt.setString(2, lastName);
+            stmt.setString(3, email);
             
             int rowsAffected = stmt.executeUpdate();
             if (rowsAffected > 0) {
@@ -174,6 +179,90 @@ public class CreateNewUser extends JPanel {
             }
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(this, "Error creating user: " + e.getMessage(), 
+                "Database Error", JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+    }
+
+    public void setUpdateMode(boolean updateMode, int userId) {
+        this.isUpdateMode = updateMode;
+        this.currentUserId = userId;
+        
+        if (updateMode && userId > 0) {
+            loadUserData(userId);
+        } else {
+            clearFields();
+        }
+    }
+
+    private void loadUserData(int userId) {
+        if (connection == null) return;
+        
+        try {
+            String sql = "SELECT first_name, last_name, email FROM bank_users WHERE user_id = ?";
+            PreparedStatement stmt = connection.prepareStatement(sql);
+            stmt.setInt(1, userId);
+            ResultSet rs = stmt.executeQuery();
+            
+            if (rs.next()) {
+                String firstName = rs.getString("first_name");
+                String lastName = rs.getString("last_name");
+                String email = rs.getString("email");
+                
+                firstNametxt.setText(firstName != null ? firstName : "");
+                lastNametxt.setText(lastName != null ? lastName : "");
+                emailtxt.setText(email != null ? email : "");
+            }
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(this, "Error loading user data: " + e.getMessage(), 
+                "Database Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    public boolean saveUserToDatabase() {
+        if (connection == null) {
+            JOptionPane.showMessageDialog(this, "Database connection is not established", 
+                "Error", JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+    
+        try {
+            if (firstNametxt.getText().trim().isEmpty() || 
+                lastNametxt.getText().trim().isEmpty() || 
+                emailtxt.getText().trim().isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Please fill in all fields", 
+                    "Error", JOptionPane.ERROR_MESSAGE);
+                return false;
+            }
+            
+            String firstName = firstNametxt.getText().trim();
+            String lastName = lastNametxt.getText().trim();
+            String email = emailtxt.getText().trim();
+            
+            if (isUpdateMode && currentUserId > 0) {
+                String sql = "UPDATE bank_users SET first_name = ?, last_name = ?, email = ? WHERE user_id = ?";
+                PreparedStatement stmt = connection.prepareStatement(sql);
+                stmt.setString(1, firstName);
+                stmt.setString(2, lastName);
+                stmt.setString(3, email);
+                stmt.setInt(4, currentUserId);
+                
+                int rowsAffected = stmt.executeUpdate();
+                if (rowsAffected > 0) {
+                    JOptionPane.showMessageDialog(this, "User updated successfully!", 
+                        "Success", JOptionPane.INFORMATION_MESSAGE);
+                    clearFields();
+                    return true;
+                } else {
+                    JOptionPane.showMessageDialog(this, "Failed to update user", 
+                        "Error", JOptionPane.ERROR_MESSAGE);
+                    return false;
+                }
+            } else {
+                return createUserInDatabase();
+            }
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(this, "Error saving user: " + e.getMessage(), 
                 "Database Error", JOptionPane.ERROR_MESSAGE);
             return false;
         }

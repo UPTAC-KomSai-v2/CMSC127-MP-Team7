@@ -108,6 +108,7 @@ public class MainFrame extends JFrame implements ActionListener{
         cardPanel.add(accountCreationSelection, "Account Creation Selection");
         accountCreationSelection.getNewUserBtn().addActionListener(this);
         accountCreationSelection.getNewCardBtn().addActionListener(this);
+        accountCreationSelection.getExitBtn().addActionListener(this);
 
 // New card creation panel
         cardPanel.add(createNewCard, "Create New Card");
@@ -148,6 +149,7 @@ public class MainFrame extends JFrame implements ActionListener{
         cardPanel.add(updateUser, "Update User");
         updateUser.okBtn.addActionListener(this);
         updateUser.exitBtn.addActionListener(this);
+        updateUser.setConnection(connection);
 
         //This panel is for deleting the information of the user: DeleteUser Panel
         cardPanel.add(deleteUser, "Delete User");
@@ -215,7 +217,7 @@ public class MainFrame extends JFrame implements ActionListener{
         dbLogIn.usertxt.setText("");
         dbLogIn.passtxt.setText("");
     
-        String url = "jdbc:mysql://localhost:3306/banking"; // Update with your database URL
+        String url = "jdbc:mysql://localhost:3306/bank"; // Update with your database URL
     
         try {
             Connection conn = DriverManager.getConnection(url, user, pass);
@@ -227,6 +229,7 @@ public class MainFrame extends JFrame implements ActionListener{
                 connection = conn; 
                 newUser.setConnection(connection); 
                 readUser.setConnection(connection);
+                updateUser.setConnection(connection);
                 deleteUser.setConnection(connection);
             }
             return true;
@@ -319,28 +322,10 @@ public class MainFrame extends JFrame implements ActionListener{
     }
 
     //Update new User
-    public void updateUserInfo(){
-        //Code para kuhaon an input han user
-
-        String firstName = newUser.firstNametxt.getText();
-        String lastName = newUser.lastNametxt.getText();
-        // String balance = newUser.balancetxt.getText();
-        // String loan = newUser.loantxt.getText();
-        // String pin = newUser.pintxt.getText();
-
-        System.out.println("First Name: "+firstName);
-        System.out.println("Last Name: "+lastName);
-        System.out.println("Balance: "+balance);
-        // System.out.println("Loan: "+loan);
-        // System.out.println("Pin: "+pin);
-
-        cardLayout.show(cardPanel, "Access Database");
-
-        newUser.firstNametxt.setText("");
-        newUser.lastNametxt.setText("");
-        // newUser.balancetxt.setText("");
-        // newUser.loantxt.setText("");
-        // newUser.pintxt.setText("");
+    public void updateUserInfo() {
+        if (updateUser.saveUserToDatabase()) {
+            cardLayout.show(cardPanel, "Access Database");
+        }
     }
 
     //ask uid of user to update
@@ -607,6 +592,10 @@ public class MainFrame extends JFrame implements ActionListener{
         cardLayout.show(cardPanel, "Create New Card");
     }
 
+    if(e.getSource() == accountCreationSelection.getExitBtn()) {
+        cardLayout.show(cardPanel, "Access Database");
+    }
+
     if(e.getSource() == createNewCard.getOkBtn()) {
         if(createNewCard.createCardInDatabase()) {
             cardLayout.show(cardPanel, "Access Database");
@@ -653,11 +642,38 @@ public class MainFrame extends JFrame implements ActionListener{
 
     //Prompt if the employee want to update the info and the user id matches something on the database
     if(e.getSource() == askUID.okBtn){
-        String uid = updateUID();
-        System.out.println(uid);
+        String uidStr = askUID.uidtxt.getText();
+        askUID.uidtxt.setText("");
         
-        //if uid matches within the database, show the panel
-        cardLayout.show(cardPanel, "Update User");
+        try {
+            int userId = Integer.parseInt(uidStr);
+            
+            // Verify user exists
+            if (connection != null) {
+                String sql = "SELECT user_id FROM bank_users WHERE user_id = ?";
+                PreparedStatement stmt = connection.prepareStatement(sql);
+                stmt.setInt(1, userId);
+                ResultSet rs = stmt.executeQuery();
+                
+                if (rs.next()) {
+                    // User exists, switch to update mode
+                    updateUser.setUpdateMode(true, userId);
+                    cardLayout.show(cardPanel, "Update User");
+                } else {
+                    JOptionPane.showMessageDialog(this, "User ID not found", 
+                        "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            } else {
+                JOptionPane.showMessageDialog(this, "Database connection not established", 
+                    "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(this, "Please enter a valid numeric User ID", 
+                "Input Error", JOptionPane.ERROR_MESSAGE);
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(this, "Database error: " + ex.getMessage(), 
+                "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     //Prompt if the employee want to delete a user from the database
