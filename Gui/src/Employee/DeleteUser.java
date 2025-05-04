@@ -75,7 +75,7 @@ public class DeleteUser extends JPanel {
 
         this.add(okBtn, gbc);
 
-        exitBtn = new JButton("Exit");
+        exitBtn = new JButton("Back");
         exitBtn.setPreferredSize(size);
         exitBtn.setOpaque(true);
         exitBtn.setBackground(Color.white);

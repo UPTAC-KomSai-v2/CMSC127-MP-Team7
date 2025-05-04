@@ -60,7 +60,7 @@ public class ReadUser extends JPanel {
         add(sp, gbc);
 
         // Add Exit Button
-        exitBtn = new JButton("Exit");
+        exitBtn = new JButton("Back");
         exitBtn.setPreferredSize(size);
         exitBtn.setOpaque(true);
         exitBtn.setBackground(Color.white);

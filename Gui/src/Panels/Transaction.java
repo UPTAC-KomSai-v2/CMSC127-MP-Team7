@@ -61,7 +61,7 @@ public class Transaction extends JPanel{
         gbc.gridy = 2;
         add(debitBtn, gbc);
 
-        exitBtn = new JButton("Exit");
+        exitBtn = new JButton("Log out");
         exitBtn.setPreferredSize(size);
         exitBtn.setOpaque(true);
         exitBtn.setBackground(Color.white);

@@ -50,7 +50,7 @@ public class Debit extends JPanel{
         gbc.gridy = 1;
         add(withdrawBtn , gbc);
 
-        exitBtn = new JButton("Exit");
+        exitBtn = new JButton("Back");
         exitBtn.setPreferredSize(size);
         exitBtn.setOpaque(true);
         exitBtn.setBackground(Color.white);

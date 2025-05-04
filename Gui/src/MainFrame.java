@@ -176,7 +176,7 @@ public class MainFrame extends JFrame implements ActionListener{
         dbLogIn.usertxt.setText("");
         dbLogIn.passtxt.setText("");
     
-        String url = "jdbc:mysql://localhost:3306/banktransaction"; // Update with your database URL
+        String url = "jdbc:mysql://localhost:3306/bank"; // Update with your database URL
     
         try {
             Connection conn = DriverManager.getConnection(url, user, pass);
@@ -252,7 +252,7 @@ public class MainFrame extends JFrame implements ActionListener{
         try {
             // Validate inputs before proceeding
             if (newUser.firstNametxt.getText().isEmpty() || newUser.lastNametxt.getText().isEmpty() ||
-                newUser.emailtxt.getText().isEmpty() || newUser.pintxt.getText().isEmpty()) {
+                newUser.emailtxt.getText().isEmpty() ) {
                 JOptionPane.showMessageDialog(this, "Please fill in all required fields", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
@@ -264,15 +264,12 @@ public class MainFrame extends JFrame implements ActionListener{
                 cardLayout.show(cardPanel, "Access Database");
                 
                 // Clear form fields
-                newUser.uidtxt.setText("");
-                newUser.cidtxt.setText("");
-                newUser.didtxt.setText("");
                 newUser.firstNametxt.setText("");
                 newUser.lastNametxt.setText("");
                 newUser.emailtxt.setText("");
                 newUser.balancetxt.setText("");
                 newUser.loantxt.setText("");
-                newUser.pintxt.setText("");
+        
             }
         } catch (NumberFormatException e) {
             JOptionPane.showMessageDialog(this, "Please enter valid numeric values for ID, balance, loan and PIN", 
@@ -284,18 +281,12 @@ public class MainFrame extends JFrame implements ActionListener{
     public void updateUserInfo(){
         //Code para kuhaon an input han user
 
-        String uid = newUser.uidtxt.getText();
-        String cid = newUser.cidtxt.getText();
-        String did = newUser.didtxt.getText();
         String firstName = newUser.firstNametxt.getText();
         String lastName = newUser.lastNametxt.getText();
         String balance = newUser.balancetxt.getText();
         String loan = newUser.loantxt.getText();
         String pin = newUser.pintxt.getText();
 
-        System.out.println("uid: "+uid);
-        System.out.println("cid: "+cid);
-        System.out.println("did: "+did);
         System.out.println("First Name: "+firstName);
         System.out.println("Last Name: "+lastName);
         System.out.println("Balance: "+balance);
@@ -304,9 +295,6 @@ public class MainFrame extends JFrame implements ActionListener{
 
         cardLayout.show(cardPanel, "Access Database");
 
-        newUser.uidtxt.setText("");
-        newUser.cidtxt.setText("");
-        newUser.didtxt.setText("");
         newUser.firstNametxt.setText("");
         newUser.lastNametxt.setText("");
         newUser.balancetxt.setText("");

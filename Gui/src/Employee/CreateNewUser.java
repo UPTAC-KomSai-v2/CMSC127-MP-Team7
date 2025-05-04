@@ -7,6 +7,9 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Image;
 import java.awt.Insets;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -16,14 +19,11 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 
 public class CreateNewUser extends JPanel {
 
-    JLabel uidlbl, cidlbl, didlbl, firstNamelbl, lastNamelbl, balancelbl, loanlbl, pinlbl, emaillbl;
-    public JTextField uidtxt, cidtxt, didtxt, firstNametxt, lastNametxt, balancetxt, loantxt, pintxt, emailtxt;
+    JLabel  firstNamelbl, lastNamelbl, balancelbl, loanlbl, pinlbl, emaillbl;
+    public JTextField firstNametxt, lastNametxt, balancetxt, loantxt, pintxt, emailtxt;
     public JButton okBtn, exitBtn;
     Dimension size;
     GridBagConstraints gbc;
@@ -35,14 +35,6 @@ public class CreateNewUser extends JPanel {
         setBackground(Color.darkGray);
         bg = new ImageIcon(getClass().getResource("/Files/bg.png")).getImage();
 
-        size = new Dimension(100, 30);
-        uidlbl = new JLabel("User Id: ");
-        uidlbl.setOpaque(true);
-        uidlbl.setPreferredSize(size);
-        uidlbl.setBackground(Color.white);
-        uidlbl.setHorizontalAlignment(SwingConstants.CENTER);
-        uidlbl.setVerticalAlignment(SwingConstants.CENTER);
-
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
         gbc.gridy = 0;
@@ -50,58 +42,7 @@ public class CreateNewUser extends JPanel {
         gbc.gridwidth = 1;
         gbc.anchor = GridBagConstraints.EAST;
 
-        this.add(uidlbl, gbc);
 
-        size = new Dimension(150, 30);
-        uidtxt = new JTextField();
-        uidtxt.setOpaque(true);
-        uidtxt.setPreferredSize(size);
-        uidtxt.setBackground(new Color(22, 180, 161));
-
-        gbc.gridx = 1;
-        this.add(uidtxt, gbc);
-
-        size = new Dimension(100, 30);
-        cidlbl = new JLabel("Credit Acc Id: ");
-        cidlbl.setOpaque(true);
-        cidlbl.setPreferredSize(size);
-        cidlbl.setBackground(Color.white);
-        cidlbl.setHorizontalAlignment(SwingConstants.CENTER);
-        cidlbl.setVerticalAlignment(SwingConstants.CENTER);
-
-        gbc.gridx = 0;
-        gbc.gridy = 1;
-        this.add(cidlbl, gbc);
-
-        size = new Dimension(150, 30);
-        cidtxt = new JTextField();
-        cidtxt.setOpaque(true);
-        cidtxt.setPreferredSize(size);
-        cidtxt.setBackground(new Color(22, 180, 161));
-
-        gbc.gridx = 1;
-        this.add(cidtxt, gbc);
-
-        size = new Dimension(100, 30);
-        didlbl = new JLabel("Debit Acc Id: ");
-        didlbl.setOpaque(true);
-        didlbl.setPreferredSize(size);
-        didlbl.setBackground(Color.white);
-        didlbl.setHorizontalAlignment(SwingConstants.CENTER);
-        didlbl.setVerticalAlignment(SwingConstants.CENTER);
-
-        gbc.gridx = 0;
-        gbc.gridy = 2;
-        this.add(didlbl, gbc);
-
-        size = new Dimension(150, 30);
-        didtxt = new JTextField();
-        didtxt.setOpaque(true);
-        didtxt.setPreferredSize(size);
-        didtxt.setBackground(new Color(22, 180, 161));
-
-        gbc.gridx = 1;
-        this.add(didtxt, gbc);
 
         size = new Dimension(100, 30);
         firstNamelbl = new JLabel("First Name: ");
@@ -244,7 +185,7 @@ public class CreateNewUser extends JPanel {
 
         this.add(okBtn, gbc);
 
-        exitBtn = new JButton("Exit");
+        exitBtn = new JButton("Back");
         exitBtn.setPreferredSize(size);
         exitBtn.setOpaque(true);
         exitBtn.setBackground(Color.white);
@@ -264,21 +205,30 @@ public class CreateNewUser extends JPanel {
             JOptionPane.showMessageDialog(this, "Database connection is not established", "Error", JOptionPane.ERROR_MESSAGE);
             return false;
         }
-
+    
         try {
             connection.setAutoCommit(false);
-
+    
             try {
-                String fullName = firstNametxt.getText() + " " + lastNametxt.getText();
-                String email = emailtxt.getText();
-                
+                // Gather and validate inputs
+                String fullName = firstNametxt.getText().trim() + " " + lastNametxt.getText().trim();
+                String email = emailtxt.getText().trim();
+    
+                int pin = Integer.parseInt(pintxt.getText().trim());
+                int loanAmount = Integer.parseInt(loantxt.getText().trim());
+                int balanceAmount = Integer.parseInt(balancetxt.getText().trim());
+    
+                // Enforce constraints from schema
+                loanAmount = loanAmount <= 0 ? loanAmount : -loanAmount;
+                balanceAmount = Math.max(0, balanceAmount);
+    
+                // Insert user
                 String insertUserSQL = "INSERT INTO bank_users (name, email) VALUES (?, ?)";
                 PreparedStatement userStmt = connection.prepareStatement(insertUserSQL, PreparedStatement.RETURN_GENERATED_KEYS);
                 userStmt.setString(1, fullName);
                 userStmt.setString(2, email);
                 userStmt.executeUpdate();
-                
-                // Get the generated user_id
+    
                 int userId;
                 try (var rs = userStmt.getGeneratedKeys()) {
                     if (rs.next()) {
@@ -287,15 +237,14 @@ public class CreateNewUser extends JPanel {
                         throw new SQLException("Creating user failed, no ID obtained.");
                     }
                 }
-                
-                //Create credit account
+    
+                // Insert credit account
                 String insertCreditSQL = "INSERT INTO credit_accounts (user_id, pin) VALUES (?, ?)";
                 PreparedStatement creditStmt = connection.prepareStatement(insertCreditSQL, PreparedStatement.RETURN_GENERATED_KEYS);
                 creditStmt.setInt(1, userId);
-                creditStmt.setInt(2, Integer.parseInt(pintxt.getText()));
+                creditStmt.setInt(2, pin);
                 creditStmt.executeUpdate();
-                
-                // Get the generated credit_id
+    
                 int creditId;
                 try (var rs = creditStmt.getGeneratedKeys()) {
                     if (rs.next()) {
@@ -304,23 +253,21 @@ public class CreateNewUser extends JPanel {
                         throw new SQLException("Creating credit account failed, no ID obtained.");
                     }
                 }
-                
-                // Create debit account
+    
+                // Insert credit loan
                 String insertLoanSQL = "INSERT INTO credit_loans (credit_id, loan) VALUES (?, ?)";
                 PreparedStatement loanStmt = connection.prepareStatement(insertLoanSQL);
                 loanStmt.setInt(1, creditId);
-                int loanAmount = Integer.parseInt(loantxt.getText());
-                loanStmt.setInt(2, loanAmount <= 0 ? loanAmount : -loanAmount);
+                loanStmt.setInt(2, loanAmount);
                 loanStmt.executeUpdate();
-                
-                // Create debit account
+    
+                // Insert debit account
                 String insertDebitSQL = "INSERT INTO debit_accounts (user_id, pin) VALUES (?, ?)";
                 PreparedStatement debitStmt = connection.prepareStatement(insertDebitSQL, PreparedStatement.RETURN_GENERATED_KEYS);
                 debitStmt.setInt(1, userId);
-                debitStmt.setInt(2, Integer.parseInt(pintxt.getText()));
+                debitStmt.setInt(2, pin);
                 debitStmt.executeUpdate();
-                
-                // Get the generated debit_id
+    
                 int debitId;
                 try (var rs = debitStmt.getGeneratedKeys()) {
                     if (rs.next()) {
@@ -329,35 +276,35 @@ public class CreateNewUser extends JPanel {
                         throw new SQLException("Creating debit account failed, no ID obtained.");
                     }
                 }
-                
+    
+                // Insert balance
                 String insertBalanceSQL = "INSERT INTO debit_balance (debit_id, balance) VALUES (?, ?)";
                 PreparedStatement balanceStmt = connection.prepareStatement(insertBalanceSQL);
                 balanceStmt.setInt(1, debitId);
-                balanceStmt.setInt(2, Integer.parseInt(balancetxt.getText()));
+                balanceStmt.setInt(2, balanceAmount);
                 balanceStmt.executeUpdate();
-                
-                // Commit the transaction
+    
+                // Commit
                 connection.commit();
                 JOptionPane.showMessageDialog(this, "User created successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
                 return true;
-                
-            } catch (SQLException e) {
-                // Roll back in case of any error
+    
+            } catch (SQLException | NumberFormatException e) {
                 connection.rollback();
                 JOptionPane.showMessageDialog(this, "Error creating user: " + e.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
                 e.printStackTrace();
                 return false;
             } finally {
-                // Restore auto-commit mode
                 connection.setAutoCommit(true);
             }
+    
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(this, "Transaction error: " + e.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
             e.printStackTrace();
             return false;
         }
     }
-
+    
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
