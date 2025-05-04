@@ -1,12 +1,13 @@
+DROP TABLE IF EXISTS double_transactions_credit;
+DROP TABLE IF EXISTS double_transactions_debit;
+DROP TABLE IF EXISTS single_transactions_credit;
+DROP TABLE IF EXISTS single_transactions_debit;
 DROP TABLE IF EXISTS debit_balance;
 DROP TABLE IF EXISTS credit_loans;
 DROP TABLE IF EXISTS debit_accounts;
 DROP TABLE IF EXISTS credit_accounts;
 DROP TABLE IF EXISTS bank_users;
-DROP TABLE IF EXISTS double_transactions_credit;
-DROP TABLE IF EXISTS double_transactions_debit;
-DROP TABLE IF EXISTS single_transactions_credit;
-DROP TABLE IF EXISTS single_transactions_debit;
+
 
 
 CREATE TABLE `bank_users` (
