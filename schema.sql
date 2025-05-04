@@ -152,18 +152,18 @@ $$
 DELIMITER ;
 
 
-INSERT INTO bank_users (name, email)
+INSERT INTO bank_users (first_name, last_name, email)
 VALUES
-  ('Alice Smith', 'alice@example.com'),
-  ('Bob Johnson', 'bob@example.com'),
-  ('Carol Lee', 'carol@example.com'),
-  ('David Kim', 'david@example.com'),
-  ('Eva Brown', 'eva@example.com'),
-  ('Frank White', 'frank@example.com'),
-  ('Grace Young', 'grace@example.com'),
-  ('Henry Black', 'henry@example.com'),
-  ('Ivy Green', 'ivy@example.com'),
-  ('Jack Gray', 'jack@example.com');
+  ('Alice', 'Smith', 'alice@example.com'),
+  ('Bob', 'Johnson', 'bob@example.com'),
+  ('Carol', 'Lee', 'carol@example.com'),
+  ('David', 'Kim', 'david@example.com'),
+  ('Eva', 'Brown', 'eva@example.com'),
+  ('Frank', 'White', 'frank@example.com'),
+  ('Grace', 'Young', 'grace@example.com'),
+  ('Henry', 'Black', 'henry@example.com'),
+  ('Ivy', 'Green', 'ivy@example.com'),
+  ('Jack', 'Gray', 'jack@example.com');
 
 INSERT INTO credit_accounts (user_id, pin)
 VALUES
