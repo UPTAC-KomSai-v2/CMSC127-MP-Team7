@@ -452,14 +452,148 @@ public class MainFrame extends JFrame implements ActionListener{
         repayPanel.input.setText("");
     }
 
-    public void amountOfDeposit(){
-        String deposit = depositPanel.input.getText();
-        System.out.println(deposit);
-
-        cardLayout.show(cardPanel, "Credit");
-
+    private boolean processDeposit(double amount) {
+        String query = """
+                INSERT INTO single_transactions_debit (transaction_id, debit_id, amount)
+                VALUES (?, ?, ?)
+                """;
+        String updateBalance = """
+                UPDATE debit_balance SET balance = balance + ? WHERE debit_id = ?
+                """;
+        
+        try {
+            int transactionID = getSingleTransactionID();
+            
+            // Start transaction
+            connection.setAutoCommit(false);
+            
+            // Record the transaction
+            PreparedStatement stmt = transactionConnection.prepareStatement(query);
+            stmt.setInt(1, transactionID);
+            stmt.setInt(2, currCardID);
+            stmt.setDouble(3, amount);
+            stmt.executeUpdate();
+            stmt.close();
+            
+            // Update the balance
+            stmt = transactionConnection.prepareStatement(updateBalance);
+            stmt.setDouble(1, amount);
+            stmt.setInt(2, currCardID);
+            stmt.executeUpdate();
+            stmt.close();
+            
+            connection.commit();
+            return true;
+        } catch (SQLException e) {
+            try {
+                connection.rollback();
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+            JOptionPane.showMessageDialog(this, "Error processing deposit: " + e.getMessage(),
+                "Deposit Error", JOptionPane.ERROR_MESSAGE);
+            return false;
+        } finally {
+            try {
+                connection.setAutoCommit(true);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+    
+    private boolean processWithdraw(double amount) {
+        String query = """
+                INSERT INTO single_transactions_debit (transaction_id, debit_id, amount)
+                VALUES (?, ?, ?)
+                """;
+        String updateBalance = """
+                UPDATE debit_balance SET balance = balance - ? WHERE debit_id = ?
+                """;
+        String checkBalance = """
+                SELECT balance FROM debit_balance WHERE debit_id = ?
+                """;
+        
+        try {
+            // First check if there's enough balance
+            PreparedStatement stmt = transactionConnection.prepareStatement(checkBalance);
+            stmt.setInt(1, currCardID);
+            ResultSet rs = stmt.executeQuery();
+            
+            if (rs.next()) {
+                double currentBalance = rs.getDouble("balance");
+                if (currentBalance < amount) {
+                    JOptionPane.showMessageDialog(this, "Insufficient funds for withdrawal",
+                        "Withdrawal Error", JOptionPane.ERROR_MESSAGE);
+                    return false;
+                }
+            }
+            rs.close();
+            stmt.close();
+            
+            int transactionID = getSingleTransactionID();
+            
+            // Start transaction
+            connection.setAutoCommit(false);
+            
+            // Record the transaction
+            stmt = transactionConnection.prepareStatement(query);
+            stmt.setInt(1, transactionID);
+            stmt.setInt(2, currCardID);
+            stmt.setDouble(3, -amount); // Negative amount for withdrawal
+            stmt.executeUpdate();
+            stmt.close();
+            
+            // Update the balance
+            stmt = transactionConnection.prepareStatement(updateBalance);
+            stmt.setDouble(1, amount);
+            stmt.setInt(2, currCardID);
+            stmt.executeUpdate();
+            stmt.close();
+            
+            connection.commit();
+            return true;
+        } catch (SQLException e) {
+            try {
+                connection.rollback();
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+            JOptionPane.showMessageDialog(this, "Error processing withdrawal: " + e.getMessage(),
+                "Withdrawal Error", JOptionPane.ERROR_MESSAGE);
+            return false;
+        } finally {
+            try {
+                connection.setAutoCommit(true);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+    
+    // Update the amountOfDeposit method
+    public void amountOfDeposit() {
+        try {
+            double amount = Double.parseDouble(depositPanel.input.getText());
+            if (amount <= 0) {
+                JOptionPane.showMessageDialog(this, "Deposit amount must be positive",
+                    "Invalid Amount", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            
+            if (processDeposit(amount)) {
+                JOptionPane.showMessageDialog(this, "Deposit successful!",
+                    "Success", JOptionPane.INFORMATION_MESSAGE);
+            }
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Please enter a valid numeric amount",
+                "Input Error", JOptionPane.ERROR_MESSAGE);
+        }
+        
+        cardLayout.show(cardPanel, "Transaction");
         depositPanel.input.setText("");
     }
+
 
     private int getSingleTransactionID() {
         String query = """
@@ -684,16 +818,27 @@ public class MainFrame extends JFrame implements ActionListener{
         transferMoney.cidtxt.setText("");
     }
 
-    public void amountOfWithdraw(){
-        String withdraw = withdrawPanel.input.getText();
-        System.out.println(withdraw);
-
-        cardLayout.show(cardPanel, "Debit");
-
-
-        withdrawPanel.input.setText("");
+    public void amountOfWithdraw() {
+    try {
+        double amount = Double.parseDouble(withdrawPanel.input.getText());
+        if (amount <= 0) {
+            JOptionPane.showMessageDialog(this, "Withdrawal amount must be positive",
+                "Invalid Amount", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
         
+        if (processWithdraw(amount)) {
+            JOptionPane.showMessageDialog(this, "Withdrawal successful!",
+                "Success", JOptionPane.INFORMATION_MESSAGE);
+        }
+    } catch (NumberFormatException e) {
+        JOptionPane.showMessageDialog(this, "Please enter a valid numeric amount",
+            "Input Error", JOptionPane.ERROR_MESSAGE);
     }
+    
+    cardLayout.show(cardPanel, "Transaction");
+    withdrawPanel.input.setText("");
+}
 
     private void closeConnections() {
         if (connection != null) {
