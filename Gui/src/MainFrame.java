@@ -67,7 +67,7 @@ public class MainFrame extends JFrame implements ActionListener{
     TransferMoney transferMoney = new TransferMoney();
     DBConnect mysqldb;
 
-    private int currUID;
+    private int currCardID;
     private String currAccType;
 
     public MainFrame() {
@@ -297,7 +297,7 @@ public class MainFrame extends JFrame implements ActionListener{
 
     //To log in to the user account
     public void logInUserInfo() {
-        String uidStr = userLogIn.idtxt.getText();
+        String cidStr = userLogIn.idtxt.getText();
         String pinStr = new String(userLogIn.pintxt.getPassword());
 
         userLogIn.idtxt.setText("");
@@ -309,39 +309,59 @@ public class MainFrame extends JFrame implements ActionListener{
         }
 
         try {
-            int uid = Integer.parseInt(uidStr);
+            int accTypeIDX = userLogIn.accountTypeCombo.getSelectedIndex();
+            int cid = Integer.parseInt(cidStr);
             int pin = Integer.parseInt(pinStr);
 
             String sql = """
-                SELECT 'debit' AS account_type FROM debit_accounts WHERE user_id = ? AND pin = ?
-                UNION
-                SELECT 'credit' AS account_type FROM credit_accounts WHERE user_id = ? AND pin = ?
+                SELECT 'debit' AS account_type FROM debit_accounts WHERE debit_id = ? AND pin = ?
             """;
 
+            if (accTypeIDX == 0) {
+                sql = """
+                        SELECT 'debit' AS account_type FROM debit_accounts WHERE debit_id = ? AND pin = ?
+                        """;
+            } else if (accTypeIDX == 1) {
+                sql = """
+                        SELECT 'credit' AS account_type FROM credit_accounts WHERE credit_id = ? AND pin = ?
+                        """;
+            } else {
+                JOptionPane.showMessageDialog(this, "How did you do that?", "Login Error", JOptionPane.ERROR_MESSAGE);
+            }
+
             PreparedStatement stmt = transactionConnection.prepareStatement(sql);
-            stmt.setInt(1, uid);
+            stmt.setInt(1, cid);
             stmt.setInt(2, pin);
-            stmt.setInt(3, uid);
-            stmt.setInt(4, pin);
 
             ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
                 String accountType = rs.getString("account_type");
-                currAccType = accountType; // set as current account type
-                currUID = uid;
+                currAccType = accountType;
+                currCardID = cid;
                 System.out.println("Login successful. Account type: " + accountType);
                 cardLayout.show(cardPanel, "Transaction");
             } else {
-                System.out.println("Invalid user ID or PIN.");
+                JOptionPane.showMessageDialog(
+                    this, "Login failed. Please check that the Account Type, \nCard ID and PIN are all typed correctly.",
+                    "Login Failed", JOptionPane.ERROR_MESSAGE
+                );
             }
 
             rs.close();
             stmt.close();
         } catch (NumberFormatException e) {
             System.out.println("User ID and PIN must be numeric.");
+            JOptionPane.showMessageDialog(
+                this, "User ID and PIN must be numeric.",
+                "Login Failed", JOptionPane.ERROR_MESSAGE
+            );
         } catch (SQLException e) {
             System.out.println("Error during login: " + e.getMessage());
+            JOptionPane.showMessageDialog(
+                this, "Login failed. Please check that the Account Type, \nCard ID and PIN are all typed correctly.",
+                "Login Failed", JOptionPane.ERROR_MESSAGE
+            );
         }
     }
 
@@ -477,16 +497,30 @@ public class MainFrame extends JFrame implements ActionListener{
 
     public void getUsername() {
         String query = """
-                SELECT name FROM bank_users WHERE user_id = ?
+                SELECT first_name, last_name FROM bank_users WHERE user_id IN
+                (SELECT user_id FROM debit_accounts WHERE debit_id = ?)
                 """;
+    
+        if (currAccType.equals("debit")) {
+            query = """
+                    SELECT first_name, last_name FROM bank_users WHERE user_id IN
+                    (SELECT user_id FROM debit_accounts WHERE debit_id = ?)
+                """;
+        } else if (currAccType.equals("credit")) {
+            query = """
+                    SELECT first_name, last_name FROM bank_users WHERE user_id IN
+                    (SELECT user_id FROM credit_accounts WHERE credit_id = ?)
+                """;
+        }
+        
         try {
             PreparedStatement stmt = transactionConnection.prepareStatement(query);
-            stmt.setInt(1, currUID);
+            stmt.setInt(1, currCardID);
 
             ResultSet rs = stmt.executeQuery();
             String username = "";
             while (rs.next()) {
-                username = rs.getString("name");
+                username = rs.getString("first_name") + " " + rs.getString("last_name");
             }
             rs.close();
 
@@ -502,11 +536,10 @@ public class MainFrame extends JFrame implements ActionListener{
             double bal = 0;
             if (currAccType.equals("credit")){
                 query = """
-                        SELECT loan FROM credit_loans WHERE credit_id IN
-                            (SELECT credit_id FROM credit_accounts WHERE user_id = ?)
+                        SELECT loan FROM credit_loans WHERE credit_id = ?
                         """;
                 PreparedStatement stmt = transactionConnection.prepareStatement(query);
-                stmt.setInt(1, currUID);
+                stmt.setInt(1, currCardID);
 
                 ResultSet rs = stmt.executeQuery();
                 while (rs.next()){
@@ -515,11 +548,10 @@ public class MainFrame extends JFrame implements ActionListener{
                 rs.close();
             } else if (currAccType.equals("debit")) {
                 query = """
-                    SELECT balance FROM debit_balance WHERE debit_id IN
-                            (SELECT debit_id FROM debit_accounts WHERE user_id = ?)
+                    SELECT balance FROM debit_balance WHERE debit_id = ?
                     """;
                 PreparedStatement stmt = transactionConnection.prepareStatement(query);
-                stmt.setInt(1, currUID);
+                stmt.setInt(1, currCardID);
 
                 ResultSet rs = stmt.executeQuery();
                 while (rs.next()){
