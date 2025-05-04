@@ -18,7 +18,7 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
 public class UserLogIn extends JPanel{
-    JLabel idlbl, pinlbl;
+    JLabel idlbl, pinlbl, titlelbl;
     public JTextField idtxt;
     public JPasswordField pintxt;
     public JButton okBtn, backBtn;
@@ -36,6 +36,17 @@ public class UserLogIn extends JPanel{
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
         gbc.gridy = 0;
+        gbc.gridwidth = 2;
+        gbc.anchor = GridBagConstraints.CENTER;
+
+        titlelbl = new JLabel("User Login");
+        titlelbl.setFont(titlelbl.getFont().deriveFont(24f));
+        titlelbl.setForeground(Color.WHITE);
+        titlelbl.setHorizontalAlignment(SwingConstants.CENTER);
+        this.add(titlelbl, gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy = 1;
         gbc.insets = new Insets(10,10,10,10);
         gbc.gridwidth=1;
         gbc.anchor = GridBagConstraints.EAST;
@@ -68,7 +79,7 @@ public class UserLogIn extends JPanel{
         pinlbl.setVerticalAlignment(SwingConstants.CENTER);
 
         gbc.gridx=0;
-        gbc.gridy=1;
+        gbc.gridy=2;
         gbc.anchor = GridBagConstraints.EAST;
         this.add(pinlbl, gbc);
 
@@ -93,7 +104,7 @@ public class UserLogIn extends JPanel{
 
         gbc.gridwidth=2;
         gbc.gridx=0;
-        gbc.gridy=2;
+        gbc.gridy=3;
         gbc.anchor=GridBagConstraints.CENTER;
         this.add(okBtn , gbc);
 
@@ -108,7 +119,7 @@ public class UserLogIn extends JPanel{
 
         gbc.gridwidth=2;
         gbc.gridx=0;
-        gbc.gridy=3;
+        gbc.gridy=4;
         gbc.anchor=GridBagConstraints.CENTER;
         this.add(backBtn, gbc);
     }
