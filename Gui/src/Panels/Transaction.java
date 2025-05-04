@@ -15,7 +15,7 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
 public class Transaction extends JPanel{
-    public JButton balanceBtn, creditBtn, debitBtn, exitBtn;
+    public JButton balanceBtn, transferMoneyBtn, debitBtn, exitBtn;
     Dimension size;
     GridBagConstraints gbc;
     Image bg, logo;
@@ -42,15 +42,15 @@ public class Transaction extends JPanel{
         gbc.insets = new Insets(10,10,10,10);
         add(balanceBtn, gbc);
 
-        creditBtn = new JButton("Credit");
-        creditBtn.setPreferredSize(size);
-        creditBtn.setOpaque(true);
-        creditBtn.setBackground(Color.white);
-        creditBtn.setHorizontalAlignment(SwingConstants.CENTER);
-        creditBtn.setVerticalAlignment(SwingConstants.CENTER);
+        transferMoneyBtn = new JButton("Credit");
+        transferMoneyBtn.setPreferredSize(size);
+        transferMoneyBtn.setOpaque(true);
+        transferMoneyBtn.setBackground(Color.white);
+        transferMoneyBtn.setHorizontalAlignment(SwingConstants.CENTER);
+        transferMoneyBtn.setVerticalAlignment(SwingConstants.CENTER);
 
         gbc.gridy = 1;
-        add(creditBtn, gbc);
+        add(transferMoneyBtn, gbc);
 
         debitBtn = new JButton("Debit");
         debitBtn.setPreferredSize(size);
