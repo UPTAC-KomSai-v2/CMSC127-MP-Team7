@@ -1,6 +1,10 @@
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.FileReader;
+import java.io.FileWriter;
+
 import Employee.AccountCreationSelection;
 import Employee.AskUID;
 import Employee.CreateNewCard;
@@ -255,7 +259,17 @@ public class MainFrame extends JFrame implements ActionListener{
                 }
                 System.out.println(USER + DB_URL + PASS);
             }
-        } catch (IOException e) {
+        }
+        catch (FileNotFoundException e) {
+            try {
+                FileWriter fWriter = new FileWriter("DefaultCredentials.txt");
+                fWriter.write("DefaultUser: exampleuser \n Defaultpass: examplepass \n DB_URL: jdbc:mariadb://localhost:3306/bank \n Default_DB: bank");
+                fWriter.close();
+            }
+            catch (IOException error) {
+            }
+        }
+        catch (IOException e) {
             System.out.println("wtf");
             e.printStackTrace();
         }
