@@ -18,12 +18,13 @@ public class Debit extends JPanel{
     public JButton transferMoneyBtn, withdrawBtn, exitBtn;
     Dimension size;
     GridBagConstraints gbc;
-    Image bg;
+    Image bg, logo;
     
     public Debit(){
         setLayout(new GridBagLayout());
         setBackground(Color.darkGray);
         bg = new ImageIcon(getClass().getResource("/Files/bg.png")).getImage();
+        logo = new ImageIcon(getClass().getResource("/Files/logo.png")).getImage();
 
         size = new Dimension(200,30);
         transferMoneyBtn = new JButton("Transfer Money");
@@ -67,6 +68,13 @@ public class Debit extends JPanel{
         if (bg != null) {
             g.drawImage(bg, 0, 0, getWidth(), getHeight(), this);
         }
+        if (logo != null) {
+            int logoWidth = 50;
+            int logoHeight = 50;
+            g.drawImage(logo, 10, 10, logoWidth, logoHeight, this);
+        }
+        g.setColor(Color.BLACK);
+        g.fillRect(70, 30, getWidth() - 80, 2);
     }
 
     public static void main(String[] args) {
