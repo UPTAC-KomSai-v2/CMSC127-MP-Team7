@@ -22,6 +22,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -54,10 +55,12 @@ public class MainFrame extends JFrame implements ActionListener{
     TransferMoney transferMoney = new TransferMoney();
 
     public MainFrame() {
-        setTitle("CardLayout Example");
+        setTitle("Bank System");
         setBounds(100, 100, 800, 800);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
+
+        setIconImage(new ImageIcon(getClass().getResource("/Files/bg3.png")).getImage());
 
 
         cardLayout = new CardLayout();
