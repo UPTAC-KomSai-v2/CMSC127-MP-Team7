@@ -115,6 +115,7 @@ public class MainFrame extends JFrame implements ActionListener{
         //This panel shows all the user and info's about the user: ReadUser Panel
         cardPanel.add(readUser, "Read User");
         readUser.exitBtn.addActionListener(this);
+        readUser.setConnection(connection);
 
         //This panel is for asking user Id which is the basis for updating the user info: AskUID Panel
         cardPanel.add(askUID, "Ask UID");
@@ -130,6 +131,7 @@ public class MainFrame extends JFrame implements ActionListener{
         cardPanel.add(deleteUser, "Delete User");
         deleteUser.okBtn.addActionListener(this);
         deleteUser.exitBtn.addActionListener(this);
+        deleteUser.setConnection(connection);
 
         //This panel display the balance of the user
         cardPanel.add(balance, "Balance");
@@ -185,6 +187,8 @@ public class MainFrame extends JFrame implements ActionListener{
             } else {
                 connection = conn; 
                 newUser.setConnection(connection); 
+                readUser.setConnection(connection);
+                deleteUser.setConnection(connection);
             }
             return true;
         } catch (SQLException e) {
@@ -457,8 +461,9 @@ public class MainFrame extends JFrame implements ActionListener{
                 cardLayout.show(cardPanel, "Access Database");
             }
     
-            if(e.getSource()==deleteUser.okBtn){
-                deleteUID();
+            if(e.getSource() == deleteUser.okBtn) {
+                deleteUser.deleteUserFromDatabase();
+                cardLayout.show(cardPanel, "Access Database");
             }
         } 
     
@@ -505,7 +510,30 @@ public class MainFrame extends JFrame implements ActionListener{
 
     //Prompt if the employee clicked the read user button
     if(e.getSource() == accessDB.readUserBtn){
-        cardLayout.show(cardPanel, "Read User");
+        System.out.println("Read User button clicked");
+        
+        if (connection != null) {
+            try {
+                if (connection.isValid(5)) {
+                    readUser.setConnection(connection);
+                    readUser.loadUserData();
+                    cardLayout.show(cardPanel, "Read User");
+                } else {
+                    JOptionPane.showMessageDialog(this, 
+                        "Database connection is no longer valid. Please reconnect.",
+                        "Connection Error", JOptionPane.ERROR_MESSAGE);
+                }
+            } catch (SQLException ex) {
+                JOptionPane.showMessageDialog(this, 
+                    "Error checking database connection: " + ex.getMessage(),
+                    "Database Error", JOptionPane.ERROR_MESSAGE);
+                ex.printStackTrace();
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, 
+                "Database connection is not established.",
+                "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     //Prompt if the employee clicked the update user button

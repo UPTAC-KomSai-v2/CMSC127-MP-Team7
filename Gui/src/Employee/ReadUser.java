@@ -7,53 +7,50 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Image;
 import java.awt.Insets;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.table.DefaultTableModel;
 
 public class ReadUser extends JPanel {
-
     JTable j;
     public JButton exitBtn;
     GridBagConstraints gbc;
     Dimension size;
     Image bg;
+    private Connection connection;
+    private DefaultTableModel tableModel;
 
     public ReadUser() {
         setLayout(new GridBagLayout());
         gbc = new GridBagConstraints();
-		setBackground(Color.darkGray);
-        size = new Dimension(100, 30); 
+        setBackground(Color.darkGray);
+        size = new Dimension(100, 30);
+
         bg = new ImageIcon(getClass().getResource("/Files/bg.png")).getImage();
 
-		//Change this data nala
-		String[][] data = {
-			{ "Jake", "Mondragon", "098990909", "0998889", "7989676", "1500.00" },
-			{ "Lara", "Santos",     "112233445", "1001001", "2002002", "2200.50" },
-			{ "Mark", "De Leon",    "223344556", "1010101", "2020202", "3400.00" },
-			{ "Anna", "Garcia",     "334455667", "1020202", "2030303", "4100.25" },
-			{ "John", "Reyes",      "445566778", "1030303", "2040404", "1800.75" },
-			{ "Ella", "Cruz",       "556677889", "1040404", "2050505", "2950.90" },
-			{ "Drew", "Tan",        "667788990", "1050505", "2060606", "1300.00" },
-			{ "Nina", "Lopez",      "778899001", "1060606", "2070707", "3700.10" },
-			{ "Paul", "Ramos",      "889900112", "1070707", "2080808", "2150.60" },
-			{ "Maya", "Torres",     "990011223", "1080808", "2090909", "4400.30" }
-		};
-		
-		
-
-		
-        String[] columnNames = { "First Name", "Last Name", "User ID", "CreditAcc ID", "DebitAcc ID", "Balance" };
-
-        j = new JTable(data, columnNames);
+        // Create table
+        String[] columnNames = {"First Name", "Last Name", "User ID", "CreditAcc ID", "DebitAcc ID", "Balance"};
+        tableModel = new DefaultTableModel(columnNames, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false; 
+            }
+        };
+        j = new JTable(tableModel);
+        j.getTableHeader().setReorderingAllowed(false);
         JScrollPane sp = new JScrollPane(j);
         sp.setPreferredSize(new Dimension(700, 300));
-
 
         // Add scroll pane
         gbc.gridx = 0;
@@ -74,6 +71,93 @@ public class ReadUser extends JPanel {
         gbc.gridwidth = 2;
         gbc.anchor = GridBagConstraints.CENTER;
         add(exitBtn, gbc);
+    }
+
+    public void setConnection(Connection conn) {
+        this.connection = conn;
+    }
+
+    // Method to load data from the database
+    public void loadUserData() {
+        if (connection == null) {
+            JOptionPane.showMessageDialog(this, 
+                "Database connection is not established.", 
+                "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+    
+        tableModel.setRowCount(0);
+    
+        try {
+            if (connection.isValid(5)) {
+                String sql = """
+                    SELECT bu.user_id, 
+                           bu.name, 
+                           bu.email,
+                           ca.credit_id, 
+                           da.debit_id,
+                           db.balance,
+                           cl.loan
+                    FROM bank_users bu
+                    LEFT JOIN credit_accounts ca ON bu.user_id = ca.user_id
+                    LEFT JOIN debit_accounts da ON bu.user_id = da.user_id
+                    LEFT JOIN debit_balance db ON da.debit_id = db.debit_id
+                    LEFT JOIN credit_loans cl ON ca.credit_id = cl.credit_id
+                    ORDER BY bu.user_id
+                """;
+    
+                try (PreparedStatement stmt = connection.prepareStatement(sql);
+                     ResultSet rs = stmt.executeQuery()) {
+    
+                    while (rs.next()) {
+                        String userId = rs.getString("user_id");
+                        String fullName = rs.getString("name");
+                        String creditId = rs.getString("credit_id");
+                        String debitId = rs.getString("debit_id");
+                        
+                        double balance = 0;
+                        if (rs.getObject("balance") != null) {
+                            balance = rs.getDouble("balance");
+                        }
+                        
+                        double loan = 0;
+                        if (rs.getObject("loan") != null) {
+                            loan = rs.getDouble("loan");
+                        }
+                        
+                        // Calculate net balance
+                        double netBalance = balance - loan;
+    
+                        String firstName = fullName;
+                        String lastName = "";
+                        if (fullName != null && fullName.contains(" ")) {
+                            int spaceIndex = fullName.indexOf(' ');
+                            firstName = fullName.substring(0, spaceIndex);
+                            lastName = fullName.substring(spaceIndex + 1);
+                        }
+    
+                        Object[] row = {
+                            firstName, 
+                            lastName, 
+                            userId, 
+                            creditId != null ? creditId : "N/A", 
+                            debitId != null ? debitId : "N/A", 
+                            String.format("%.2f", netBalance)
+                        };
+                        tableModel.addRow(row);
+                    }
+                }
+            } else {
+                JOptionPane.showMessageDialog(this, 
+                    "Database connection is no longer valid.", 
+                    "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(this, 
+                "Error loading user data: " + e.getMessage(), 
+                "Database Error", JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
+        }
     }
 
     @Override

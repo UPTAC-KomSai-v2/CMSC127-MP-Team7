@@ -266,11 +266,9 @@ public class CreateNewUser extends JPanel {
         }
 
         try {
-            // Start a transaction
             connection.setAutoCommit(false);
 
             try {
-                // 1. Create user in bank_users table
                 String fullName = firstNametxt.getText() + " " + lastNametxt.getText();
                 String email = emailtxt.getText();
                 
@@ -290,7 +288,7 @@ public class CreateNewUser extends JPanel {
                     }
                 }
                 
-                // 2. Create credit account
+                //Create credit account
                 String insertCreditSQL = "INSERT INTO credit_accounts (user_id, pin) VALUES (?, ?)";
                 PreparedStatement creditStmt = connection.prepareStatement(insertCreditSQL, PreparedStatement.RETURN_GENERATED_KEYS);
                 creditStmt.setInt(1, userId);
@@ -307,6 +305,7 @@ public class CreateNewUser extends JPanel {
                     }
                 }
                 
+                // Create debit account
                 String insertLoanSQL = "INSERT INTO credit_loans (credit_id, loan) VALUES (?, ?)";
                 PreparedStatement loanStmt = connection.prepareStatement(insertLoanSQL);
                 loanStmt.setInt(1, creditId);
@@ -314,6 +313,7 @@ public class CreateNewUser extends JPanel {
                 loanStmt.setInt(2, loanAmount <= 0 ? loanAmount : -loanAmount);
                 loanStmt.executeUpdate();
                 
+                // Create debit account
                 String insertDebitSQL = "INSERT INTO debit_accounts (user_id, pin) VALUES (?, ?)";
                 PreparedStatement debitStmt = connection.prepareStatement(insertDebitSQL, PreparedStatement.RETURN_GENERATED_KEYS);
                 debitStmt.setInt(1, userId);
