@@ -17,7 +17,7 @@ CREATE TABLE `credit_accounts` (
   `pin` int(11) NOT NULL,
   PRIMARY KEY (`credit_id`),
   KEY `pin` (`pin`),
-  CONSTRAINT `credit_accounts_ibfk_1` FOREIGN KEY (`pin`) REFERENCES `bank_users` (`user_id`) ON DELETE CASCADE
+  CONSTRAINT `credit_accounts_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `bank_users` (`user_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE `debit_accounts` (
@@ -26,7 +26,7 @@ CREATE TABLE `debit_accounts` (
   `pin` int(11) NOT NULL,
   PRIMARY KEY (`debit_id`),
   KEY `pin` (`pin`),
-  CONSTRAINT `debit_accounts_ibfk_1` FOREIGN KEY (`pin`) REFERENCES `bank_users` (`user_id`) ON DELETE CASCADE
+  CONSTRAINT `debit_accounts_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `bank_users` (`user_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE `credit_loans` (
