@@ -59,7 +59,7 @@ public class MainFrame extends JFrame implements ActionListener{
     CreateNewUser updateUser = new CreateNewUser();
     DeleteUser deleteUser = new DeleteUser();
     Balance balance = new Balance();
-    Amount creditPanel = new Amount();
+    Amount depositPanel = new Amount();
     Amount loanPanel = new Amount();
     Amount repayPanel = new Amount();
     Amount withdrawPanel = new Amount();
@@ -106,11 +106,37 @@ public class MainFrame extends JFrame implements ActionListener{
         //Menu Panel for User Transactions: Transaction Panel
         cardPanel.add(transaction, "Transaction");
         transaction.balanceBtn.addActionListener(this);
-        transaction.transferMoneyBtn.addActionListener(this);
-        transaction.depositBtn.addActionListener(this);
-        transaction.withdrawBtn.addActionListener(this);
-        transaction.loanBtn.addActionListener(this);
-        transaction.payBtn.addActionListener(this);
+        transaction.transferMoneyBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                cardLayout.show(cardPanel, "Transfer Money");
+            }
+        });
+
+        transaction.depositBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                cardLayout.show(cardPanel, "Deposit Panel"); // lord help me with these names
+            }
+        });
+        transaction.withdrawBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                cardLayout.show(cardPanel, "Withdraw Panel");
+            }
+        });
+        transaction.loanBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                cardLayout.show(cardPanel, "Loan Panel");
+            }
+        });
+        transaction.payBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                cardLayout.show(cardPanel, "Repay Panel");
+            }
+        });
         transaction.exitBtn.addActionListener(this);
 
         cardPanel.add(accountCreationSelection, "Account Creation Selection");
@@ -124,7 +150,7 @@ public class MainFrame extends JFrame implements ActionListener{
         createNewCard.getExitBtn().addActionListener(this);
 
 
-        //Menu Panel for the actions you can do for your credit account: Credit Panel
+        //Menu Panel for the actions you can do for your credit account: Deposit Panel
         cardPanel.add(credit, "Credit");
         credit.depositBtn.addActionListener(this);
         credit.loanBtn.addActionListener(this);
@@ -171,8 +197,8 @@ public class MainFrame extends JFrame implements ActionListener{
 
 
         //This ask the amount of money to be deposited
-        cardPanel.add(creditPanel, "Credit Panel");
-        creditPanel.okBtn.addActionListener(this);
+        cardPanel.add(depositPanel, "Deposit Panel");
+        depositPanel.okBtn.addActionListener(this);
 
         //This ask the amount of money to be loaned
         cardPanel.add(loanPanel, "Loan Panel");
@@ -427,12 +453,12 @@ public class MainFrame extends JFrame implements ActionListener{
     }
 
     public void amountOfDeposit(){
-        String deposit = creditPanel.input.getText();
+        String deposit = depositPanel.input.getText();
         System.out.println(deposit);
 
         cardLayout.show(cardPanel, "Credit");
 
-        creditPanel.input.setText("");
+        depositPanel.input.setText("");
     }
 
     private int getTransactionID() {
@@ -609,6 +635,8 @@ public class MainFrame extends JFrame implements ActionListener{
                 // Then try to increase the balance of the receiving account
                 transferMoney(accType, 1, transaction_id, Integer.parseInt(cid), Double.parseDouble(amount));
                 
+                JOptionPane.showMessageDialog(this, "Transfer successful!", 
+                    "Transfer Success", JOptionPane.INFORMATION_MESSAGE);
             } catch (SQLException e) {
                 try {
                     connection.rollback();
@@ -831,10 +859,10 @@ public class MainFrame extends JFrame implements ActionListener{
         }
 
     //Prompt for credit transaction if chosen
-    if(e.getSource() == creditPanel.okBtn ||e.getSource() == loanPanel.okBtn||e.getSource() == repayPanel.okBtn ){
+    if(e.getSource() == depositPanel.okBtn ||e.getSource() == loanPanel.okBtn||e.getSource() == repayPanel.okBtn ){
         if (e.getSource() == loanPanel.okBtn) {
             amountOfLoan();
-        }else if (e.getSource() == creditPanel.okBtn) {
+        }else if (e.getSource() == depositPanel.okBtn) {
             amountOfDeposit();
         }else if (e.getSource() == repayPanel.okBtn) {
             amountOfRepay();
@@ -966,7 +994,7 @@ public class MainFrame extends JFrame implements ActionListener{
 
     //This ask the amount of money to be deposited: Amount Panel
     if(e.getSource() == credit.depositBtn){
-        cardLayout.show(cardPanel, "Credit Panel");
+        cardLayout.show(cardPanel, "Deposit Panel");
     }
 
     //This ask the amount of money to be loaned: Amount Panel
