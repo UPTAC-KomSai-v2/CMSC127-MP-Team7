@@ -106,6 +106,11 @@ public class MainFrame extends JFrame implements ActionListener{
         //Menu Panel for User Transactions: Transaction Panel
         cardPanel.add(transaction, "Transaction");
         transaction.balanceBtn.addActionListener(this);
+        transaction.transferMoneyBtn.addActionListener(this);
+        transaction.depositBtn.addActionListener(this);
+        transaction.withdrawBtn.addActionListener(this);
+        transaction.loanBtn.addActionListener(this);
+        transaction.payBtn.addActionListener(this);
         transaction.exitBtn.addActionListener(this);
 
         cardPanel.add(accountCreationSelection, "Account Creation Selection");
