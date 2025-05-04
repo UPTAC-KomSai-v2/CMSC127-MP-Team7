@@ -252,6 +252,9 @@ public class MainFrame extends JFrame implements ActionListener{
                     case "DB_URL":
                         DB_URL = value;
                         break;
+                    case "Default_DB":
+                        DB_URL += "/" + value;
+                        break;
                 }
                 System.out.println(USER + DB_URL + PASS);
             }
