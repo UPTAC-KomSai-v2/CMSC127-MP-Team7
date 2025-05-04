@@ -20,7 +20,7 @@ public class DataBaseLogIn extends JPanel{
     JLabel userlbl, passlbl;
     public JTextField usertxt;
     public JPasswordField passtxt;
-    public JButton logInBtn;
+    public JButton logInBtn, backBtn;
     Dimension size;
     GridBagConstraints gbc;
     Image bg;
