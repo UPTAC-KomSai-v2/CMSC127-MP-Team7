@@ -1,5 +1,7 @@
 
+import Employee.AccountCreationSelection;
 import Employee.AskUID;
+import Employee.CreateNewCard;
 import Employee.CreateNewUser;
 import Employee.DeleteUser;
 import Employee.ReadUser;
@@ -34,6 +36,8 @@ public class MainFrame extends JFrame implements ActionListener{
     private Connection connection;
     private boolean isTransactionLogin = false;
     private Connection transactionConnection = null;
+    private AccountCreationSelection accountCreationSelection = new AccountCreationSelection();
+    private CreateNewCard createNewCard = new CreateNewCard();
 
     MainMenu menu = new MainMenu();
     DataBaseLogIn dbLogIn = new DataBaseLogIn();
@@ -94,6 +98,15 @@ public class MainFrame extends JFrame implements ActionListener{
         transaction.creditBtn.addActionListener(this);
         transaction.debitBtn.addActionListener(this);
         transaction.exitBtn.addActionListener(this);
+
+        cardPanel.add(accountCreationSelection, "Account Creation Selection");
+        accountCreationSelection.getNewUserBtn().addActionListener(this);
+        accountCreationSelection.getNewCardBtn().addActionListener(this);
+
+// New card creation panel
+        cardPanel.add(createNewCard, "Create New Card");
+        createNewCard.getOkBtn().addActionListener(this);
+        createNewCard.getExitBtn().addActionListener(this);
 
 
         //Menu Panel for the actions you can do for your credit account: Credit Panel
@@ -184,7 +197,7 @@ public class MainFrame extends JFrame implements ActionListener{
         dbLogIn.usertxt.setText("");
         dbLogIn.passtxt.setText("");
     
-        String url = "jdbc:mysql://localhost:3306/bank"; // Update with your database URL
+        String url = "jdbc:mysql://localhost:3306/banking"; // Update with your database URL
     
         try {
             Connection conn = DriverManager.getConnection(url, user, pass);
@@ -275,8 +288,8 @@ public class MainFrame extends JFrame implements ActionListener{
                 newUser.firstNametxt.setText("");
                 newUser.lastNametxt.setText("");
                 newUser.emailtxt.setText("");
-                newUser.balancetxt.setText("");
-                newUser.loantxt.setText("");
+                // newUser.balancetxt.setText("");
+                // newUser.loantxt.setText("");
         
             }
         } catch (NumberFormatException e) {
@@ -291,23 +304,23 @@ public class MainFrame extends JFrame implements ActionListener{
 
         String firstName = newUser.firstNametxt.getText();
         String lastName = newUser.lastNametxt.getText();
-        String balance = newUser.balancetxt.getText();
-        String loan = newUser.loantxt.getText();
-        String pin = newUser.pintxt.getText();
+        // String balance = newUser.balancetxt.getText();
+        // String loan = newUser.loantxt.getText();
+        // String pin = newUser.pintxt.getText();
 
         System.out.println("First Name: "+firstName);
         System.out.println("Last Name: "+lastName);
         System.out.println("Balance: "+balance);
-        System.out.println("Loan: "+loan);
-        System.out.println("Pin: "+pin);
+        // System.out.println("Loan: "+loan);
+        // System.out.println("Pin: "+pin);
 
         cardLayout.show(cardPanel, "Access Database");
 
         newUser.firstNametxt.setText("");
         newUser.lastNametxt.setText("");
-        newUser.balancetxt.setText("");
-        newUser.loantxt.setText("");
-        newUser.pintxt.setText("");
+        // newUser.balancetxt.setText("");
+        // newUser.loantxt.setText("");
+        // newUser.pintxt.setText("");
     }
 
     //ask uid of user to update
@@ -503,8 +516,27 @@ public class MainFrame extends JFrame implements ActionListener{
     }
 
     //Prompt the employee to input details if create account is clicked
-    if(e.getSource() == accessDB.createUserBtn){
+    if(e.getSource() == accessDB.createUserBtn) {
+        cardLayout.show(cardPanel, "Account Creation Selection");
+    }
+
+    if(e.getSource() == accountCreationSelection.getNewUserBtn()) {
         cardLayout.show(cardPanel, "Create New User");
+    }
+
+    if(e.getSource() == accountCreationSelection.getNewCardBtn()) {
+        createNewCard.setConnection(connection);
+        cardLayout.show(cardPanel, "Create New Card");
+    }
+
+    if(e.getSource() == createNewCard.getOkBtn()) {
+        if(createNewCard.createCardInDatabase()) {
+            cardLayout.show(cardPanel, "Access Database");
+        }
+    }
+
+    if(e.getSource() == createNewCard.getExitBtn()) {
+        cardLayout.show(cardPanel, "Account Creation Selection");
     }
 
 
@@ -555,7 +587,6 @@ public class MainFrame extends JFrame implements ActionListener{
         cardLayout.show(cardPanel, "Delete User");
     }
 
-    //This displays the balance of the user
     if(e.getSource()==transaction.balanceBtn){
         cardLayout.show(cardPanel, "Balance");
     }
