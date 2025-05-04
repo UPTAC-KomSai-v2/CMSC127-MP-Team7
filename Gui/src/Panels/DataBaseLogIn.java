@@ -31,6 +31,22 @@ public class DataBaseLogIn extends JPanel{
     public DataBaseLogIn(){
         setLayout(new GridBagLayout());
         setBackground(Color.darkGray);
+
+        size = new Dimension(100,30);
+        backBtn = new JButton("Back");
+        backBtn.setPreferredSize(size);
+        backBtn.setOpaque(true);
+        backBtn.setBackground(Color.white);
+        backBtn.setHorizontalAlignment(SwingConstants.CENTER);
+        backBtn.setVerticalAlignment(SwingConstants.CENTER);
+        gbc.anchor = GridBagConstraints.CENTER;
+
+        gbc.gridwidth=2;
+        gbc.gridx=0;
+        gbc.gridy=3;
+        gbc.anchor=GridBagConstraints.CENTER;
+        this.add(backBtn, gbc);
+        
         size = new Dimension(80,30);
 
         bg = new ImageIcon(getClass().getResource("/Files/bg.png")).getImage();
