@@ -12,7 +12,8 @@ DROP TABLE IF EXISTS bank_users;
 
 CREATE TABLE `bank_users` (
   `user_id` int(11) NOT NULL AUTO_INCREMENT,
-  `name` varchar(100) NOT NULL,
+  `first_name` varchar(100) NOT NULL,
+  `last_name` varchar(100) NOT NULL,
   `email` varchar(100) NOT NULL,
   PRIMARY KEY (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -91,6 +92,66 @@ CREATE TABLE `single_transactions_debit` (
   CONSTRAINT `single_transactions_debit_ibfk_1` FOREIGN KEY (`debit_id`) REFERENCES `debit_accounts` (`debit_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- TRIGGERS
+DELIMITER $$
+
+CREATE TRIGGER trg_limit_credit_transaction_entries
+BEFORE INSERT ON double_transactions_credit
+FOR EACH ROW
+BEGIN
+  DECLARE cnt_credit INT;
+  DECLARE cnt_debit INT;
+  DECLARE total_cnt INT;
+
+  -- Count entries in credit table
+  SELECT COUNT(*) INTO cnt_credit
+  FROM double_transactions_credit
+  WHERE transaction_id = NEW.transaction_id;
+
+  -- Count entries in debit table
+  SELECT COUNT(*) INTO cnt_debit
+  FROM double_transactions_debit
+  WHERE transaction_id = NEW.transaction_id;
+
+  SET total_cnt = cnt_credit + cnt_debit;
+
+  IF total_cnt >= 2 THEN
+    SIGNAL SQLSTATE '45000'
+    SET MESSAGE_TEXT = 'Only two entries allowed per transaction_id across credit and debit tables';
+  END IF;
+END;
+$$
+
+CREATE TRIGGER trg_limit_debit_transaction_entries
+BEFORE INSERT ON double_transactions_debit
+FOR EACH ROW
+BEGIN
+  DECLARE cnt_credit INT;
+  DECLARE cnt_debit INT;
+  DECLARE total_cnt INT;
+
+  -- Count entries in credit table
+  SELECT COUNT(*) INTO cnt_credit
+  FROM double_transactions_credit
+  WHERE transaction_id = NEW.transaction_id;
+
+  -- Count entries in debit table
+  SELECT COUNT(*) INTO cnt_debit
+  FROM double_transactions_debit
+  WHERE transaction_id = NEW.transaction_id;
+
+  SET total_cnt = cnt_credit + cnt_debit;
+
+  IF total_cnt >= 2 THEN
+    SIGNAL SQLSTATE '45000'
+    SET MESSAGE_TEXT = 'Only two entries allowed per transaction_id across credit and debit tables';
+  END IF;
+END;
+$$
+
+DELIMITER ;
+
+
 INSERT INTO bank_users (name, email)
 VALUES
   ('Alice Smith', 'alice@example.com'),
@@ -156,8 +217,8 @@ VALUES
   (9, 1500),
   (10, 4000);
 
-INSERT INTO double_transactions_credit (transaction_id, credit_id, amount)
-VALUES
+insert into double_transactions_credit (transaction_id, credit_id, amount)
+values
   (1001, 1, 1000),
   (1002, 2, 1500),
   (1003, 3, 2000),
