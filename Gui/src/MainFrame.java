@@ -108,6 +108,7 @@ public class MainFrame extends JFrame implements ActionListener{
         cardPanel.add(accountCreationSelection, "Account Creation Selection");
         accountCreationSelection.getNewUserBtn().addActionListener(this);
         accountCreationSelection.getNewCardBtn().addActionListener(this);
+        accountCreationSelection.getExitBtn().addActionListener(this);
 
 // New card creation panel
         cardPanel.add(createNewCard, "Create New Card");
@@ -589,6 +590,10 @@ public class MainFrame extends JFrame implements ActionListener{
     if(e.getSource() == accountCreationSelection.getNewCardBtn()) {
         createNewCard.setConnection(connection);
         cardLayout.show(cardPanel, "Create New Card");
+    }
+
+    if(e.getSource() == accountCreationSelection.getExitBtn()) {
+        cardLayout.show(cardPanel, "Access Database");
     }
 
     if(e.getSource() == createNewCard.getOkBtn()) {
