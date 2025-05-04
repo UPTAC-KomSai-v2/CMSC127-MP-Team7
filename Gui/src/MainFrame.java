@@ -461,6 +461,30 @@ public class MainFrame extends JFrame implements ActionListener{
         depositPanel.input.setText("");
     }
 
+    private int getSingleTransactionID() {
+        String query = """
+                SELECT MAX(transaction_id) AS max_transaction_id
+                FROM (
+                    SELECT transaction_id FROM single_transactions_debit
+                    UNION ALL
+                    SELECT transaction_id FROM single_transactions_credit
+                ) AS combined_transactions
+                """;
+        int transactionID = 0;
+        try (
+            PreparedStatement stmt = transactionConnection.prepareStatement(query);
+        ){
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                transactionID = rs.getInt("max_transaction_id") + 1;
+            }
+            rs.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return transactionID;
+    }
+
     private int getDoubleTransactionID() {
         String query = """
                 SELECT MAX(transaction_id) AS max_transaction_id
