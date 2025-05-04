@@ -145,7 +145,6 @@ public class CreateNewUser extends JPanel {
         gbc.gridx = 1;
         this.add(lastNametxt, gbc);
 
-        // Add email field
         size = new Dimension(100, 30);
         emaillbl = new JLabel("Email: ");
         emaillbl.setOpaque(true);
@@ -308,16 +307,13 @@ public class CreateNewUser extends JPanel {
                     }
                 }
                 
-                // 3. Create loan record for credit account
                 String insertLoanSQL = "INSERT INTO credit_loans (credit_id, loan) VALUES (?, ?)";
                 PreparedStatement loanStmt = connection.prepareStatement(insertLoanSQL);
                 loanStmt.setInt(1, creditId);
                 int loanAmount = Integer.parseInt(loantxt.getText());
-                // Ensure loan is stored as negative per the constraint
                 loanStmt.setInt(2, loanAmount <= 0 ? loanAmount : -loanAmount);
                 loanStmt.executeUpdate();
                 
-                // 4. Create debit account
                 String insertDebitSQL = "INSERT INTO debit_accounts (user_id, pin) VALUES (?, ?)";
                 PreparedStatement debitStmt = connection.prepareStatement(insertDebitSQL, PreparedStatement.RETURN_GENERATED_KEYS);
                 debitStmt.setInt(1, userId);
@@ -334,7 +330,6 @@ public class CreateNewUser extends JPanel {
                     }
                 }
                 
-                // 5. Create balance record for debit account
                 String insertBalanceSQL = "INSERT INTO debit_balance (debit_id, balance) VALUES (?, ?)";
                 PreparedStatement balanceStmt = connection.prepareStatement(insertBalanceSQL);
                 balanceStmt.setInt(1, debitId);

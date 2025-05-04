@@ -329,13 +329,11 @@ public class MainFrame extends JFrame implements ActionListener{
     }
 
 
-    //below functions are for user transaction
     public void amountOfLoan(){
         String loan = loanPanel.input.getText();
         System.out.println(loan);
 
         cardLayout.show(cardPanel, "Credit");
-        //do other logic here
 
         loanPanel.input.setText("");
     }
@@ -346,7 +344,6 @@ public class MainFrame extends JFrame implements ActionListener{
         System.out.println(repay);
 
         cardLayout.show(cardPanel, "Credit");
-        //do other logic here
 
         repayPanel.input.setText("");
     }
@@ -356,7 +353,6 @@ public class MainFrame extends JFrame implements ActionListener{
         System.out.println(deposit);
 
         cardLayout.show(cardPanel, "Credit");
-        //do other logic here
 
         creditPanel.input.setText("");
     }
@@ -367,7 +363,6 @@ public class MainFrame extends JFrame implements ActionListener{
         System.out.println("UID: "+uid+" Money: "+transfer);
 
         cardLayout.show(cardPanel, "Debit");
-        //do other logic here
 
         transferMoney.moneytxt.setText("");
         transferMoney.uidtxt.setText("");
@@ -378,7 +373,6 @@ public class MainFrame extends JFrame implements ActionListener{
         System.out.println(withdraw);
 
         cardLayout.show(cardPanel, "Debit");
-        //do other logic here
 
 
         withdrawPanel.input.setText("");
