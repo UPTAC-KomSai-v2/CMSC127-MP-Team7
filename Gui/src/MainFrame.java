@@ -265,6 +265,8 @@ public class MainFrame extends JFrame implements ActionListener{
                 FileWriter fWriter = new FileWriter("DefaultCredentials.txt");
                 fWriter.write("DefaultUser: exampleuser \n Defaultpass: examplepass \n DB_URL: jdbc:mariadb://localhost:3306/bank \n Default_DB: bank");
                 fWriter.close();
+                JOptionPane.showMessageDialog(this, "Check your DefaultCredentials.txt file (somewhere in the root), and input your database credentials", "Error", JOptionPane.ERROR_MESSAGE);
+                System.exit(0);
             }
             catch (IOException error) {
             }
