@@ -23,13 +23,14 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 
 public class MainFrame extends JFrame implements ActionListener{
     private CardLayout cardLayout;
     private JPanel cardPanel;
-    //private Connection connection;
+    private Connection connection;
     private boolean isTransactionLogin = false;
     private Connection transactionConnection = null;
 
@@ -109,6 +110,7 @@ public class MainFrame extends JFrame implements ActionListener{
         cardPanel.add(newUser, "Create New User");
         newUser.okBtn.addActionListener(this);
         newUser.exitBtn.addActionListener(this);
+        newUser.setConnection(connection);
 
         //This panel shows all the user and info's about the user: ReadUser Panel
         cardPanel.add(readUser, "Read User");
@@ -181,12 +183,14 @@ public class MainFrame extends JFrame implements ActionListener{
             if(isTransactionLogin) {
                 transactionConnection = conn;
             } else {
-                conn.close();
+                connection = conn; 
+                newUser.setConnection(connection); 
             }
             return true;
         } catch (SQLException e) {
             System.out.println("Database connection failed!");
             System.out.println("Error: " + e.getMessage());
+            JOptionPane.showMessageDialog(this, "Database connection failed: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             return false;
         }
     }
@@ -240,37 +244,36 @@ public class MainFrame extends JFrame implements ActionListener{
     }
 
     //Create new User
-    public void newUserInfo(){
-                //Code para kuhaon an input han user
-
-                String uid = newUser.uidtxt.getText();
-                String cid = newUser.cidtxt.getText();
-                String did = newUser.didtxt.getText();
-                String firstName = newUser.firstNametxt.getText();
-                String lastName = newUser.lastNametxt.getText();
-                String balance = newUser.balancetxt.getText();
-                String loan = newUser.loantxt.getText();
-                String pin = newUser.pintxt.getText();
-        
-                System.out.println("uid: "+uid);
-                System.out.println("cid: "+cid);
-                System.out.println("did: "+did);
-                System.out.println("First Name: "+firstName);
-                System.out.println("Last Name: "+lastName);
-                System.out.println("Balance: "+balance);
-                System.out.println("Loan: "+loan);
-                System.out.println("Pin: "+pin);
-        
+    public void newUserInfo() {
+        try {
+            // Validate inputs before proceeding
+            if (newUser.firstNametxt.getText().isEmpty() || newUser.lastNametxt.getText().isEmpty() ||
+                newUser.emailtxt.getText().isEmpty() || newUser.pintxt.getText().isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Please fill in all required fields", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            
+            // Create user in database
+            boolean success = newUser.createUserInDatabase();
+            
+            if (success) {
                 cardLayout.show(cardPanel, "Access Database");
-        
+                
+                // Clear form fields
                 newUser.uidtxt.setText("");
                 newUser.cidtxt.setText("");
                 newUser.didtxt.setText("");
                 newUser.firstNametxt.setText("");
                 newUser.lastNametxt.setText("");
+                newUser.emailtxt.setText("");
                 newUser.balancetxt.setText("");
                 newUser.loantxt.setText("");
                 newUser.pintxt.setText("");
+            }
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Please enter valid numeric values for ID, balance, loan and PIN", 
+                "Input Error", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     //Update new User
@@ -382,6 +385,18 @@ public class MainFrame extends JFrame implements ActionListener{
         
     }
 
+    private void closeConnections() {
+        if (connection != null) {
+            try {
+                connection.close();
+                System.out.println("Database connection closed.");
+            } catch (SQLException e) {
+                System.out.println("Error closing connection: " + e.getMessage());
+            }
+        }
+        closeTransactionConnection();
+    }
+
     private void closeTransactionConnection() {
         if (transactionConnection != null) {
             try {
@@ -394,6 +409,11 @@ public class MainFrame extends JFrame implements ActionListener{
         }
     }
 
+    @Override
+    public void dispose() {
+        closeConnections();
+        super.dispose();
+    }
 
     @Override
     public void actionPerformed(ActionEvent e) {
@@ -446,9 +466,8 @@ public class MainFrame extends JFrame implements ActionListener{
             if(e.getSource()==deleteUser.okBtn){
                 deleteUID();
             }
-        } // This closing brace was missing in your original code
+        } 
     
-        //Prompt to proceed transaction if user login is success or if user want to exit from chosen transaction
         if(e.getSource() == userLogIn.okBtn || e.getSource()==debit.exitBtn || e.getSource()== credit.exitBtn || e.getSource()==balance.exitBtn){
             if(e.getSource() == userLogIn.okBtn){
                 logInUserInfo();
