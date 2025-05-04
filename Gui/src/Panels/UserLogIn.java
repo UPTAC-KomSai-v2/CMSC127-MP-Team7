@@ -52,7 +52,7 @@ public class UserLogIn extends JPanel{
         gbc.anchor = GridBagConstraints.EAST;
 
         
-        idlbl = new JLabel("User Id");
+        idlbl = new JLabel("Card Id");
         idlbl.setOpaque(true);
         idlbl.setPreferredSize(size);
         idlbl.setBackground(Color.white);

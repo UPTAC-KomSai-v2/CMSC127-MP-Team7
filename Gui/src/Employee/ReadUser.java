@@ -92,7 +92,8 @@ public class ReadUser extends JPanel {
             if (connection.isValid(5)) {
                 String sql = """
                     SELECT bu.user_id, 
-                           bu.name, 
+                           bu.first_name,
+                           bu.last_name, 
                            bu.email,
                            ca.credit_id, 
                            da.debit_id,
@@ -111,7 +112,8 @@ public class ReadUser extends JPanel {
     
                     while (rs.next()) {
                         String userId = rs.getString("user_id");
-                        String fullName = rs.getString("name");
+                        String firstName = rs.getString("first_name");
+                        String lastName = rs.getString("last_name");
                         String creditId = rs.getString("credit_id");
                         String debitId = rs.getString("debit_id");
                         
@@ -127,14 +129,6 @@ public class ReadUser extends JPanel {
                         
                         // Calculate net balance
                         double netBalance = balance - loan;
-    
-                        String firstName = fullName;
-                        String lastName = "";
-                        if (fullName != null && fullName.contains(" ")) {
-                            int spaceIndex = fullName.indexOf(' ');
-                            firstName = fullName.substring(0, spaceIndex);
-                            lastName = fullName.substring(spaceIndex + 1);
-                        }
     
                         Object[] row = {
                             firstName, 
