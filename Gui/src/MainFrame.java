@@ -213,8 +213,6 @@ public class MainFrame extends JFrame implements ActionListener{
 
     //To log in to the database
     public boolean logDatabaseUserInfo() {
-        String user = dbLogIn.usertxt.getText();
-        String pass = new String(dbLogIn.passtxt.getPassword());
 
         String USER = "";
         String PASS = "";
@@ -232,7 +230,6 @@ public class MainFrame extends JFrame implements ActionListener{
             System.out.println("driver failed");
         }
 
-        String url = "jdbc:mysql://localhost:3306/bank"; // Update with your database URL
         try (BufferedReader br = new BufferedReader(new FileReader("DefaultCredentials.txt"))) {
             String line;
             while ((line = br.readLine()) != null) {
@@ -280,7 +277,7 @@ public class MainFrame extends JFrame implements ActionListener{
         } catch (SQLException e) {
             System.out.println("Database connection failed!");
             System.out.println("Error: " + e.getMessage());
-            JOptionPane.showMessageDialog(this, "Database connection failed: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Database connection failed. Check your DefaultCredentials.txt file (wherever it is).\nError MSG: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             return false;
         }
     }
