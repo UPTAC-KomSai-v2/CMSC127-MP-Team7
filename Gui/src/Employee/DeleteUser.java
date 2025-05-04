@@ -1,6 +1,5 @@
 package Employee;
 
-
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -8,30 +7,34 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Image;
 import java.awt.Insets;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
-public class DeleteUser extends JPanel{
-    
+public class DeleteUser extends JPanel {
     JLabel uidlbl;
     public JTextField uidtxt;
     public JButton okBtn, exitBtn;
     Dimension size;
     GridBagConstraints gbc;
     Image bg;
+    private Connection connection;
 
-    public DeleteUser(){
+    public DeleteUser() {
         setLayout(new GridBagLayout());
         setBackground(Color.darkGray);
         bg = new ImageIcon(getClass().getResource("/Files/bg.png")).getImage();
 
-        size = new Dimension(150,30);
+        size = new Dimension(150, 30);
         uidlbl = new JLabel("User id of user to Delete: ");
         uidlbl.setOpaque(true);
         uidlbl.setPreferredSize(size);
@@ -42,22 +45,22 @@ public class DeleteUser extends JPanel{
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
         gbc.gridy = 0;
-        gbc.insets = new Insets(10,10,10,10);
-        gbc.gridwidth=1;
+        gbc.insets = new Insets(10, 10, 10, 10);
+        gbc.gridwidth = 1;
         gbc.anchor = GridBagConstraints.EAST;
 
         this.add(uidlbl, gbc);
 
-        size = new Dimension(150,30);
+        size = new Dimension(150, 30);
         uidtxt = new JTextField();
         uidtxt.setOpaque(true);
         uidtxt.setPreferredSize(size);
         uidtxt.setBackground(new Color(22, 180, 161));
 
-        gbc.gridx=1;
+        gbc.gridx = 1;
         this.add(uidtxt, gbc);
 
-        size = new Dimension(200,30);
+        size = new Dimension(200, 30);
         okBtn = new JButton("Ok");
         okBtn.setOpaque(true);
         okBtn.setPreferredSize(size);
@@ -65,15 +68,14 @@ public class DeleteUser extends JPanel{
         okBtn.setHorizontalAlignment(SwingConstants.CENTER);
         okBtn.setVerticalAlignment(SwingConstants.CENTER);
 
-
         gbc.gridwidth = 2;
         gbc.anchor = GridBagConstraints.CENTER;
-        gbc.gridx=0;
-        gbc.gridy=1;
+        gbc.gridx = 0;
+        gbc.gridy = 1;
 
-        this.add(okBtn , gbc);
+        this.add(okBtn, gbc);
 
-        exitBtn = new JButton("Exit");
+        exitBtn = new JButton("Back");
         exitBtn.setPreferredSize(size);
         exitBtn.setOpaque(true);
         exitBtn.setBackground(Color.white);
@@ -82,8 +84,72 @@ public class DeleteUser extends JPanel{
 
         gbc.gridy = 2;
         add(exitBtn, gbc);
+    }
 
+    public void setConnection(Connection connection) {
+        this.connection = connection;
+    }
 
+    public boolean deleteUserFromDatabase() {
+        if (connection == null) {
+            JOptionPane.showMessageDialog(this, 
+                "Database connection is not established", 
+                "Error", JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+
+        String userIdStr = uidtxt.getText();
+        if (userIdStr.isEmpty()) {
+            JOptionPane.showMessageDialog(this, 
+                "Please enter a User ID", 
+                "Error", JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+
+        try {
+            int userId = Integer.parseInt(userIdStr);
+            
+            // Confirm deletion
+            int confirm = JOptionPane.showConfirmDialog(
+                this, 
+                "Are you sure you want to delete user with ID: " + userId + "?",
+                "Confirm Deletion",
+                JOptionPane.YES_NO_OPTION);
+            
+            if (confirm != JOptionPane.YES_OPTION) {
+                return false;
+            }
+
+            String sql = "DELETE FROM bank_users WHERE user_id = ?";
+            try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+                stmt.setInt(1, userId);
+                int rowsAffected = stmt.executeUpdate();
+                
+                if (rowsAffected > 0) {
+                    JOptionPane.showMessageDialog(this, 
+                        "User deleted successfully!", 
+                        "Success", JOptionPane.INFORMATION_MESSAGE);
+                    uidtxt.setText("");
+                    return true;
+                } else {
+                    JOptionPane.showMessageDialog(this, 
+                        "No user found with ID: " + userId, 
+                        "Error", JOptionPane.ERROR_MESSAGE);
+                    return false;
+                }
+            }
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, 
+                "User ID must be a number", 
+                "Error", JOptionPane.ERROR_MESSAGE);
+            return false;
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(this, 
+                "Error deleting user: " + e.getMessage(), 
+                "Database Error", JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
+            return false;
+        }
     }
 
     @Override
@@ -96,14 +162,12 @@ public class DeleteUser extends JPanel{
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            JFrame frame = new JFrame("Main Menu Test");
+            JFrame frame = new JFrame("Delete User Test");
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             frame.setSize(800, 800);
 
             DeleteUser d = new DeleteUser();
-            // Ensure components are added
             frame.setContentPane(d);
-
             frame.setVisible(true);
         });
     }

@@ -61,7 +61,7 @@ public class Credit extends JPanel{
         gbc.gridy = 2;
         add(repayLoanBtn, gbc);
 
-        exitBtn = new JButton("Exit");
+        exitBtn = new JButton("Back");
         exitBtn.setPreferredSize(size);
         exitBtn.setOpaque(true);
         exitBtn.setBackground(Color.white);

@@ -44,7 +44,7 @@ public class Balance extends JPanel {
         add(balancePane, gbc);
 
        size = new Dimension(100,30);
-       exitBtn = new JButton("Exit");
+       exitBtn = new JButton("Back");
        exitBtn.setPreferredSize(size);
        exitBtn.setOpaque(true);
        exitBtn.setBackground(Color.white);

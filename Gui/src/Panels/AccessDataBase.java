@@ -66,7 +66,7 @@ public class AccessDataBase extends JPanel{
         gbc.gridy=4;
         this.add(deleteUserBtn, gbc);
 
-        exitBtn =new JButton("Exit");
+        exitBtn =new JButton("Log out");
         exitBtn.setPreferredSize(size);
         exitBtn.setBackground(Color.white);
         exitBtn.setOpaque(true);

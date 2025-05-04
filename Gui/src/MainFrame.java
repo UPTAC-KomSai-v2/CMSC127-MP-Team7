@@ -17,7 +17,13 @@ import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import Connectivity.DBConnect;
@@ -26,6 +32,9 @@ import Connectivity.DBConnect;
 public class MainFrame extends JFrame implements ActionListener{
     private CardLayout cardLayout;
     private JPanel cardPanel;
+    private Connection connection;
+    private boolean isTransactionLogin = false;
+    private Connection transactionConnection = null;
 
     MainMenu menu = new MainMenu();
     DataBaseLogIn dbLogIn = new DataBaseLogIn();
@@ -104,10 +113,12 @@ public class MainFrame extends JFrame implements ActionListener{
         cardPanel.add(newUser, "Create New User");
         newUser.okBtn.addActionListener(this);
         newUser.exitBtn.addActionListener(this);
+        newUser.setConnection(connection);
 
         //This panel shows all the user and info's about the user: ReadUser Panel
         cardPanel.add(readUser, "Read User");
         readUser.exitBtn.addActionListener(this);
+        readUser.setConnection(connection);
 
         //This panel is for asking user Id which is the basis for updating the user info: AskUID Panel
         cardPanel.add(askUID, "Ask UID");
@@ -123,6 +134,7 @@ public class MainFrame extends JFrame implements ActionListener{
         cardPanel.add(deleteUser, "Delete User");
         deleteUser.okBtn.addActionListener(this);
         deleteUser.exitBtn.addActionListener(this);
+        deleteUser.setConnection(connection);
 
         //This panel display the balance of the user
         cardPanel.add(balance, "Balance");
@@ -172,100 +184,124 @@ public class MainFrame extends JFrame implements ActionListener{
     }
 
     //To log in to the database
-    public void logDatabaseUserInfo(){
-        String user = new String();
-        user = dbLogIn.usertxt.getText();
+    public boolean logDatabaseUserInfo() {
+        String user = dbLogIn.usertxt.getText();
         String pass = new String(dbLogIn.passtxt.getPassword());
-
-        System.out.println("User: " + user + " Pass: " + new String(pass));
     
         dbLogIn.usertxt.setText("");
         dbLogIn.passtxt.setText("");
-
-        //change this logic nalang with how to connect to database
-        if(user.equals("User")&&pass.equals("Pass")){
-            cardLayout.show(cardPanel, "Access Database");
-        }else{
-            System.out.println("ANot mali");
-            System.out.println(user);
-            System.out.println(pass);
+    
+        String url = "jdbc:mysql://localhost:3306/bank"; // Update with your database URL
+    
+        try {
+            Connection conn = DriverManager.getConnection(url, user, pass);
+            System.out.println("Connected to database successfully!");
+            
+            if(isTransactionLogin) {
+                transactionConnection = conn;
+            } else {
+                connection = conn; 
+                newUser.setConnection(connection); 
+                readUser.setConnection(connection);
+                deleteUser.setConnection(connection);
+            }
+            return true;
+        } catch (SQLException e) {
+            System.out.println("Database connection failed!");
+            System.out.println("Error: " + e.getMessage());
+            JOptionPane.showMessageDialog(this, "Database connection failed: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            return false;
         }
     }
 
-    //To Log in user bank account
-    public void logInUserInfo(){
-        String uid = new String();
-        uid = userLogIn.idtxt.getText();
-        String pin = new String(userLogIn.pintxt.getPassword());
-
-        System.out.println("User: " + uid + " Pass: " + new String(pin));
+    //To log in to the user account
+    public void logInUserInfo() {
+        String uidStr = userLogIn.idtxt.getText();
+        String pinStr = new String(userLogIn.pintxt.getPassword());
 
         userLogIn.idtxt.setText("");
         userLogIn.pintxt.setText("");
-        
 
-        //change this logic nalang with how to query the uid and pass to crosscheck if an user kay ada database
-        if(uid.equals("User")&&pin.equals("Pass")){
-            cardLayout.show(cardPanel, "Transaction");
-        }else{
-            System.out.println("ANot mali");
-            System.out.println(uid);
-            System.out.println(pin);
+        if (transactionConnection == null) {
+            System.out.println("Database is not connected. Please connect first.");
+            return;
+        }
+
+        try {
+            int uid = Integer.parseInt(uidStr);
+            int pin = Integer.parseInt(pinStr);
+
+            String sql = """
+                SELECT 'debit' AS account_type FROM debit_accounts WHERE user_id = ? AND pin = ?
+                UNION
+                SELECT 'credit' AS account_type FROM credit_accounts WHERE user_id = ? AND pin = ?
+            """;
+
+            PreparedStatement stmt = transactionConnection.prepareStatement(sql);
+            stmt.setInt(1, uid);
+            stmt.setInt(2, pin);
+            stmt.setInt(3, uid);
+            stmt.setInt(4, pin);
+
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                String accountType = rs.getString("account_type");
+                System.out.println("Login successful. Account type: " + accountType);
+                cardLayout.show(cardPanel, "Transaction");
+            } else {
+                System.out.println("Invalid user ID or PIN.");
+            }
+
+            rs.close();
+            stmt.close();
+        } catch (NumberFormatException e) {
+            System.out.println("User ID and PIN must be numeric.");
+        } catch (SQLException e) {
+            System.out.println("Error during login: " + e.getMessage());
         }
     }
 
-
-
     //Create new User
-    public void newUserInfo(){
-                //Code para kuhaon an input han user
-
-                String uid = newUser.uidtxt.getText();
-                String cid = newUser.cidtxt.getText();
-                String did = newUser.didtxt.getText();
-                String firstName = newUser.firstNametxt.getText();
-                String lastName = newUser.lastNametxt.getText();
-                String balance = newUser.balancetxt.getText();
-                String loan = newUser.loantxt.getText();
-                String pin = newUser.pintxt.getText();
-        
-                System.out.println("uid: "+uid);
-                System.out.println("cid: "+cid);
-                System.out.println("did: "+did);
-                System.out.println("First Name: "+firstName);
-                System.out.println("Last Name: "+lastName);
-                System.out.println("Balance: "+balance);
-                System.out.println("Loan: "+loan);
-                System.out.println("Pin: "+pin);
-        
+    public void newUserInfo() {
+        try {
+            // Validate inputs before proceeding
+            if (newUser.firstNametxt.getText().isEmpty() || newUser.lastNametxt.getText().isEmpty() ||
+                newUser.emailtxt.getText().isEmpty() ) {
+                JOptionPane.showMessageDialog(this, "Please fill in all required fields", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            
+            // Create user in database
+            boolean success = newUser.createUserInDatabase();
+            
+            if (success) {
                 cardLayout.show(cardPanel, "Access Database");
-        
-                newUser.uidtxt.setText("");
-                newUser.cidtxt.setText("");
-                newUser.didtxt.setText("");
+                
+                // Clear form fields
                 newUser.firstNametxt.setText("");
                 newUser.lastNametxt.setText("");
+                newUser.emailtxt.setText("");
                 newUser.balancetxt.setText("");
                 newUser.loantxt.setText("");
-                newUser.pintxt.setText("");
+        
+            }
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Please enter valid numeric values for ID, balance, loan and PIN", 
+                "Input Error", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     //Update new User
     public void updateUserInfo(){
         //Code para kuhaon an input han user
 
-        String uid = newUser.uidtxt.getText();
-        String cid = newUser.cidtxt.getText();
-        String did = newUser.didtxt.getText();
         String firstName = newUser.firstNametxt.getText();
         String lastName = newUser.lastNametxt.getText();
         String balance = newUser.balancetxt.getText();
         String loan = newUser.loantxt.getText();
         String pin = newUser.pintxt.getText();
 
-        System.out.println("uid: "+uid);
-        System.out.println("cid: "+cid);
-        System.out.println("did: "+did);
         System.out.println("First Name: "+firstName);
         System.out.println("Last Name: "+lastName);
         System.out.println("Balance: "+balance);
@@ -274,9 +310,6 @@ public class MainFrame extends JFrame implements ActionListener{
 
         cardLayout.show(cardPanel, "Access Database");
 
-        newUser.uidtxt.setText("");
-        newUser.cidtxt.setText("");
-        newUser.didtxt.setText("");
         newUser.firstNametxt.setText("");
         newUser.lastNametxt.setText("");
         newUser.balancetxt.setText("");
@@ -303,13 +336,11 @@ public class MainFrame extends JFrame implements ActionListener{
     }
 
 
-    //below functions are for user transaction
     public void amountOfLoan(){
         String loan = loanPanel.input.getText();
         System.out.println(loan);
 
         cardLayout.show(cardPanel, "Credit");
-        //do other logic here
 
         loanPanel.input.setText("");
     }
@@ -320,7 +351,6 @@ public class MainFrame extends JFrame implements ActionListener{
         System.out.println(repay);
 
         cardLayout.show(cardPanel, "Credit");
-        //do other logic here
 
         repayPanel.input.setText("");
     }
@@ -330,7 +360,6 @@ public class MainFrame extends JFrame implements ActionListener{
         System.out.println(deposit);
 
         cardLayout.show(cardPanel, "Credit");
-        //do other logic here
 
         creditPanel.input.setText("");
     }
@@ -341,7 +370,6 @@ public class MainFrame extends JFrame implements ActionListener{
         System.out.println("UID: "+uid+" Money: "+transfer);
 
         cardLayout.show(cardPanel, "Debit");
-        //do other logic here
 
         transferMoney.moneytxt.setText("");
         transferMoney.uidtxt.setText("");
@@ -352,70 +380,105 @@ public class MainFrame extends JFrame implements ActionListener{
         System.out.println(withdraw);
 
         cardLayout.show(cardPanel, "Debit");
-        //do other logic here
 
 
         withdrawPanel.input.setText("");
         
     }
 
-
-@Override
-public void actionPerformed(ActionEvent e) {
-
-    //Prompt to go back to main if chosen to exit from the transaction or database access
-    if(e.getSource() == transaction.exitBtn || e.getSource() == accessDB.exitBtn){
-        cardLayout.show(cardPanel, "Main");
+    private void closeConnections() {
+        if (connection != null) {
+            try {
+                connection.close();
+                System.out.println("Database connection closed.");
+            } catch (SQLException e) {
+                System.out.println("Error closing connection: " + e.getMessage());
+            }
+        }
+        closeTransactionConnection();
     }
 
-    //Prompt to enter username and password to access database
-    if (e.getSource() == menu.accessDatabaseBtn) {
-        cardLayout.show(cardPanel, "Database Log In");
-    }
-
-    //Prompt to enter user id and pin to access account
-    if (e.getSource() == menu.transactionBtn) {
-        cardLayout.show(cardPanel, "User Log In");
-    }
-
-    //Prompt to CRUD operation if database login in success
-    if(e.getSource() == dbLogIn.logInBtn  ||e.getSource()==newUser.okBtn|| e.getSource() ==newUser.exitBtn|| e.getSource()==readUser.exitBtn || e.getSource() == updateUser.exitBtn || e.getSource() == updateUser.okBtn || e.getSource()==askUID.exitBtn|| e.getSource() == deleteUser.okBtn || e.getSource()==deleteUser.exitBtn){
-
-        if(e.getSource() == dbLogIn.logInBtn){
-            logDatabaseUserInfo();
-        }
-
-        if(e.getSource()==newUser.okBtn){
-            newUserInfo();
-        }
-
-        if(e.getSource()==updateUser.okBtn){
-            updateUserInfo();
-        }
-
-        if(e.getSource() ==newUser.exitBtn||e.getSource() ==readUser.exitBtn||e.getSource() ==updateUser.exitBtn||e.getSource()==deleteUser.exitBtn||e.getSource()==askUID.exitBtn){
-            cardLayout.show(cardPanel, "Access Database");
-        }
-
-        if(e.getSource()==deleteUser.okBtn){
-            deleteUID();
+    private void closeTransactionConnection() {
+        if (transactionConnection != null) {
+            try {
+                transactionConnection.close();
+                transactionConnection = null;
+                System.out.println("Transaction database connection closed.");
+            } catch (SQLException e) {
+                System.out.println("Error closing transaction connection: " + e.getMessage());
+            }
         }
     }
 
-
-
-    //Prompt to proceed transaction if user login is success or if user want to exit from chosen transaction
-    if(e.getSource() == userLogIn.okBtn || e.getSource()==debit.exitBtn || e.getSource()== credit.exitBtn || e.getSource()==balance.exitBtn){
-
-        if(e.getSource() == userLogIn.okBtn){
-            logInUserInfo();
-        }
-
-        if (e.getSource()==debit.exitBtn||e.getSource()== credit.exitBtn||e.getSource()==balance.exitBtn) {
-            cardLayout.show(cardPanel, "Transaction");
-        }
-
+    @Override
+    public void dispose() {
+        closeConnections();
+        super.dispose();
     }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        //Prompt to go back to main if chosen to exit from the transaction or database access
+        if(e.getSource() == transaction.exitBtn || e.getSource() == accessDB.exitBtn){
+            if(e.getSource() == transaction.exitBtn) {
+                closeTransactionConnection();
+            }
+            cardLayout.show(cardPanel, "Main");
+        }
+    
+        //Prompt to enter username and password to access database
+        if (e.getSource() == menu.accessDatabaseBtn) {
+            cardLayout.show(cardPanel, "Database Log In");
+        }
+    
+        //Prompt to enter user id and pin to access account
+        if (e.getSource() == menu.transactionBtn) {
+            cardLayout.show(cardPanel, "Database Log In");
+            isTransactionLogin = true;
+        }
+    
+        //Prompt to CRUD operation if database login in success
+        if(e.getSource() == dbLogIn.logInBtn  ||e.getSource()==newUser.okBtn|| e.getSource() ==newUser.exitBtn|| e.getSource()==readUser.exitBtn || e.getSource() == updateUser.exitBtn || e.getSource() == updateUser.okBtn || e.getSource()==askUID.exitBtn|| e.getSource() == deleteUser.okBtn || e.getSource()==deleteUser.exitBtn){
+            if(e.getSource() == dbLogIn.logInBtn){
+                if(logDatabaseUserInfo()) {
+                    if(isTransactionLogin) {
+                        // After successful DB login for transaction, show user login
+                        cardLayout.show(cardPanel, "User Log In");
+                        isTransactionLogin = false;
+                    } else {
+                        // Regular database access
+                        cardLayout.show(cardPanel, "Access Database");
+                    }
+                }
+            }
+    
+            if(e.getSource()==newUser.okBtn){
+                newUserInfo();
+            }
+    
+            if(e.getSource()==updateUser.okBtn){
+                updateUserInfo();
+            }
+    
+            if(e.getSource() ==newUser.exitBtn||e.getSource() ==readUser.exitBtn||e.getSource() ==updateUser.exitBtn||e.getSource()==deleteUser.exitBtn||e.getSource()==askUID.exitBtn){
+                cardLayout.show(cardPanel, "Access Database");
+            }
+    
+            if(e.getSource() == deleteUser.okBtn) {
+                deleteUser.deleteUserFromDatabase();
+                cardLayout.show(cardPanel, "Access Database");
+            }
+        } 
+    
+        if(e.getSource() == userLogIn.okBtn || e.getSource()==debit.exitBtn || e.getSource()== credit.exitBtn || e.getSource()==balance.exitBtn){
+            if(e.getSource() == userLogIn.okBtn){
+                logInUserInfo();
+            }
+    
+            if (e.getSource()==debit.exitBtn||e.getSource()== credit.exitBtn||e.getSource()==balance.exitBtn) {
+                cardLayout.show(cardPanel, "Transaction");
+            }
+        }
 
     //Prompt for credit transaction if chosen
     if(e.getSource() == transaction.creditBtn || e.getSource() == creditPanel.okBtn ||e.getSource() == loanPanel.okBtn||e.getSource() == repayPanel.okBtn ){
@@ -450,7 +513,30 @@ public void actionPerformed(ActionEvent e) {
 
     //Prompt if the employee clicked the read user button
     if(e.getSource() == accessDB.readUserBtn){
-        cardLayout.show(cardPanel, "Read User");
+        System.out.println("Read User button clicked");
+        
+        if (connection != null) {
+            try {
+                if (connection.isValid(5)) {
+                    readUser.setConnection(connection);
+                    readUser.loadUserData();
+                    cardLayout.show(cardPanel, "Read User");
+                } else {
+                    JOptionPane.showMessageDialog(this, 
+                        "Database connection is no longer valid. Please reconnect.",
+                        "Connection Error", JOptionPane.ERROR_MESSAGE);
+                }
+            } catch (SQLException ex) {
+                JOptionPane.showMessageDialog(this, 
+                    "Error checking database connection: " + ex.getMessage(),
+                    "Database Error", JOptionPane.ERROR_MESSAGE);
+                ex.printStackTrace();
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, 
+                "Database connection is not established.",
+                "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     //Prompt if the employee clicked the update user button
@@ -501,7 +587,7 @@ public void actionPerformed(ActionEvent e) {
     if(e.getSource() == debit.transferMoneyBtn){
         cardLayout.show(cardPanel, "Transfer Money");
     }
-}
+    }
 
     //main class
     public static void main(String[] args) {
