@@ -10,11 +10,10 @@ public class Balance extends JPanel {
     GridBagConstraints gbc;
     Dimension size;
     Image bg;
+    private String userName = "Username";
+    private double balance = 0.0;
 
     public Balance() {
-
-        String userName = "User name";
-        double balance = 1000;
 
         setLayout(new GridBagLayout());
         setBackground(Color.DARK_GRAY);
@@ -25,7 +24,7 @@ public class Balance extends JPanel {
         balancePane.setEditable(false);
         balancePane.setFont(new Font("Arial", Font.PLAIN, 18));
         balancePane.setBackground(Color.WHITE);
-        balancePane.setText("\nUser: " + userName + "\nBalance: ₱" + String.format("%.2f", balance));
+        updateBalanceText("debit");
 
         
         StyledDocument doc = balancePane.getStyledDocument();
@@ -65,6 +64,26 @@ public class Balance extends JPanel {
         if (bg != null) {
             g.drawImage(bg, 0, 0, getWidth(), getHeight(), this);
         }
+    }
+
+    private void updateBalanceText(String accType) {
+        if (accType.equals("debit")) {
+            balancePane.setText("\nUser: " + userName + "\nBalance: ₱" + String.format("%.2f", balance));
+        } else if (accType.equals("credit")) {
+            balancePane.setText("\nUser: " + userName + "\nLoans: ₱" + String.format("%.2f", balance));
+        } else {
+            balancePane.setText("\nUser: " + userName + "\nBalance: ₱" + String.format("%.2f", balance));
+        }
+    }
+
+    public void setUsername(String username, String accType) {
+        this.userName = username;
+        updateBalanceText(accType);
+    }
+
+    public void setBalance(double balance, String accType) {
+        this.balance = balance;
+        updateBalanceText(accType);
     }
 
     public static void main(String[] args) {

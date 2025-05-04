@@ -56,6 +56,9 @@ public class MainFrame extends JFrame implements ActionListener{
     TransferMoney transferMoney = new TransferMoney();
     DBConnect mysqldb;
 
+    private int currUID;
+    private String currAccType;
+
     public MainFrame() {
         setTitle("CardLayout Example");
         setBounds(100, 100, 800, 800);
@@ -247,6 +250,8 @@ public class MainFrame extends JFrame implements ActionListener{
 
             if (rs.next()) {
                 String accountType = rs.getString("account_type");
+                currAccType = accountType; // set as current account type
+                currUID = uid;
                 System.out.println("Login successful. Account type: " + accountType);
                 cardLayout.show(cardPanel, "Transaction");
             } else {
@@ -410,6 +415,64 @@ public class MainFrame extends JFrame implements ActionListener{
         }
     }
 
+    public void getUsername() {
+        String query = """
+                SELECT name FROM bank_users WHERE user_id = ?
+                """;
+        try {
+            PreparedStatement stmt = transactionConnection.prepareStatement(query);
+            stmt.setInt(1, currUID);
+
+            ResultSet rs = stmt.executeQuery();
+            String username = "";
+            while (rs.next()) {
+                username = rs.getString("name");
+            }
+            rs.close();
+
+            balance.setUsername(username, currAccType);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void getBalance() {
+        String query = "";
+        try {
+            double bal = 0;
+            if (currAccType.equals("credit")){
+                query = """
+                        SELECT loan FROM credit_loans WHERE credit_id IN
+                            (SELECT credit_id FROM credit_accounts WHERE user_id = ?)
+                        """;
+                PreparedStatement stmt = transactionConnection.prepareStatement(query);
+                stmt.setInt(1, currUID);
+
+                ResultSet rs = stmt.executeQuery();
+                while (rs.next()){
+                    bal = rs.getDouble("loan");
+                }
+                rs.close();
+            } else if (currAccType.equals("debit")) {
+                query = """
+                    SELECT balance FROM debit_balance WHERE debit_id IN
+                            (SELECT debit_id FROM debit_accounts WHERE user_id = ?)
+                    """;
+                PreparedStatement stmt = transactionConnection.prepareStatement(query);
+                stmt.setInt(1, currUID);
+
+                ResultSet rs = stmt.executeQuery();
+                while (rs.next()){
+                    bal = rs.getDouble("balance");
+                }
+                rs.close();
+            }
+            balance.setBalance(bal, currAccType);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
     @Override
     public void dispose() {
         closeConnections();
@@ -560,6 +623,8 @@ public class MainFrame extends JFrame implements ActionListener{
 
     //This displays the balance of the user
     if(e.getSource()==transaction.balanceBtn){
+        this.getUsername();
+        this.getBalance();
         cardLayout.show(cardPanel, "Balance");
     }
 
