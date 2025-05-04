@@ -461,7 +461,7 @@ public class MainFrame extends JFrame implements ActionListener{
         depositPanel.input.setText("");
     }
 
-    private int getTransactionID() {
+    private int getDoubleTransactionID() {
         String query = """
                 SELECT MAX(transaction_id) AS max_transaction_id
                 FROM (
@@ -627,7 +627,7 @@ public class MainFrame extends JFrame implements ActionListener{
         if (validateTransfer(accType, Integer.parseInt(cid), Double.parseDouble(amount))) {
             System.out.println("Transfer is valid. Proceeding with transfer...");
             try {
-                int transaction_id = getTransactionID();
+                int transaction_id = getDoubleTransactionID();
                 connection.setAutoCommit(false);
                 // Try to reduce the balance of the current account first
                 transferMoney(currAccTypeNum, -1, transaction_id, currCardID, Double.parseDouble(amount));
