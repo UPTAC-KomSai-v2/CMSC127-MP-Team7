@@ -29,6 +29,8 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
+import Connectivity.DBConnect;
+
 
 public class MainFrame extends JFrame implements ActionListener{
     private CardLayout cardLayout;
@@ -57,6 +59,10 @@ public class MainFrame extends JFrame implements ActionListener{
     Amount repayPanel = new Amount();
     Amount withdrawPanel = new Amount();
     TransferMoney transferMoney = new TransferMoney();
+    DBConnect mysqldb;
+
+    private int currUID;
+    private String currAccType;
 
     public MainFrame() {
         setTitle("Bank System");
@@ -189,6 +195,18 @@ public class MainFrame extends JFrame implements ActionListener{
         cardLayout.show(cardPanel, "Main");
     }
 
+    public void connect() {
+        try {
+            String db_url = "jdbc:mysql://localhost:3306";
+            String database = "bank";
+            String dbuser = "bank_admin";
+            String dbpass = "bank123";
+            mysqldb = new DBConnect(dbuser, dbpass, db_url + "/" + database); // just declares this idk
+        } catch (Exception e) {
+            System.exit(0); // just go exit xd
+        }
+    }
+
     //To log in to the database
     public boolean logDatabaseUserInfo() {
         String user = dbLogIn.usertxt.getText();
@@ -253,6 +271,8 @@ public class MainFrame extends JFrame implements ActionListener{
 
             if (rs.next()) {
                 String accountType = rs.getString("account_type");
+                currAccType = accountType; // set as current account type
+                currUID = uid;
                 System.out.println("Login successful. Account type: " + accountType);
                 cardLayout.show(cardPanel, "Transaction");
             } else {
@@ -413,6 +433,64 @@ public class MainFrame extends JFrame implements ActionListener{
             } catch (SQLException e) {
                 System.out.println("Error closing transaction connection: " + e.getMessage());
             }
+        }
+    }
+
+    public void getUsername() {
+        String query = """
+                SELECT name FROM bank_users WHERE user_id = ?
+                """;
+        try {
+            PreparedStatement stmt = transactionConnection.prepareStatement(query);
+            stmt.setInt(1, currUID);
+
+            ResultSet rs = stmt.executeQuery();
+            String username = "";
+            while (rs.next()) {
+                username = rs.getString("name");
+            }
+            rs.close();
+
+            balance.setUsername(username, currAccType);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void getBalance() {
+        String query = "";
+        try {
+            double bal = 0;
+            if (currAccType.equals("credit")){
+                query = """
+                        SELECT loan FROM credit_loans WHERE credit_id IN
+                            (SELECT credit_id FROM credit_accounts WHERE user_id = ?)
+                        """;
+                PreparedStatement stmt = transactionConnection.prepareStatement(query);
+                stmt.setInt(1, currUID);
+
+                ResultSet rs = stmt.executeQuery();
+                while (rs.next()){
+                    bal = rs.getDouble("loan");
+                }
+                rs.close();
+            } else if (currAccType.equals("debit")) {
+                query = """
+                    SELECT balance FROM debit_balance WHERE debit_id IN
+                            (SELECT debit_id FROM debit_accounts WHERE user_id = ?)
+                    """;
+                PreparedStatement stmt = transactionConnection.prepareStatement(query);
+                stmt.setInt(1, currUID);
+
+                ResultSet rs = stmt.executeQuery();
+                while (rs.next()){
+                    bal = rs.getDouble("balance");
+                }
+                rs.close();
+            }
+            balance.setBalance(bal, currAccType);
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 
@@ -588,6 +666,8 @@ public class MainFrame extends JFrame implements ActionListener{
     }
 
     if(e.getSource()==transaction.balanceBtn){
+        this.getUsername();
+        this.getBalance();
         cardLayout.show(cardPanel, "Balance");
     }
 
