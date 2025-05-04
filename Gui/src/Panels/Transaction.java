@@ -84,7 +84,7 @@ public class Transaction extends JPanel{
             int logoHeight = 50;
             g.drawImage(logo, 10, 10, logoWidth, logoHeight, this);
         }
-        g.setColor(Color.BLACK);
+        g.setColor(Color.WHITE);
         g.fillRect(70, 30, getWidth() - 80, 2);
     }
 
