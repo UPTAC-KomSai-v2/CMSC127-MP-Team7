@@ -103,8 +103,6 @@ public class MainFrame extends JFrame implements ActionListener{
         //Menu Panel for User Transactions: Transaction Panel
         cardPanel.add(transaction, "Transaction");
         transaction.balanceBtn.addActionListener(this);
-        transaction.transferMoneyBtn.addActionListener(this);
-        transaction.debitBtn.addActionListener(this);
         transaction.exitBtn.addActionListener(this);
 
         cardPanel.add(accountCreationSelection, "Account Creation Selection");
@@ -318,6 +316,8 @@ public class MainFrame extends JFrame implements ActionListener{
                 currCardID = cid;
                 System.out.println("Login successful. Account type: " + accountType);
                 cardLayout.show(cardPanel, "Transaction");
+                transaction.setAccountType(userLogIn.isDebitSelected());
+                transaction.set_buttons();
             } else {
                 JOptionPane.showMessageDialog(
                     this, "Login failed. Please check that the Account Type, \nCard ID and PIN are all typed correctly.",
@@ -616,6 +616,8 @@ public class MainFrame extends JFrame implements ActionListener{
         if(e.getSource() == userLogIn.okBtn || e.getSource()==debit.exitBtn || e.getSource()== credit.exitBtn || e.getSource()==balance.exitBtn){
             if(e.getSource() == userLogIn.okBtn){
                 logInUserInfo();
+                transaction.setAccountType(userLogIn.isDebitSelected());
+                transaction.set_buttons();
             }
     
             if (e.getSource()==debit.exitBtn||e.getSource()== credit.exitBtn||e.getSource()==balance.exitBtn) {
@@ -624,7 +626,7 @@ public class MainFrame extends JFrame implements ActionListener{
         }
 
     //Prompt for credit transaction if chosen
-    if(e.getSource() == transaction.transferMoneyBtn || e.getSource() == creditPanel.okBtn ||e.getSource() == loanPanel.okBtn||e.getSource() == repayPanel.okBtn ){
+    if(e.getSource() == creditPanel.okBtn ||e.getSource() == loanPanel.okBtn||e.getSource() == repayPanel.okBtn ){
         if (e.getSource() == loanPanel.okBtn) {
             amountOfLoan();
         }else if (e.getSource() == creditPanel.okBtn) {
@@ -637,7 +639,7 @@ public class MainFrame extends JFrame implements ActionListener{
     }
 
     //Prompt for debit transaction if chosen
-    if(e.getSource() == transaction.debitBtn||e.getSource() == withdrawPanel.okBtn||e.getSource()==transferMoney.okBtn){
+    if(e.getSource() == withdrawPanel.okBtn||e.getSource()==transferMoney.okBtn){
         if(e.getSource() == withdrawPanel.okBtn){
             amountOfWithdraw();
         }else if(e.getSource()==transferMoney.okBtn){

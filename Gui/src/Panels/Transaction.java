@@ -15,19 +15,24 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
 public class Transaction extends JPanel{
-    public JButton balanceBtn, transferMoneyBtn, debitBtn, exitBtn;
+    public JButton balanceBtn, transferMoneyBtn, withdraw, deposit, loan, pay, exitBtn;
     Dimension size;
     GridBagConstraints gbc;
     Image bg, logo;
+    boolean accountType;
 
     public Transaction(){
         
         setLayout(new GridBagLayout());
+        gbc = new GridBagConstraints();
+        gbc.anchor = GridBagConstraints.CENTER;
+        gbc.insets = new Insets(10,10,10,10);
+
         setBackground(Color.darkGray);
         bg = new ImageIcon(getClass().getResource("/Files/bg.png")).getImage();
         logo = new ImageIcon(getClass().getResource("/Files/logo.png")).getImage();
-
         size = new Dimension(100,30);
+
         balanceBtn = new JButton("Balance");
         balanceBtn.setPreferredSize(size);
         balanceBtn.setOpaque(true);
@@ -35,32 +40,40 @@ public class Transaction extends JPanel{
         balanceBtn.setHorizontalAlignment(SwingConstants.CENTER);
         balanceBtn.setVerticalAlignment(SwingConstants.CENTER);
 
-        gbc = new GridBagConstraints();
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        gbc.anchor = GridBagConstraints.CENTER;
-        gbc.insets = new Insets(10,10,10,10);
-        add(balanceBtn, gbc);
-
-        transferMoneyBtn = new JButton("Credit");
+        transferMoneyBtn = new JButton("Transfer");
         transferMoneyBtn.setPreferredSize(size);
         transferMoneyBtn.setOpaque(true);
         transferMoneyBtn.setBackground(Color.white);
         transferMoneyBtn.setHorizontalAlignment(SwingConstants.CENTER);
         transferMoneyBtn.setVerticalAlignment(SwingConstants.CENTER);
 
-        gbc.gridy = 1;
-        add(transferMoneyBtn, gbc);
+        deposit = new JButton("Deposit");
+        deposit.setPreferredSize(size);
+        deposit.setOpaque(true);
+        deposit.setBackground(Color.white);
+        deposit.setHorizontalAlignment(SwingConstants.CENTER);
+        deposit.setVerticalAlignment(SwingConstants.CENTER);
 
-        debitBtn = new JButton("Debit");
-        debitBtn.setPreferredSize(size);
-        debitBtn.setOpaque(true);
-        debitBtn.setBackground(Color.white);
-        debitBtn.setHorizontalAlignment(SwingConstants.CENTER);
-        debitBtn.setVerticalAlignment(SwingConstants.CENTER);
+        withdraw = new JButton("Withdraw");
+        withdraw.setPreferredSize(size);
+        withdraw.setOpaque(true);
+        withdraw.setBackground(Color.white);
+        withdraw.setHorizontalAlignment(SwingConstants.CENTER);
+        withdraw.setVerticalAlignment(SwingConstants.CENTER);
 
-        gbc.gridy = 2;
-        add(debitBtn, gbc);
+        loan = new JButton("Loan");
+        loan.setPreferredSize(size);
+        loan.setOpaque(true);
+        loan.setBackground(Color.white);
+        loan.setHorizontalAlignment(SwingConstants.CENTER);
+        loan.setVerticalAlignment(SwingConstants.CENTER);
+
+        pay = new JButton("Pay");
+        pay.setPreferredSize(size);
+        pay.setOpaque(true);
+        pay.setBackground(Color.white);
+        pay.setHorizontalAlignment(SwingConstants.CENTER);
+        pay.setVerticalAlignment(SwingConstants.CENTER);
 
         exitBtn = new JButton("Log out");
         exitBtn.setPreferredSize(size);
@@ -69,9 +82,41 @@ public class Transaction extends JPanel{
         exitBtn.setHorizontalAlignment(SwingConstants.CENTER);
         exitBtn.setVerticalAlignment(SwingConstants.CENTER);
 
-        gbc.gridy = 3;
+    }
+    
+    public void set_buttons(){
+        removeAll();
+        repaint();
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        add(balanceBtn, gbc);
+        gbc.gridy++;
+        add(transferMoneyBtn, gbc);
+        gbc.gridy++;
+
+        if(accountType){
+        System.out.println("shit is running");
+        add(deposit, gbc);
+        gbc.gridy++;
+
+        add(withdraw, gbc);
+        gbc.gridy++;
+        }
+
+        else if(!accountType){
+        System.out.println("shit is blasting");
+        add(loan, gbc);
+        gbc.gridy++;
+
+        add(pay, gbc);
+        gbc.gridy++;
+        }
+
+        gbc.gridy ++;
         add(exitBtn, gbc);
     }
+    
+  
 
     @Override
     protected void paintComponent(Graphics g) {
@@ -103,4 +148,7 @@ public class Transaction extends JPanel{
         });
     }
 
+    public void setAccountType(boolean accountType){
+        this.accountType = accountType;
+    }
 }
