@@ -42,7 +42,7 @@ public class MainFrame extends JFrame implements ActionListener{
     private CardLayout cardLayout;
     private JPanel cardPanel;
     private Connection connection;
-    private boolean isTransactionLogin = false;
+    // private boolean isTransactionLogin = true;
     private Connection transactionConnection = null;
     private AccountCreationSelection accountCreationSelection = new AccountCreationSelection();
     private CreateNewCard createNewCard = new CreateNewCard();
@@ -278,15 +278,12 @@ public class MainFrame extends JFrame implements ActionListener{
             Connection conn = DriverManager.getConnection(DB_URL, USER, PASS);
             System.out.println("Connected to database successfully!");
             
-            if(isTransactionLogin) {
-                transactionConnection = conn;
-            } else {
-                connection = conn; 
-                newUser.setConnection(connection); 
-                readUser.setConnection(connection);
-                updateUser.setConnection(connection);
-                deleteUser.setConnection(connection);
-            }
+            transactionConnection = conn;
+            connection = conn;
+            newUser.setConnection(conn); 
+            readUser.setConnection(conn);
+            updateUser.setConnection(conn);
+            deleteUser.setConnection(conn);
             return true;
         } catch (SQLException e) {
             System.out.println("Database connection failed!");
@@ -547,10 +544,10 @@ public class MainFrame extends JFrame implements ActionListener{
         e.getSource() == dbLogIn.backBtn || e.getSource() == userLogIn.backBtn) {
         
         if (e.getSource() == transaction.exitBtn || e.getSource() == userLogIn.backBtn) {
-            closeTransactionConnection();
-            cardLayout.show(cardPanel, "Database Log In");
+            // closeTransactionConnection();
+            cardLayout.show(cardPanel, "Main");
         } else if (e.getSource() == dbLogIn.backBtn) {
-            isTransactionLogin = false;
+            // isTransactionLogin = false;
             cardLayout.show(cardPanel, "Main"); 
         } else if (e.getSource() == accessDB.exitBtn) {
             cardLayout.show(cardPanel, "Main"); 
@@ -569,23 +566,23 @@ public class MainFrame extends JFrame implements ActionListener{
             //cardLayout.show(cardPanel, "Database Log In");
             logDatabaseUserInfo();
             cardLayout.show(cardPanel, "User Log In");
-            isTransactionLogin = true;
+            // isTransactionLogin = true;
         }
     
         //Prompt to CRUD operation if database login in success
         if(e.getSource() == dbLogIn.logInBtn  ||e.getSource()==newUser.okBtn|| e.getSource() ==newUser.exitBtn|| e.getSource()==readUser.exitBtn || e.getSource() == updateUser.exitBtn || e.getSource() == updateUser.okBtn || e.getSource()==askUID.exitBtn|| e.getSource() == deleteUser.okBtn || e.getSource()==deleteUser.exitBtn){
-            if(e.getSource() == dbLogIn.logInBtn){
-                if(logDatabaseUserInfo()) {
-                    if(isTransactionLogin) {
-                        // After successful DB login for transaction, show user login
-                        cardLayout.show(cardPanel, "User Log In");
-                        isTransactionLogin = false;
-                    } else {
-                        // Regular database access
-                        cardLayout.show(cardPanel, "Access Database");
-                    }
-                }
-            }
+            // if(e.getSource() == dbLogIn.logInBtn){
+            //     if(logDatabaseUserInfo()) {
+            //         if(isTransactionLogin) {
+            //             // After successful DB login for transaction, show user login
+            //             cardLayout.show(cardPanel, "User Log In");
+            //             isTransactionLogin = false;
+            //         } else {
+            //             // Regular database access
+            //             cardLayout.show(cardPanel, "Access Database");
+            //         }
+            //     }
+            // }
     
             if(e.getSource()==newUser.okBtn){
                 newUserInfo();
