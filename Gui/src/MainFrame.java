@@ -36,6 +36,8 @@ import javax.swing.JPanel;
 
 
 public class MainFrame extends JFrame implements ActionListener{
+    public static final int max_loan = 50000;
+
     private CardLayout cardLayout;
     private JPanel cardPanel;
     private Connection connection;
@@ -65,6 +67,7 @@ public class MainFrame extends JFrame implements ActionListener{
 
     private int currCardID;
     private String currAccType;
+    private int currAccTypeNum;
 
     public MainFrame() {
         setTitle("Bank System");
@@ -287,6 +290,7 @@ public class MainFrame extends JFrame implements ActionListener{
 
         try {
             int accTypeIDX = userLogIn.accountTypeCombo.getSelectedIndex();
+            currAccTypeNum = accTypeIDX;
             int cid = Integer.parseInt(cidStr);
             int pin = Integer.parseInt(pinStr);
 
@@ -426,15 +430,201 @@ public class MainFrame extends JFrame implements ActionListener{
         creditPanel.input.setText("");
     }
 
-    public void TransferMoneyInfo(){
-        String transfer = transferMoney.moneytxt.getText();
-        String uid = transferMoney.uidtxt.getText();
-        System.out.println("UID: "+uid+" Money: "+transfer);
+    private int getTransactionID() {
+        String query = """
+                SELECT MAX(transaction_id) AS max_transaction_id
+                FROM (
+                    SELECT transaction_id FROM double_transactions_debit
+                    UNION ALL
+                    SELECT transaction_id FROM double_transactions_credit
+                ) AS combined_transactions
+                """;
+        int transactionID = 0;
+        try (
+            PreparedStatement stmt = transactionConnection.prepareStatement(query);
+        ){
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                transactionID = rs.getInt("max_transaction_id") + 1;
+            }
+            rs.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return transactionID;
+    }
 
-        cardLayout.show(cardPanel, "Debit");
+    private void updateBalance(int accType, double amount, int cid) {
+        String updateBalance = """
+                UPDATE debit_balance SET balance = ? WHERE debit_id = ?
+                """;
+        String updateLoan = """
+                UPDATE credit_loans SET loan = ? WHERE credit_id = ?
+                """;
+        
+        try {
+            if (accType == 0) {
+                PreparedStatement stmt = transactionConnection.prepareStatement(updateBalance);
+                stmt.setDouble(1, amount);
+                stmt.setInt(2, cid);
+                stmt.executeUpdate();
+                stmt.close();
+            } else if (accType == 1) {
+                PreparedStatement stmt = transactionConnection.prepareStatement(updateLoan);
+                stmt.setDouble(1, amount);
+                stmt.setInt(2, cid);
+                stmt.executeUpdate();
+                stmt.close();
+            }
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(this, "SQL Error Message:\n" + e.getMessage(), 
+                "Update Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private boolean transferMoney(int accType, int transferType, int transactionID, int cid, double amount) throws SQLException{
+        String debitTransfer = """
+                INSERT INTO double_transactions_debit (transaction_id, debit_id, amount) 
+                VALUES (?, ?, ?)
+                """;
+        String creditTransfer = """
+                INSERT INTO double_transactions_credit (transaction_id, credit_id, amount) 
+                VALUES (?, ?, ?)
+                """;
+        
+        if (accType == 0) {
+            try {
+                PreparedStatement stmt = transactionConnection.prepareStatement(debitTransfer);
+                stmt.setInt(1, transactionID);
+                stmt.setInt(2, cid);
+                stmt.setDouble(3, amount * transferType);
+                updateBalance(accType, getCurrAmount(accType, cid) + amount * transferType, cid);
+                stmt.executeUpdate();
+                stmt.close();
+            } catch (SQLException e) {
+                JOptionPane.showMessageDialog(this, "SQL Error Message:\n" + e.getMessage(), 
+                    "Transfer Error", JOptionPane.ERROR_MESSAGE);
+                return false;
+            }
+        } else if (accType == 1) {
+            try {
+                PreparedStatement stmt = transactionConnection.prepareStatement(creditTransfer);
+                stmt.setInt(1, transactionID);
+                stmt.setInt(2, cid);
+                stmt.setDouble(3, amount * transferType);
+                updateBalance(accType, getCurrAmount(accType, cid) + amount * transferType, cid);
+                stmt.executeUpdate();
+                stmt.close();
+            } catch (SQLException e) {
+                JOptionPane.showMessageDialog(this, "SQL Error Message:\n" + e.getMessage(), 
+                    "Transfer Error", JOptionPane.ERROR_MESSAGE);
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private double getCurrAmount(int accType, int cid) {
+        if (currAccTypeNum == 0) {
+            String query = """
+                SELECT balance FROM debit_balance WHERE debit_id = ?
+                """;
+            try {
+                PreparedStatement stmt = transactionConnection.prepareStatement(query);
+                stmt.setInt(1, currCardID);
+                ResultSet rs = stmt.executeQuery();
+                if (rs.next()) {
+                    return rs.getDouble("balance");
+                }
+                rs.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        } else {
+            String query = """
+                SELECT loan FROM credit_loans WHERE credit_id = ?
+                """;
+            try {
+                PreparedStatement stmt = transactionConnection.prepareStatement(query);
+                stmt.setInt(1, currCardID);
+                ResultSet rs = stmt.executeQuery();
+                if (rs.next()) {
+                    return rs.getDouble("loan");
+                }
+                rs.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return 0.0;
+    }
+
+    private boolean validateTransfer(int accType, int cid, double amount) {
+        System.out.println("Validating transfer...");
+        System.out.println("Current Account Type: " + currAccType + " Current Card ID: " + currCardID);
+        System.out.println("Transfer Account Type: " + accType + " Transfer Card ID: " + cid);
+        if (accType == currAccTypeNum && currCardID == cid) {
+            JOptionPane.showMessageDialog(this, "You cannot transfer money to the same account.", 
+                "Transfer Error", JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+        
+        if (currAccTypeNum == 0) {
+            double balance = getCurrAmount(accType, cid);
+            if (amount > balance) {
+                JOptionPane.showMessageDialog(this, "Insufficient funds for transfer.", 
+                    "Transfer Error", JOptionPane.ERROR_MESSAGE);
+                return false;
+            }
+        } else {
+            double loan = getCurrAmount(accType, cid);
+            if (amount > max_loan + loan) {
+                JOptionPane.showMessageDialog(this, "Insufficient credit for transfer.", 
+                    "Transfer Error", JOptionPane.ERROR_MESSAGE);
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public void TransferMoneyInfo(){
+        String amount = transferMoney.moneytxt.getText();
+        String cid = transferMoney.cidtxt.getText();
+        int accType = transferMoney.receiveAccTypeCBX.getSelectedIndex();
+        System.out.println("Card ID: "+cid+" Money: "+ amount + " Account Type: "+ accType);
+
+        if (validateTransfer(accType, Integer.parseInt(cid), Double.parseDouble(amount))) {
+            System.out.println("Transfer is valid. Proceeding with transfer...");
+            try {
+                int transaction_id = getTransactionID();
+                connection.setAutoCommit(false);
+                // Try to reduce the balance of the current account first
+                transferMoney(currAccTypeNum, -1, transaction_id, currCardID, Double.parseDouble(amount));
+    
+                // Then try to increase the balance of the receiving account
+                transferMoney(accType, 1, transaction_id, Integer.parseInt(cid), Double.parseDouble(amount));
+                
+            } catch (SQLException e) {
+                try {
+                    connection.rollback();
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
+                }
+                JOptionPane.showMessageDialog(this, "SQL Error Message:\n" + e.getMessage(), 
+                    "Transfer Error", JOptionPane.ERROR_MESSAGE);
+            } finally {
+                try {
+                    connection.setAutoCommit(true);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        cardLayout.show(cardPanel, "Transaction");
 
         transferMoney.moneytxt.setText("");
-        transferMoney.uidtxt.setText("");
+        transferMoney.cidtxt.setText("");
     }
 
     public void amountOfWithdraw(){
@@ -608,7 +798,17 @@ public class MainFrame extends JFrame implements ActionListener{
             }
     
             if(e.getSource() == deleteUser.okBtn) {
-                deleteUser.deleteUserFromDatabase();
+                if (deleteUser.deleteUserFromDatabase()) {
+                    JOptionPane.showMessageDialog(
+                        this, "User deleted successfully!", 
+                        "Success", JOptionPane.INFORMATION_MESSAGE
+                    );
+                } else {
+                    JOptionPane.showMessageDialog(
+                        this, "Failed to delete user.", 
+                        "Error", JOptionPane.ERROR_MESSAGE
+                    );
+                }
                 cardLayout.show(cardPanel, "Access Database");
             }
         } 
