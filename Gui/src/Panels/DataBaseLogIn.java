@@ -17,7 +17,7 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 public class DataBaseLogIn extends JPanel{
-    JLabel userlbl, passlbl;
+    JLabel userlbl, passlbl, dtlbl, titlelbl;
     public JTextField usertxt;
     public JPasswordField passtxt;
     public JButton logInBtn, backBtn;
@@ -39,10 +39,20 @@ public class DataBaseLogIn extends JPanel{
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
         gbc.gridy = 0;
+        gbc.gridwidth = 2;
+        gbc.anchor = GridBagConstraints.CENTER;
+
+        titlelbl = new JLabel("Admin Database Login");
+        titlelbl.setFont(titlelbl.getFont().deriveFont(24f));
+        titlelbl.setForeground(Color.WHITE);
+        titlelbl.setHorizontalAlignment(SwingConstants.CENTER);
+        this.add(titlelbl, gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy = 1;
         gbc.insets = new Insets(10,10,10,10);
         gbc.gridwidth=1;
         gbc.anchor = GridBagConstraints.EAST;
-
         
         userlbl = new JLabel("Username");
         userlbl.setOpaque(true);
@@ -57,7 +67,6 @@ public class DataBaseLogIn extends JPanel{
         usertxt.setPreferredSize(size);
         usertxt.setOpaque(true);
         usertxt.setBackground(new Color(22, 180, 161));
-
         
         gbc.gridx=1;
         gbc.anchor = GridBagConstraints.WEST;
@@ -72,7 +81,7 @@ public class DataBaseLogIn extends JPanel{
         passlbl.setVerticalAlignment(SwingConstants.CENTER);
 
         gbc.gridx=0;
-        gbc.gridy=1;
+        gbc.gridy=2;
         gbc.anchor = GridBagConstraints.EAST;
         this.add(passlbl, gbc);
 
@@ -97,7 +106,7 @@ public class DataBaseLogIn extends JPanel{
 
         gbc.gridwidth=2;
         gbc.gridx=0;
-        gbc.gridy=2;
+        gbc.gridy=3;
         gbc.anchor=GridBagConstraints.CENTER;
         this.add(logInBtn, gbc);
 
@@ -112,7 +121,7 @@ public class DataBaseLogIn extends JPanel{
 
         gbc.gridwidth=2;
         gbc.gridx=0;
-        gbc.gridy=3;
+        gbc.gridy=4;
         gbc.anchor=GridBagConstraints.CENTER;
         this.add(backBtn, gbc);
     }
@@ -127,7 +136,7 @@ public class DataBaseLogIn extends JPanel{
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            JFrame frame = new JFrame("Main Menu Test");
+            JFrame frame = new JFrame("Admin Login");
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             frame.setSize(800, 800);
 
