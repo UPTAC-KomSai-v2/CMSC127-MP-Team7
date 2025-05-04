@@ -4,46 +4,51 @@ import java.sql.Statement;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-public class DBConnect
-{
-    private static final String DEFAULT_USER = "bank_admin";
-    private static final String DEFAULT_PASS = "bank123";
-    private static final String DB_URL = "jdbc:mysql://localhost:3306";
-    private static final String DEFAULT_DB = "bank";
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Properties;
 
+public class DBConnect {
+    private static final String CONFIG_FILE = "dbconfig.properties";
     private Connection conn;
     private Statement stmnt;
 
-    public DBConnect () throws SQLException {
-        this(DEFAULT_USER, DEFAULT_PASS, DEFAULT_DB);
+    public DBConnect() throws SQLException, IOException {
+        this(null); // Call the main constructor with null to use default config
     }
 
-    public DBConnect (int x) throws SQLException
-    {
-        this(DEFAULT_USER, DEFAULT_PASS, DEFAULT_DB);
+    public DBConnect(String customDbUrl) throws SQLException, IOException {
+        // Load properties from file
+        Properties props = new Properties();
+        try (FileInputStream in = new FileInputStream(CONFIG_FILE)) {
+            props.load(in);
+        }
+
+        String dbUrl = customDbUrl != null ? customDbUrl : props.getProperty("db.url");
+        String dbUser = props.getProperty("db.user");
+        String dbPass = props.getProperty("db.password");
+        String dbName = props.getProperty("db.name", "bank"); // Default to "bank" if not specified
+
+        connect(dbUrl, dbUser, dbPass, dbName);
     }
 
-    public DBConnect(String user, String pass, String database) throws SQLException
-    {
-        connect(user, pass, database);
+    public DBConnect(String user, String pass, String database) throws SQLException, IOException {
+        this(user, pass, database, "jdbc:mysql://localhost:3306");
     }
 
-    public DBConnect(String user, String pass) throws SQLException
-    {
-        connect(user, pass, DEFAULT_DB);
+    public DBConnect(String user, String pass, String database, String dbUrl) throws SQLException, IOException {
+        connect(dbUrl, user, pass, database);
     }
 
-    public void connect(String user, String pass, String database) throws SQLException
-    {
-        try
-        {
+    private void connect(String dbUrl, String user, String pass, String database) throws SQLException {
+        try {
             Class.forName("com.mysql.cj.jdbc.Driver");
+        } catch (ClassNotFoundException e) {
+            throw new SQLException("MySQL JDBC Driver not found", e);
         }
-        catch (ClassNotFoundException e)
-        {
-            e.printStackTrace();
-        }
-        conn = DriverManager.getConnection(DB_URL + "/" + database, user, pass);
+
+        String connectionUrl = dbUrl + (database != null ? "/" + database : "");
+        conn = DriverManager.getConnection(connectionUrl, user, pass);
         stmnt = conn.createStatement();
     }
 
@@ -57,9 +62,11 @@ public class DBConnect
 
     public void closeConnection() {
         try {
-            conn.close();
+            if (conn != null && !conn.isClosed()) {
+                conn.close();
+            }
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.err.println("Error closing connection: " + e.getMessage());
         }
     }
 }
