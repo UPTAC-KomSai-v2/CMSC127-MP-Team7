@@ -42,7 +42,7 @@ public class DataBaseLogIn extends JPanel{
         gbc.gridwidth = 2;
         gbc.anchor = GridBagConstraints.CENTER;
 
-        titlelbl = new JLabel("Admin Database Login");
+        titlelbl = new JLabel("Admin Login");
         titlelbl.setFont(titlelbl.getFont().deriveFont(24f));
         titlelbl.setForeground(Color.WHITE);
         titlelbl.setHorizontalAlignment(SwingConstants.CENTER);
