@@ -7,13 +7,22 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Image;
 import java.awt.Insets;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
+
+import javax.swing.ComboBoxModel;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -23,13 +32,19 @@ import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
 
 public class ReadUser extends JPanel {
-    JTable j;
+    JTable crd_tbl, deb_tbl;
     public JButton exitBtn;
     GridBagConstraints gbc;
     Dimension size;
     Image bg;
+    private String[] creditColumns = {"Account ID", "Loans"};
+    private String[] debitColumns = {"Account ID", "Balance"};
     private Connection connection;
-    private DefaultTableModel tableModel;
+    private DefaultTableModel creditTableModel, debitTableModel;
+    private JComboBox<String> comboBox;
+    private ArrayList<DefaultTableModel> crd_tbls, deb_tbls;
+    private ArrayList<String> ids;
+    private JLabel label1, label2;
 
     public ReadUser() {
         setLayout(new GridBagLayout());
@@ -38,26 +53,65 @@ public class ReadUser extends JPanel {
         size = new Dimension(100, 30);
 
         bg = new ImageIcon(getClass().getResource("/Files/bg.png")).getImage();
+        crd_tbls = new ArrayList<>();
 
         // Create table
-        String[] columnNames = {"First Name", "Last Name", "User ID", "CreditAcc ID", "DebitAcc ID", "Balance"};
-        tableModel = new DefaultTableModel(columnNames, 0) {
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return false; 
-            }
-        };
-        j = new JTable(tableModel);
-        j.getTableHeader().setReorderingAllowed(false);
-        JScrollPane sp = new JScrollPane(j);
-        sp.setPreferredSize(new Dimension(700, 300));
+        creditTableModel = createTableModel(creditColumns);
+        crd_tbl = new JTable(creditTableModel);
+        crd_tbl.getTableHeader().setReorderingAllowed(false);
 
-        // Add scroll pane
+        debitTableModel = createTableModel(debitColumns);
+        deb_tbl = new JTable(debitTableModel);
+        deb_tbl.getTableHeader().setReorderingAllowed(false);
+        JScrollPane sp1 = new JScrollPane(crd_tbl), sp2 = new JScrollPane(deb_tbl);
+        sp1.setPreferredSize(new Dimension(400, 300));
+        sp2.setPreferredSize(new Dimension(400, 300));
+
+        // Table Label - Credit
         gbc.gridx = 0;
         gbc.gridy = 0;
-        gbc.gridwidth = 2;
+        gbc.gridwidth = 1;
+        gbc.anchor = GridBagConstraints.CENTER;
+
+        label1 = new JLabel("Credit Table");
+        label1.setFont(label1.getFont().deriveFont(24f));
+        label1.setForeground(Color.WHITE);
+        label1.setHorizontalAlignment(SwingConstants.CENTER);
+        add(label1, gbc);
+
+        // Table Label - Debit
+        gbc.gridx = 1;
+        gbc.gridy = 0;
+        gbc.gridwidth = 1;
+        gbc.anchor = GridBagConstraints.CENTER;
+
+        label2 = new JLabel("Debit Table");
+        label2.setFont(label2.getFont().deriveFont(24f));
+        label2.setForeground(Color.WHITE);
+        label2.setHorizontalAlignment(SwingConstants.CENTER);
+        add(label2, gbc);
+
+        // Add Credit Accounts Table
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        gbc.gridwidth = 1;
         gbc.insets = new Insets(10, 10, 10, 10);
-        add(sp, gbc);
+        gbc.weightx = 1.0;
+        gbc.weighty = 1.0;
+        gbc.fill = GridBagConstraints.BOTH;
+        add(sp1, gbc);
+
+        // Add Debit Accounts Table
+        gbc.gridx = 1;
+        gbc.gridy = 1;
+        add(sp2, gbc);
+
+        gbc.weightx = 0;
+        gbc.weighty = 0;
+        gbc.fill = GridBagConstraints.NONE;
+        
+        // Add the combobox
+        createComboBox();
 
         // Add Exit Button
         exitBtn = new JButton("Back");
@@ -67,7 +121,7 @@ public class ReadUser extends JPanel {
         exitBtn.setHorizontalAlignment(SwingConstants.CENTER);
         exitBtn.setVerticalAlignment(SwingConstants.CENTER);
 
-        gbc.gridy = 1;
+        gbc.gridy = 3;
         gbc.gridwidth = 2;
         gbc.anchor = GridBagConstraints.CENTER;
         add(exitBtn, gbc);
@@ -75,6 +129,42 @@ public class ReadUser extends JPanel {
 
     public void setConnection(Connection conn) {
         this.connection = conn;
+    }
+
+    private DefaultTableModel createTableModel(String[] columnNames) {
+        return new DefaultTableModel(columnNames, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false; 
+            }
+        };
+    }
+    private void createComboBox() {
+        comboBox = new JComboBox<>(); 
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        gbc.gridwidth = 2;
+        gbc.anchor = GridBagConstraints.CENTER;
+        add(comboBox, gbc);
+
+        comboBox.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                int index = comboBox.getSelectedIndex();
+                switchTables(index);
+            }
+        });
+    }
+
+    private void switchTables(int index) {
+        try {
+            crd_tbl.setModel(crd_tbls.get(index));
+            deb_tbl.setModel(deb_tbls.get(index));
+            System.out.println("Set models...");
+            repaint();
+        } catch (IllegalArgumentException | IndexOutOfBoundsException ie ) {
+            JOptionPane.showMessageDialog(this, "Error switching table...", "Table Error", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     // Method to load data from the database
@@ -86,61 +176,94 @@ public class ReadUser extends JPanel {
             return;
         }
     
-        tableModel.setRowCount(0);
+        creditTableModel.setRowCount(0);
     
         try {
             if (connection.isValid(5)) {
-                String sql = """
-                    SELECT bu.user_id, 
-                           bu.first_name,
-                           bu.last_name, 
-                           bu.email,
-                           ca.credit_id, 
-                           da.debit_id,
-                           db.balance,
-                           cl.loan
-                    FROM bank_users bu
-                    LEFT JOIN credit_accounts ca ON bu.user_id = ca.user_id
-                    LEFT JOIN debit_accounts da ON bu.user_id = da.user_id
-                    LEFT JOIN debit_balance db ON da.debit_id = db.debit_id
-                    LEFT JOIN credit_loans cl ON ca.credit_id = cl.credit_id
-                    ORDER BY bu.user_id
+                // Add combobox list
+                String userQuery = """
+                    SELECT * FROM bank_users
                 """;
-    
-                try (PreparedStatement stmt = connection.prepareStatement(sql);
-                     ResultSet rs = stmt.executeQuery()) {
-    
-                    while (rs.next()) {
-                        String userId = rs.getString("user_id");
-                        String firstName = rs.getString("first_name");
-                        String lastName = rs.getString("last_name");
-                        String creditId = rs.getString("credit_id");
-                        String debitId = rs.getString("debit_id");
-                        
-                        double balance = 0;
-                        if (rs.getObject("balance") != null) {
-                            balance = rs.getDouble("balance");
+                try (
+                    PreparedStatement ustmt = connection.prepareStatement(userQuery);
+                    ResultSet users = ustmt.executeQuery()
+                ) {
+                    ArrayList<String> usr = new ArrayList<>();
+                    ids = new ArrayList<>();
+                    while (users.next()) {
+                        String userid = users.getString("user_id"),
+                               fname = users.getString("first_name"),
+                               lname = users.getString("last_name"),
+                               email = users.getString("email");
+                        usr.add("ID - " + userid + " " + fname + " " + lname + " " + " | " + email);
+                        ids.add(userid);
+                    }
+                    String[] strArray = Arrays.copyOf(usr.toArray(), usr.size(), String[].class);
+                    comboBox.setModel(new DefaultComboBoxModel<>(strArray));
+                } catch (SQLException e) {
+                    JOptionPane.showMessageDialog(this, 
+                        "Error retrieving user data: " + e.getMessage(), 
+                        "Database Error", JOptionPane.ERROR_MESSAGE);
+                }
+
+                // Get Credit Stuff...
+                crd_tbls = new ArrayList<>();
+                for (String userid : ids) {
+                    String creditTableQuery = """
+                            SELECT credit_id, loan FROM credit_loans WHERE credit_id IN
+                            (SELECT credit_id FROM credit_accounts WHERE user_id = ?)
+                            """;
+                    try (
+                        PreparedStatement cstmt = connection.prepareStatement(creditTableQuery);
+                    ) {
+                        cstmt.setString(1,userid);
+                        ResultSet credits = cstmt.executeQuery();
+                        DefaultTableModel cTableModel = createTableModel(creditColumns);
+                        while(credits.next()) {
+                            String[] row = {
+                                credits.getString("credit_id"),
+                                credits.getString("loan")
+                            };
+                            cTableModel.addRow(row);
                         }
-                        
-                        double loan = 0;
-                        if (rs.getObject("loan") != null) {
-                            loan = rs.getDouble("loan");
-                        }
-                        
-                        // Calculate net balance
-                        double netBalance = balance - loan;
-    
-                        Object[] row = {
-                            firstName, 
-                            lastName, 
-                            userId, 
-                            creditId != null ? creditId : "N/A", 
-                            debitId != null ? debitId : "N/A", 
-                            String.format("%.2f", netBalance)
-                        };
-                        tableModel.addRow(row);
+                        crd_tbls.add(cTableModel);
+                    } catch (SQLException e) {
+                        JOptionPane.showMessageDialog(this, 
+                        "Error retrieving credit data: " + e.getMessage(), 
+                        "Database Error", JOptionPane.ERROR_MESSAGE);
                     }
                 }
+
+                // Get Debit Stuff...
+                deb_tbls = new ArrayList<>();
+                for (String userid : ids) {
+                    String debitTableQuery = """
+                            SELECT debit_id, balance FROM debit_balance WHERE debit_id IN
+                            (SELECT debit_id FROM debit_accounts WHERE user_id = ?)
+                            """;
+                    try (
+                        PreparedStatement cstmt = connection.prepareStatement(debitTableQuery);
+                    ) {
+                        cstmt.setString(1,userid);
+                        ResultSet debits = cstmt.executeQuery();
+                        DefaultTableModel dTableModel = createTableModel(debitColumns);
+                        while(debits.next()) {
+                            String[] row = {
+                                debits.getString("debit_id"),
+                                debits.getString("balance")
+                            };
+                            dTableModel.addRow(row);
+                        }
+                        deb_tbls.add(dTableModel);
+                    } catch (SQLException e) {
+                        JOptionPane.showMessageDialog(this, 
+                        "Error retrieving credit data: " + e.getMessage(), 
+                        "Database Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+
+                comboBox.setSelectedIndex(0);
+                switchTables(0);
             } else {
                 JOptionPane.showMessageDialog(this, 
                     "Database connection is no longer valid.", 
