@@ -318,6 +318,7 @@ public class MainFrame extends JFrame implements ActionListener{
             updateUser.setConnection(conn);
             deleteUser.setConnection(conn);
             transactionHistory.setConnection(conn);
+            fileImport.setConnection(conn);
             // set session isolation level here
             connection.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
             return true;
