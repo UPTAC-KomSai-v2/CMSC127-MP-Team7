@@ -19,6 +19,7 @@ import Panels.Transaction;
 import Panels.UserLogIn;
 import User.Amount;
 import User.Balance;
+import User.TransactionHistory;
 import User.TransferMoney;
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
@@ -63,6 +64,7 @@ public class MainFrame extends JFrame implements ActionListener{
     Amount loanPanel = new Amount();
     Amount repayPanel = new Amount();
     Amount withdrawPanel = new Amount();
+    TransactionHistory transactionHistory = new TransactionHistory();
     TransferMoney transferMoney = new TransferMoney();
 
     private int currCardID;
@@ -112,6 +114,13 @@ public class MainFrame extends JFrame implements ActionListener{
                 cardLayout.show(cardPanel, "Transfer Money");
             }
         });
+        transaction.historyBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                transactionHistory.loadUserData();
+                cardLayout.show(cardPanel, "Transaction History");
+            }
+        });
 
         transaction.depositBtn.addActionListener(new ActionListener() {
             @Override
@@ -139,6 +148,16 @@ public class MainFrame extends JFrame implements ActionListener{
         });
         transaction.exitBtn.addActionListener(this);
 
+        // Transaction History Stuff
+        cardPanel.add(transactionHistory, "Transaction History");
+        transactionHistory.exitBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                cardLayout.show(cardPanel, "Transaction");
+            }
+        });
+
+        // Account Creation Selection
         cardPanel.add(accountCreationSelection, "Account Creation Selection");
         accountCreationSelection.getNewUserBtn().addActionListener(this);
         accountCreationSelection.getNewCardBtn().addActionListener(this);
@@ -293,6 +312,7 @@ public class MainFrame extends JFrame implements ActionListener{
             readUser.setConnection(conn);
             updateUser.setConnection(conn);
             deleteUser.setConnection(conn);
+            transactionHistory.setConnection(conn);
             // set session isolation level here
             connection.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
             return true;
@@ -349,6 +369,8 @@ public class MainFrame extends JFrame implements ActionListener{
                 String accountType = rs.getString("account_type");
                 currAccType = accountType;
                 currCardID = cid;
+                transactionHistory.accType = accTypeIDX;
+                transactionHistory.cid = cid;
                 System.out.println("Login successful. Account type: " + accountType);
                 cardLayout.show(cardPanel, "Transaction");
                 transaction.setAccountType(userLogIn.isDebitSelected());
@@ -752,6 +774,12 @@ public class MainFrame extends JFrame implements ActionListener{
         System.out.println("Validating transfer...");
         System.out.println("Current Account Type: " + currAccType + " Current Card ID: " + currCardID);
         System.out.println("Transfer Account Type: " + accType + " Transfer Card ID: " + cid);
+        if (amount <= 0) {
+            JOptionPane.showMessageDialog(this, "Transfer amount must be positive.", 
+                "Transfer Error", JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+
         if (accType == currAccTypeNum && currCardID == cid) {
             JOptionPane.showMessageDialog(this, "You cannot transfer money to the same account.", 
                 "Transfer Error", JOptionPane.ERROR_MESSAGE);

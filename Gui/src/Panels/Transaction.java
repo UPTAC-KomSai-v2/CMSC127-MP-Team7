@@ -15,7 +15,7 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
 public class Transaction extends JPanel{
-    public JButton balanceBtn, transferMoneyBtn, withdrawBtn, depositBtn, loanBtn, payBtn, exitBtn;
+    public JButton balanceBtn, transferMoneyBtn, withdrawBtn, historyBtn, depositBtn, loanBtn, payBtn, exitBtn;
     Dimension size;
     GridBagConstraints gbc;
     Image bg, logo;
@@ -46,6 +46,13 @@ public class Transaction extends JPanel{
         transferMoneyBtn.setBackground(Color.white);
         transferMoneyBtn.setHorizontalAlignment(SwingConstants.CENTER);
         transferMoneyBtn.setVerticalAlignment(SwingConstants.CENTER);
+
+        historyBtn = new JButton("History");
+        historyBtn.setPreferredSize(size);
+        historyBtn.setOpaque(true);
+        historyBtn.setBackground(Color.white);
+        historyBtn.setHorizontalAlignment(SwingConstants.CENTER);
+        historyBtn.setVerticalAlignment(SwingConstants.CENTER);
 
         depositBtn = new JButton("Deposit");
         depositBtn.setPreferredSize(size);
@@ -92,6 +99,9 @@ public class Transaction extends JPanel{
         add(balanceBtn, gbc);
         gbc.gridy++;
         add(transferMoneyBtn, gbc);
+        gbc.gridy++;
+
+        add(historyBtn, gbc);
         gbc.gridy++;
 
         if(accountType){
