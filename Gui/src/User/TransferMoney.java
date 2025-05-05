@@ -19,7 +19,7 @@ import javax.swing.SwingUtilities;
 
 public class TransferMoney extends JPanel {
     JLabel transferToLbl, cidlbl, moneylbl, receiveAccTypeLbl;
-    public JButton okBtn;
+    public JButton okBtn, exitBtn;
     public JTextField cidtxt, moneytxt;
     public JComboBox<String> receiveAccTypeCBX;
     Dimension size;
@@ -122,11 +122,23 @@ public class TransferMoney extends JPanel {
         okBtn.setHorizontalAlignment(SwingConstants.CENTER);
         okBtn.setVerticalAlignment(SwingConstants.CENTER);
 
-        gbc.gridx = 0;
-        gbc.gridwidth = 2;
-        gbc.anchor = GridBagConstraints.CENTER;
+        gbc.gridx = 1;
+        gbc.gridwidth = 1;
+        gbc.anchor = GridBagConstraints.WEST;
         gbc.gridy = 4;
         add(okBtn, gbc);
+
+        // Add Exit button
+        exitBtn = new JButton("Back");
+        exitBtn.setOpaque(true);
+        exitBtn.setPreferredSize(size);
+        exitBtn.setBackground(Color.white);
+        exitBtn.setHorizontalAlignment(SwingConstants.CENTER);
+        exitBtn.setVerticalAlignment(SwingConstants.CENTER);
+
+        gbc.gridx = 0;
+        gbc.anchor = GridBagConstraints.EAST;
+        add(exitBtn, gbc);
     }
 
     @Override

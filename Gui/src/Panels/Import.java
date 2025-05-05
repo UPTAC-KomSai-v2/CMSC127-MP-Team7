@@ -10,8 +10,10 @@ import java.awt.Insets;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -110,7 +112,6 @@ public class Import extends JPanel {
         gbc.anchor = GridBagConstraints.EAST;
         add(tablelbl, gbc);
 
-        // Add OK button
         size = new Dimension(100, 30);
         okBtn = new JButton("Ok");
         okBtn.setOpaque(true);
@@ -165,36 +166,49 @@ public class Import extends JPanel {
 
     private void importCSVToDatabase(Connection conn, String csvFilePath, String tableName) {
         try (BufferedReader br = new BufferedReader(new FileReader(csvFilePath))) {
-            String line;
-            String[] headers = br.readLine().split(",");
-    
-            String sql = generateInsertQuery(tableName, headers.length);
+            String headerLine = br.readLine();
+            if (headerLine == null) throw new IOException("CSV file is empty");
+
+            String[] allHeaders = headerLine.split(",");
+            List<String> columns = new ArrayList<>();
+
+            Set<String> autoIncrementCols = Set.of("id", "auto_id");
+
+            for (String col : allHeaders) {
+                if (!autoIncrementCols.contains(col.trim().toLowerCase())) {
+                    columns.add(col.trim());
+                }
+            }
+
+            String sql = generateInsertQuery(tableName, columns);
             PreparedStatement stmt = conn.prepareStatement(sql);
-    
+
+            String line;
             while ((line = br.readLine()) != null) {
                 String[] values = line.split(",");
-                for (int i = 0; i < values.length; i++) {
-                    stmt.setString(i + 1, values[i].trim());
+                int paramIndex = 1;
+
+                for (int i = 0; i < allHeaders.length; i++) {
+                    String header = allHeaders[i].trim();
+                    if (!autoIncrementCols.contains(header.toLowerCase())) {
+                        stmt.setString(paramIndex++, values[i].trim());
+                    }
                 }
+
                 stmt.executeUpdate();
             }
-    
+
             JOptionPane.showMessageDialog(this, "Import successful!");
-    
         } catch (Exception ex) {
             ex.printStackTrace();
             JOptionPane.showMessageDialog(this, "Import failed: " + ex.getMessage());
         }
     }
 
-    private String generateInsertQuery(String tableName, int columnCount) {
-        StringBuilder sb = new StringBuilder("INSERT INTO " + tableName + " VALUES (");
-        for (int i = 0; i < columnCount; i++) {
-            sb.append("?");
-            if (i < columnCount - 1) sb.append(",");
-        }
-        sb.append(")");
-        return sb.toString();
+    private String generateInsertQuery(String tableName, List<String> columns) {
+        String colPart = String.join(", ", columns);
+        String valPart = columns.stream().map(c -> "?").collect(Collectors.joining(", "));
+        return "INSERT INTO " + tableName + " (" + colPart + ") VALUES (" + valPart + ")";
     }
 
     public static void main(String[] args) {
