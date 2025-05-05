@@ -237,7 +237,20 @@ public class MainFrame extends JFrame implements ActionListener{
         transferMoney.okBtn.addActionListener(this);
 
         cardPanel.add(fileImport, "File Imports");
+        fileImport.okBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                // TODO Auto-generated method stub
+            }
+        });
+
         cardPanel.add(fileExport, "File Exports");
+        fileExport.okBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                // TODO Auto-generated method stub
+            }
+        });
 
 
         // For Database Log In back button
@@ -835,6 +848,7 @@ public class MainFrame extends JFrame implements ActionListener{
     }
 
     private void updateBalance(int accType, double amount, int cid) {
+        System.out.println("Balance update: " + amount + " for account type: " + accType + " and card ID: " + cid);
         String updateBalance = """
                 UPDATE debit_balance SET balance = ? WHERE debit_id = ?
                 """;
@@ -871,7 +885,7 @@ public class MainFrame extends JFrame implements ActionListener{
                 INSERT INTO double_transactions_credit (transaction_id, credit_id, amount) 
                 VALUES (?, ?, ?)
                 """;
-        
+        System.out.println("Current Amount: " + getCurrAmount(accType, cid));
         if (accType == 0) {
             try {
                 PreparedStatement stmt = transactionConnection.prepareStatement(debitTransfer);
@@ -905,13 +919,13 @@ public class MainFrame extends JFrame implements ActionListener{
     }
 
     private double getCurrAmount(int accType, int cid) {
-        if (currAccTypeNum == 0) {
+        if (accType == 0) {
             String query = """
                 SELECT balance FROM debit_balance WHERE debit_id = ?
                 """;
             try {
                 PreparedStatement stmt = transactionConnection.prepareStatement(query);
-                stmt.setInt(1, currCardID);
+                stmt.setInt(1, cid);
                 ResultSet rs = stmt.executeQuery();
                 if (rs.next()) {
                     return rs.getDouble("balance");
@@ -926,7 +940,7 @@ public class MainFrame extends JFrame implements ActionListener{
                 """;
             try {
                 PreparedStatement stmt = transactionConnection.prepareStatement(query);
-                stmt.setInt(1, currCardID);
+                stmt.setInt(1, cid);
                 ResultSet rs = stmt.executeQuery();
                 if (rs.next()) {
                     return rs.getDouble("loan");
@@ -955,7 +969,7 @@ public class MainFrame extends JFrame implements ActionListener{
             return false;
         }
         
-        if (currAccTypeNum == 0) {
+        if (accType == 0) {
             double balance = getCurrAmount(accType, cid);
             if (amount > balance) {
                 JOptionPane.showMessageDialog(this, "Insufficient funds for transfer.", 
@@ -976,6 +990,10 @@ public class MainFrame extends JFrame implements ActionListener{
     public void TransferMoneyInfo(){
         String amount = transferMoney.moneytxt.getText();
         String cid = transferMoney.cidtxt.getText();
+        if (amount.isEmpty() || cid.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please fill in all required fields", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
         int accType = transferMoney.receiveAccTypeCBX.getSelectedIndex();
         System.out.println("Card ID: "+cid+" Money: "+ amount + " Account Type: "+ accType);
 
@@ -985,9 +1003,11 @@ public class MainFrame extends JFrame implements ActionListener{
                 int transaction_id = getDoubleTransactionID();
                 connection.setAutoCommit(false);
                 // Try to reduce the balance of the current account first
+                System.out.println("First transfer");
                 transferMoney(currAccTypeNum, -1, transaction_id, currCardID, Double.parseDouble(amount));
     
                 // Then try to increase the balance of the receiving account
+                System.out.println("Second transfer");
                 transferMoney(accType, 1, transaction_id, Integer.parseInt(cid), Double.parseDouble(amount));
                 
                 JOptionPane.showMessageDialog(this, "Transfer successful!", 
@@ -1100,7 +1120,7 @@ public class MainFrame extends JFrame implements ActionListener{
         String query = "";
         try {
             double bal = 0;
-            if (currAccType.equals("credit")){
+            if (currAccTypeNum == 1){
                 query = """
                         SELECT loan FROM credit_loans WHERE credit_id = ?
                         """;
@@ -1112,7 +1132,7 @@ public class MainFrame extends JFrame implements ActionListener{
                     bal = rs.getDouble("loan");
                 }
                 rs.close();
-            } else if (currAccType.equals("debit")) {
+            } else if (currAccTypeNum == 0) {
                 query = """
                     SELECT balance FROM debit_balance WHERE debit_id = ?
                     """;
