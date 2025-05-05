@@ -34,7 +34,7 @@ public class TransactionHistory extends JPanel {
     Dimension size;
     Image bg;
     private String[] sTrnsctCols = {"Transaction ID", "Transfer Amount"};
-    private String[] dTrnsctCols = {"Transaction ID", "Transfer Amount", "Recepient ID", "Account Type"};
+    private String[] dTrnsctCols = {"Transaction ID", "Transfer Amount", "Recepient/Sender ID", "Account Type"};
     private Connection connection;
     private DefaultTableModel sTrnsctTblMdl, dTrnsctTblMdl;
     private JLabel label1, label2;
@@ -180,7 +180,7 @@ public class TransactionHistory extends JPanel {
         }
     }
 
-    private void getDoubleTransactionHistory() {
+    private void getOutgoingDoubleTransactionHistory() {
         String doubleTransactionQuery_Debit2ndHalf = """
                 SELECT debit_id, 'Debit' AS account_type
                 FROM double_transactions_debit 
@@ -243,7 +243,123 @@ public class TransactionHistory extends JPanel {
             }
         } else {
             String doubleTransactionQuery_Credit = """
-                SELECT transaction_id, amount FROM double_transactions_credit WHERE credit_id = ?
+                SELECT transaction_id, amount 
+                FROM double_transactions_credit 
+                WHERE credit_id = ? AND amount < 0
+                """;
+            try (
+                PreparedStatement dstmt = connection.prepareStatement(doubleTransactionQuery_Credit);
+                PreparedStatement dstmt2 = connection.prepareStatement(doubleTransactionQuery_Debit2ndHalf);
+                PreparedStatement dstmt3 = connection.prepareStatement(doubleTransactionQuery_Credit2ndHalf);
+            ){
+                dstmt.setInt(1, cid);
+                ResultSet doubleTransaction = dstmt.executeQuery();
+                DefaultTableModel dTableModel = createTableModel(dTrnsctCols);
+                while(doubleTransaction.next()) {
+                    int tr_id = doubleTransaction.getInt("transaction_id");
+                    dstmt2.setInt(1, tr_id);
+                    dstmt3.setInt(1, tr_id);
+                    ResultSet rs2 = dstmt2.executeQuery();
+                    ResultSet rs3 = dstmt3.executeQuery();
+                    if (rs2.next()) {
+                        String[] row = {
+                            String.valueOf(tr_id),
+                            String.valueOf(doubleTransaction.getDouble("amount") * -1),
+                            rs2.getString("debit_id"),
+                            rs2.getString("account_type")
+                        };
+                        dTableModel.addRow(row);
+                    } else if (rs3.next()) {
+                        String[] row = {
+                            String.valueOf(tr_id),
+                            String.valueOf(doubleTransaction.getDouble("amount") * -1),
+                            rs3.getString("credit_id"),
+                            rs3.getString("account_type")
+                        };
+                        dTableModel.addRow(row);
+                    }
+                    rs2.close();
+                    rs3.close();
+                }
+                dTrnsc_tbl.setModel(dTableModel);
+                dstmt.close();
+                dstmt2.close();
+                dstmt3.close();
+                doubleTransaction.close();
+            } catch (SQLException e) {
+                JOptionPane.showMessageDialog(this, 
+                    "Error retrieving double transaction data: " + e.getMessage(), 
+                    "Database Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
+    private void getIncomingDoubleTransactionHistory() {
+        String doubleTransactionQuery_Debit2ndHalf = """
+                SELECT debit_id, 'Debit' AS account_type
+                FROM double_transactions_debit 
+                WHERE transaction_id = ? AND amount < 0
+                """;
+        String doubleTransactionQuery_Credit2ndHalf = """
+            SELECT credit_id, 'Credit' AS account_type
+            FROM double_transactions_credit 
+            WHERE transaction_id = ? AND amount < 0
+            """;
+        if (accType == 0) {
+            String doubleTransactionQuery_Debit = """
+                SELECT transaction_id, amount
+                FROM double_transactions_debit 
+                WHERE debit_id = ? AND amount > 0
+                """;
+            try (
+                PreparedStatement dstmt = connection.prepareStatement(doubleTransactionQuery_Debit);
+                PreparedStatement dstmt2 = connection.prepareStatement(doubleTransactionQuery_Debit2ndHalf);
+                PreparedStatement dstmt3 = connection.prepareStatement(doubleTransactionQuery_Credit2ndHalf);
+            ){
+                dstmt.setInt(1, cid);
+                ResultSet doubleTransaction = dstmt.executeQuery();
+                DefaultTableModel dTableModel = createTableModel(dTrnsctCols);
+                while(doubleTransaction.next()) {
+                    int tr_id = doubleTransaction.getInt("transaction_id");
+                    dstmt2.setInt(1, tr_id);
+                    dstmt3.setInt(1, tr_id);
+                    ResultSet rs2 = dstmt2.executeQuery();
+                    ResultSet rs3 = dstmt3.executeQuery();
+                    if (rs2.next()) {
+                        String[] row = {
+                            String.valueOf(tr_id),
+                            String.valueOf(doubleTransaction.getDouble("amount") * -1),
+                            rs2.getString("debit_id"),
+                            rs2.getString("account_type")
+                        };
+                        dTableModel.addRow(row);
+                    } else if (rs3.next()) {
+                        String[] row = {
+                            String.valueOf(tr_id),
+                            String.valueOf(doubleTransaction.getDouble("amount") * -1),
+                            rs3.getString("credit_id"),
+                            rs3.getString("account_type")
+                        };
+                        dTableModel.addRow(row);
+                    }
+                    rs2.close();
+                    rs3.close();
+                }
+                dTrnsc_tbl.setModel(dTableModel);
+                dstmt.close();
+                dstmt2.close();
+                dstmt3.close();
+                doubleTransaction.close();
+            } catch (SQLException e) {
+                JOptionPane.showMessageDialog(this, 
+                    "Error retrieving double transaction data: " + e.getMessage(), 
+                    "Database Error", JOptionPane.ERROR_MESSAGE);
+            }
+        } else {
+            String doubleTransactionQuery_Credit = """
+                SELECT transaction_id, amount 
+                FROM double_transactions_credit 
+                WHERE credit_id = ? > 0
                 """;
             try (
                 PreparedStatement dstmt = connection.prepareStatement(doubleTransactionQuery_Credit);
@@ -307,7 +423,8 @@ public class TransactionHistory extends JPanel {
                 getSingleTransactionHistory();
                 
                 // Get Double Transaction Data
-                getDoubleTransactionHistory();
+                getOutgoingDoubleTransactionHistory();
+                getIncomingDoubleTransactionHistory();
                 
             } else {
                 JOptionPane.showMessageDialog(this, 
