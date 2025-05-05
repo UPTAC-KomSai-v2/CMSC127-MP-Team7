@@ -235,6 +235,12 @@ public class MainFrame extends JFrame implements ActionListener{
         //This ask the amount of money to  transfer and the user id of the receiver
         cardPanel.add(transferMoney, "Transfer Money");
         transferMoney.okBtn.addActionListener(this);
+        transferMoney.exitBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                cardLayout.show(cardPanel, "Transaction");
+            } 
+        });
 
         cardPanel.add(fileImport, "File Imports");
         fileImport.okBtn.addActionListener(new ActionListener() {

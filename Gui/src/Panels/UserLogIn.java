@@ -121,7 +121,7 @@ public class UserLogIn extends JPanel {
         okBtn.setVerticalAlignment(SwingConstants.CENTER);
 
         gbc.gridwidth = 2;
-        gbc.gridx = 0;
+        gbc.gridx = 1;
         gbc.gridy = 5;
         gbc.anchor = GridBagConstraints.CENTER;
         this.add(okBtn, gbc);
@@ -134,7 +134,8 @@ public class UserLogIn extends JPanel {
         backBtn.setHorizontalAlignment(SwingConstants.CENTER);
         backBtn.setVerticalAlignment(SwingConstants.CENTER);
 
-        gbc.gridy = 6;
+        gbc.gridx = 0;
+        gbc.anchor = GridBagConstraints.WEST;
         this.add(backBtn, gbc);
     }
 
