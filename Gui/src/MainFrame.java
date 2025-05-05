@@ -455,23 +455,186 @@ public class MainFrame extends JFrame implements ActionListener{
     }
 
 
-    public void amountOfLoan(){
-        String loan = loanPanel.input.getText();
-        System.out.println(loan);
-
-        cardLayout.show(cardPanel, "Credit");
-
+    public void amountOfLoan() {
+        try {
+            double amount = Double.parseDouble(loanPanel.input.getText());
+            if (amount <= 0) {
+                JOptionPane.showMessageDialog(this, "Loan amount must be positive",
+                    "Invalid Amount", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            
+            if (processLoan(amount)) {
+                JOptionPane.showMessageDialog(this, "Loan processed successfully!",
+                    "Success", JOptionPane.INFORMATION_MESSAGE);
+            }
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Please enter a valid numeric amount",
+                "Input Error", JOptionPane.ERROR_MESSAGE);
+        }
+        
+        cardLayout.show(cardPanel, "Transaction");
         loanPanel.input.setText("");
     }
-
-
-    public void amountOfRepay(){
-        String repay = repayPanel.input.getText();
-        System.out.println(repay);
-
-        cardLayout.show(cardPanel, "Credit");
-
+    
+    public void amountOfRepay() {
+        try {
+            double amount = Double.parseDouble(repayPanel.input.getText());
+            if (amount <= 0) {
+                JOptionPane.showMessageDialog(this, "Repayment amount must be positive",
+                    "Invalid Amount", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            
+            if (processRepay(amount)) {
+                JOptionPane.showMessageDialog(this, "Repayment processed successfully!",
+                    "Success", JOptionPane.INFORMATION_MESSAGE);
+            }
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Please enter a valid numeric amount",
+                "Input Error", JOptionPane.ERROR_MESSAGE);
+        }
+        
+        cardLayout.show(cardPanel, "Transaction");
         repayPanel.input.setText("");
+    }
+
+    private boolean processLoan(double amount) {
+        String query = """
+                INSERT INTO single_transactions_credit (transaction_id, credit_id, amount)
+                VALUES (?, ?, ?)
+                """;
+        String updateLoan = """
+                UPDATE credit_loans SET loan = loan - ? WHERE credit_id = ?
+                """;
+        String checkLoan = """
+                SELECT loan FROM credit_loans WHERE credit_id = ?
+                """;
+        
+        try {
+            PreparedStatement stmt = transactionConnection.prepareStatement(checkLoan);
+            stmt.setInt(1, currCardID);
+            ResultSet rs = stmt.executeQuery();
+            
+            double currentLoan = 0;
+            if (rs.next()) {
+                currentLoan = rs.getDouble("loan");
+                if (currentLoan - amount < -max_loan) {
+                    JOptionPane.showMessageDialog(this, 
+                        "Loan amount exceeds maximum allowed. Maximum remaining credit is " + 
+                        (max_loan + currentLoan),
+                        "Loan Error", JOptionPane.ERROR_MESSAGE);
+                    return false;
+                }
+            }
+            rs.close();
+            stmt.close();
+            
+            int transactionID = getSingleTransactionID();
+            
+            connection.setAutoCommit(false);
+            
+            stmt = transactionConnection.prepareStatement(query);
+            stmt.setInt(1, transactionID);
+            stmt.setInt(2, currCardID);
+            stmt.setDouble(3, amount);
+            stmt.executeUpdate();
+            stmt.close();
+            
+            stmt = transactionConnection.prepareStatement(updateLoan);
+            stmt.setDouble(1, amount);
+            stmt.setInt(2, currCardID);
+            stmt.executeUpdate();
+            stmt.close();
+            
+            connection.commit();
+            return true;
+        } catch (SQLException e) {
+            try {
+                connection.rollback();
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+            JOptionPane.showMessageDialog(this, "Error processing loan: " + e.getMessage(),
+                "Loan Error", JOptionPane.ERROR_MESSAGE);
+            return false;
+        } finally {
+            try {
+                connection.setAutoCommit(true);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private boolean processRepay(double amount) {
+        String query = """
+                INSERT INTO single_transactions_credit (transaction_id, credit_id, amount)
+                VALUES (?, ?, ?)
+                """;
+        String updateLoan = """
+                UPDATE credit_loans SET loan = loan + ? WHERE credit_id = ?
+                """;
+        String checkLoan = """
+                SELECT loan FROM credit_loans WHERE credit_id = ?
+                """;
+        
+        try {
+            PreparedStatement stmt = transactionConnection.prepareStatement(checkLoan);
+            stmt.setInt(1, currCardID);
+            ResultSet rs = stmt.executeQuery();
+            
+            double currentLoan = 0;
+            if (rs.next()) {
+                currentLoan = rs.getDouble("loan");
+                if (amount > -currentLoan) {
+                    JOptionPane.showMessageDialog(this, 
+                        "Repayment amount cannot exceed current loan of " + (-currentLoan),
+                        "Repayment Error", JOptionPane.ERROR_MESSAGE);
+                    return false;
+                }
+            }
+            rs.close();
+            stmt.close();
+            
+            int transactionID = getSingleTransactionID();
+            
+            // Start transaction
+            connection.setAutoCommit(false);
+            
+            // Record the transaction (negative amount for repayment)
+            stmt = transactionConnection.prepareStatement(query);
+            stmt.setInt(1, transactionID);
+            stmt.setInt(2, currCardID);
+            stmt.setDouble(3, -amount);
+            stmt.executeUpdate();
+            stmt.close();
+            
+            // Update the loan (add because loans are stored as negatives)
+            stmt = transactionConnection.prepareStatement(updateLoan);
+            stmt.setDouble(1, amount);
+            stmt.setInt(2, currCardID);
+            stmt.executeUpdate();
+            stmt.close();
+            
+            connection.commit();
+            return true;
+        } catch (SQLException e) {
+            try {
+                connection.rollback();
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+            JOptionPane.showMessageDialog(this, "Error processing repayment: " + e.getMessage(),
+                "Repayment Error", JOptionPane.ERROR_MESSAGE);
+            return false;
+        } finally {
+            try {
+                connection.setAutoCommit(true);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     private boolean processDeposit(double amount) {

@@ -137,12 +137,12 @@ public class CreateNewCard extends JPanel {
         
         userComboBox.removeAllItems();
         try {
-            String sql = "SELECT user_id, name FROM bank_users";
+            String sql = "SELECT user_id, first_name, last_name FROM bank_users ORDER BY user_id";
             PreparedStatement stmt = connection.prepareStatement(sql);
             ResultSet rs = stmt.executeQuery();
             
             while (rs.next()) {
-                userComboBox.addItem(rs.getInt("user_id") + " - " + rs.getString("name"));
+                userComboBox.addItem(rs.getInt("user_id") + " - " + rs.getString("first_name") + " " + rs.getString("last_name"));
             }
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(this, "Error loading users: " + e.getMessage(), 
@@ -212,7 +212,7 @@ public boolean createCardInDatabase() {
                 String balanceSql = "INSERT INTO debit_balance (debit_id, balance) VALUES (?, ?)";
                 PreparedStatement balanceStmt = connection.prepareStatement(balanceSql);
                 balanceStmt.setInt(1, debitId);
-                balanceStmt.setInt(2, Math.abs(amount)); // Balance is positive
+                balanceStmt.setInt(2, Math.abs(amount));
                 balanceStmt.executeUpdate();
             }
 
