@@ -7,11 +7,20 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Image;
 import java.awt.Insets;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
@@ -25,6 +34,7 @@ public class Import extends JPanel {
     Dimension size;
     GridBagConstraints gbc;
     Image bg;
+    Connection conn;
 
     public Import() {
         setLayout(new GridBagLayout());
@@ -110,6 +120,16 @@ public class Import extends JPanel {
         okBtn.setBackground(Color.white);
         okBtn.setHorizontalAlignment(SwingConstants.CENTER);
         okBtn.setVerticalAlignment(SwingConstants.CENTER);
+        okBtn.addActionListener(e -> {
+            JFileChooser fileChooser = new JFileChooser();
+            int result = fileChooser.showOpenDialog(this);
+            if (result == JFileChooser.APPROVE_OPTION) {
+                File file = fileChooser.getSelectedFile();
+                String selectedTable = (String) table.getSelectedItem();
+                String filePath = file.getAbsolutePath();
+                importCSVToDatabase(conn, filePath, selectedTable);
+            }
+        });
 
         gbc.gridx = 0;
         gbc.gridwidth = 2;
@@ -118,12 +138,50 @@ public class Import extends JPanel {
         add(okBtn, gbc);
     }
 
+    public void setConnection(Connection conn){
+        this.conn = conn;
+    }
+
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         if (bg != null) {
             g.drawImage(bg, 0, 0, getWidth(), getHeight(), this);
         }
+    }
+
+    private void importCSVToDatabase(Connection conn, String csvFilePath, String tableName) {
+        try (BufferedReader br = new BufferedReader(new FileReader(csvFilePath))) {
+            String line;
+            String[] headers = br.readLine().split(",");
+    
+            String sql = generateInsertQuery(tableName, headers.length);
+            PreparedStatement stmt = conn.prepareStatement(sql);
+    
+            while ((line = br.readLine()) != null) {
+                String[] values = line.split(",");
+                for (int i = 0; i < values.length; i++) {
+                    stmt.setString(i + 1, values[i].trim());
+                }
+                stmt.executeUpdate();
+            }
+    
+            JOptionPane.showMessageDialog(this, "Import successful!");
+    
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Import failed: " + ex.getMessage());
+        }
+    }
+
+    private String generateInsertQuery(String tableName, int columnCount) {
+        StringBuilder sb = new StringBuilder("INSERT INTO " + tableName + " VALUES (");
+        for (int i = 0; i < columnCount; i++) {
+            sb.append("?");
+            if (i < columnCount - 1) sb.append(",");
+        }
+        sb.append(")");
+        return sb.toString();
     }
 
     public static void main(String[] args) {
@@ -139,3 +197,4 @@ public class Import extends JPanel {
         });
     }
 }
+
