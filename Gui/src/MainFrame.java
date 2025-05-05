@@ -968,7 +968,7 @@ public class MainFrame extends JFrame implements ActionListener{
             return false;
         }
         
-        if (currAccTypeNum == 0) {
+        if (accType == 0) {
             double balance = getCurrAmount(accType, cid);
             if (amount > balance) {
                 JOptionPane.showMessageDialog(this, "Insufficient funds for transfer.", 
@@ -989,6 +989,10 @@ public class MainFrame extends JFrame implements ActionListener{
     public void TransferMoneyInfo(){
         String amount = transferMoney.moneytxt.getText();
         String cid = transferMoney.cidtxt.getText();
+        if (amount.isEmpty() || cid.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please fill in all required fields", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
         int accType = transferMoney.receiveAccTypeCBX.getSelectedIndex();
         System.out.println("Card ID: "+cid+" Money: "+ amount + " Account Type: "+ accType);
 
