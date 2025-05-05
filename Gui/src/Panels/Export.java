@@ -7,11 +7,22 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Image;
 import java.awt.Insets;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.Statement;
+
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
@@ -25,6 +36,7 @@ public class Export extends JPanel {
     Dimension size;
     GridBagConstraints gbc;
     Image bg;
+    Connection conn;
 
     public Export() {
         setLayout(new GridBagLayout());
@@ -110,6 +122,32 @@ public class Export extends JPanel {
         okBtn.setBackground(Color.white);
         okBtn.setHorizontalAlignment(SwingConstants.CENTER);
         okBtn.setVerticalAlignment(SwingConstants.CENTER);
+        okBtn.addActionListener(e -> {
+        String selectedTable = (String) table.getSelectedItem();
+        String fileTypeSelected = (String) fileType.getSelectedItem();
+
+        if ("CSV".equals(fileTypeSelected)) {
+            JFileChooser chooser = new JFileChooser();
+            chooser.setDialogTitle("Save CSV");
+            int userSelection = chooser.showSaveDialog(null);
+            
+            if (userSelection == JFileChooser.APPROVE_OPTION) {
+                File fileToSave = chooser.getSelectedFile();
+                String filePath = fileToSave.getAbsolutePath();
+                if (!filePath.toLowerCase().endsWith(".csv")) {
+                    filePath += ".csv";
+                }
+            
+                try {
+                    exportTableToCSV(conn, selectedTable, filePath);
+                    JOptionPane.showMessageDialog(this, "Export successful!");
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    JOptionPane.showMessageDialog(this, "Export failed: " + ex.getMessage());
+                }
+            }
+        }
+    });
 
         gbc.gridx = 0;
         gbc.gridwidth = 2;
@@ -123,6 +161,52 @@ public class Export extends JPanel {
         super.paintComponent(g);
         if (bg != null) {
             g.drawImage(bg, 0, 0, getWidth(), getHeight(), this);
+        }
+    }
+
+    public void setConnection(Connection conn){
+        this.conn = conn;
+    }
+
+    public void exportTableToCSV(Connection conn, String tableName, String filePath) {
+        String query = "SELECT * FROM " + tableName;
+    
+        try (Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(query);
+             BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
+    
+            ResultSetMetaData meta = rs.getMetaData();
+            int columnCount = meta.getColumnCount();
+    
+            // Write header
+            for (int i = 1; i <= columnCount; i++) {
+                writer.write(meta.getColumnName(i));
+                if (i < columnCount) writer.write(",");
+            }
+            writer.newLine();
+    
+            // Write data rows
+            while (rs.next()) {
+                for (int i = 1; i <= columnCount; i++) {
+                    String value = rs.getString(i);
+                    if (value != null) {
+                        value = value.replaceAll("\"", "\"\""); // Escape double quotes
+                        if (value.contains(",") || value.contains("\"") || value.contains("\n")) {
+                            value = "\"" + value + "\""; // Wrap in quotes if needed
+                        }
+                    }
+                    writer.write(value != null ? value : "");
+                    if (i < columnCount) writer.write(",");
+                }
+                writer.newLine();
+            }
+    
+            writer.flush();
+            System.out.println("Exported table '" + tableName + "' to CSV: " + filePath);
+    
+        } catch (Exception e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Export failed: " + e.getMessage());
         }
     }
 
