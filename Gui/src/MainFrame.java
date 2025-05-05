@@ -1,9 +1,3 @@
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.FileReader;
-import java.io.FileWriter;
-
 import Employee.*;
 import Panels.*;
 import User.*;
@@ -11,6 +5,11 @@ import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -244,6 +243,9 @@ public class MainFrame extends JFrame implements ActionListener{
                 // TODO Auto-generated method stub
             }
         });
+        fileImport.backBtn.addActionListener(this);
+
+        
 
         cardPanel.add(fileExport, "File Exports");
         fileExport.okBtn.addActionListener(new ActionListener() {
@@ -252,6 +254,7 @@ public class MainFrame extends JFrame implements ActionListener{
                 // TODO Auto-generated method stub
             }
         });
+        fileExport.backBtn.addActionListener(this);
 
 
         // For Database Log In back button
@@ -1213,7 +1216,7 @@ public class MainFrame extends JFrame implements ActionListener{
                 updateUserInfo();
             }
     
-            if(e.getSource() ==newUser.exitBtn||e.getSource() ==readUser.exitBtn||e.getSource() ==updateUser.exitBtn||e.getSource()==deleteUser.exitBtn||e.getSource()==askUID.exitBtn){
+            if(e.getSource() ==newUser.exitBtn||e.getSource() ==readUser.exitBtn||e.getSource() ==updateUser.exitBtn||e.getSource()==deleteUser.exitBtn||e.getSource()==askUID.exitBtn||e.getSource()==fileImport){
                 cardLayout.show(cardPanel, "Access Database");
             }
     
@@ -1284,7 +1287,7 @@ public class MainFrame extends JFrame implements ActionListener{
         cardLayout.show(cardPanel, "Create New Card");
     }
 
-    if(e.getSource() == accountCreationSelection.getExitBtn()) {
+    if(e.getSource() == accountCreationSelection.getExitBtn()||e.getSource()==fileExport.backBtn||e.getSource()==fileImport.backBtn) {
         cardLayout.show(cardPanel, "Access Database");
     }
 
