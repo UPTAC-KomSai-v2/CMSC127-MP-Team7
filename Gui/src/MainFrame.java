@@ -219,18 +219,25 @@ public class MainFrame extends JFrame implements ActionListener{
         //This ask the amount of money to be deposited
         cardPanel.add(depositPanel, "Deposit Panel");
         depositPanel.okBtn.addActionListener(this);
+        depositPanel.backBtn.addActionListener(this);
+       
 
         //This ask the amount of money to be loaned
         cardPanel.add(loanPanel, "Loan Panel");
         loanPanel.okBtn.addActionListener(this);
+        loanPanel.backBtn.addActionListener(this);
 
         //This ask the amount of money to  pay
         cardPanel.add(repayPanel, "Repay Panel");
         repayPanel.okBtn.addActionListener(this);
+        repayPanel.backBtn.addActionListener(this);
+
+        
 
         //This ask the amount of money to  withdraw
         cardPanel.add(withdrawPanel, "Withdraw Panel");
         withdrawPanel.okBtn.addActionListener(this);
+        withdrawPanel.backBtn.addActionListener(this);
 
         //This ask the amount of money to  transfer and the user id of the receiver
         cardPanel.add(transferMoney, "Transfer Money");
@@ -1255,6 +1262,13 @@ public class MainFrame extends JFrame implements ActionListener{
             }
         }
 
+        if( e.getSource()==loanPanel.backBtn || e.getSource()==repayPanel.backBtn|| e.getSource()==depositPanel.backBtn|| e.getSource()==withdrawPanel.backBtn){
+            System.out.println("why are you not working");
+            cardLayout.show(cardPanel, "Transaction");
+        }
+
+
+
     //Prompt for credit transaction if chosen
     if(e.getSource() == depositPanel.okBtn ||e.getSource() == loanPanel.okBtn||e.getSource() == repayPanel.okBtn ){
         if (e.getSource() == loanPanel.okBtn) {
@@ -1304,7 +1318,7 @@ public class MainFrame extends JFrame implements ActionListener{
         }
     }
 
-    if(e.getSource() == createNewCard.getExitBtn()) {
+    if(e.getSource() == createNewCard.getExitBtn() ) {
         cardLayout.show(cardPanel, "Account Creation Selection");
     }
 
