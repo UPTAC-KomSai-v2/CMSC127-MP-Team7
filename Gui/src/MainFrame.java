@@ -237,7 +237,20 @@ public class MainFrame extends JFrame implements ActionListener{
         transferMoney.okBtn.addActionListener(this);
 
         cardPanel.add(fileImport, "File Imports");
+        fileImport.okBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                // TODO Auto-generated method stub
+            }
+        });
+
         cardPanel.add(fileExport, "File Exports");
+        fileExport.okBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                // TODO Auto-generated method stub
+            }
+        });
 
 
         // For Database Log In back button
