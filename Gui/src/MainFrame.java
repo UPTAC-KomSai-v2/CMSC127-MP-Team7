@@ -75,6 +75,7 @@ public class MainFrame extends JFrame implements ActionListener{
         cardPanel.add(menu, "Main");
         menu.accessDatabaseBtn.addActionListener(this);
         menu.transactionBtn.addActionListener(this);
+        menu.closeBtn.addActionListener(this);
 
 
         //Panel to access the database: DatabaseLogIn Panel
@@ -1407,6 +1408,13 @@ public class MainFrame extends JFrame implements ActionListener{
     //This ask the amount of money to transfer and the uid of the receiver: TransferMoney Panel
     if(e.getSource() == debit.transferMoneyBtn){
         cardLayout.show(cardPanel, "Transfer Money");
+    }
+
+
+    //To close the program
+    if(e.getSource()==menu.closeBtn){
+        System.out.println("Exitingg..");
+        System.exit(0);
     }
     }
 
