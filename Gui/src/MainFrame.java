@@ -4,23 +4,9 @@ import java.io.IOException;
 import java.io.FileReader;
 import java.io.FileWriter;
 
-import Employee.AccountCreationSelection;
-import Employee.AskUID;
-import Employee.CreateNewCard;
-import Employee.CreateNewUser;
-import Employee.DeleteUser;
-import Employee.ReadUser;
-import Panels.AccessDataBase;
-import Panels.Credit;
-import Panels.DataBaseLogIn;
-import Panels.Debit;
-import Panels.MainMenu;
-import Panels.Transaction;
-import Panels.UserLogIn;
-import User.Amount;
-import User.Balance;
-import User.TransactionHistory;
-import User.TransferMoney;
+import Employee.*;
+import Panels.*;
+import User.*;
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.event.ActionEvent;
@@ -66,6 +52,8 @@ public class MainFrame extends JFrame implements ActionListener{
     Amount withdrawPanel = new Amount();
     TransactionHistory transactionHistory = new TransactionHistory();
     TransferMoney transferMoney = new TransferMoney();
+    Import fileImport = new Import();
+    Export fileExport = new Export();
 
     private int currCardID;
     private String currAccType;
@@ -104,6 +92,19 @@ public class MainFrame extends JFrame implements ActionListener{
         accessDB.readUserBtn.addActionListener(this);
         accessDB.updateUserBtn.addActionListener(this);
         accessDB.deleteUserBtn.addActionListener(this);
+        accessDB.importBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                cardLayout.show(cardPanel, "File Imports");
+            }
+        });
+
+        accessDB.exportBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                cardLayout.show(cardPanel, "File Exports");
+            }
+        });
 
         //Menu Panel for User Transactions: Transaction Panel
         cardPanel.add(transaction, "Transaction");
@@ -234,6 +235,10 @@ public class MainFrame extends JFrame implements ActionListener{
         //This ask the amount of money to  transfer and the user id of the receiver
         cardPanel.add(transferMoney, "Transfer Money");
         transferMoney.okBtn.addActionListener(this);
+
+        cardPanel.add(fileImport, "File Imports");
+        cardPanel.add(fileExport, "File Exports");
+
 
         // For Database Log In back button
         dbLogIn.backBtn.addActionListener(this);
