@@ -26,13 +26,15 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import java.util.List;
+import java.util.ArrayList;
+import java.util.Set;
 
 
 public class Import extends JPanel {
     JLabel exportlbl, cidlbl, tablelbl, fileTypelbl;
     private JButton okBtn, backBtn;
-    public JTextField cidtxt, moneytxt;
-    public JComboBox<String> fileType, table;
+    private JTextField cidtxt, moneytxt;
+    private JComboBox<String> fileType, table;
     Dimension size;
     GridBagConstraints gbc;
     Image bg;
@@ -219,6 +221,20 @@ public class Import extends JPanel {
         String valPart = columns.stream().map(c -> "?").collect(Collectors.joining(", "));
         return "INSERT INTO " + tableName + " (" + colPart + ") VALUES (" + valPart + ")";
     }
+    public JTextField getCidtxt(){
+        return cidtxt;
+    }
+    public JTextField getMoneytxt(){
+        return moneytxt;
+    }
+
+    public JComboBox<String> getFileType(){
+        return fileType;
+    }
+    public JComboBox<String> getTable(){
+        return table;
+    }
+
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {

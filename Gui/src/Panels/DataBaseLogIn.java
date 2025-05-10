@@ -18,8 +18,8 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 public class DataBaseLogIn extends JPanel{
     JLabel userlbl, passlbl, dtlbl, titlelbl;
-    public JTextField usertxt;
-    public JPasswordField passtxt;
+    private JTextField usertxt;
+    private JPasswordField passtxt;
     private JButton logInBtn, backBtn;
     Dimension size;
     GridBagConstraints gbc;
@@ -148,6 +148,15 @@ public class DataBaseLogIn extends JPanel{
     public JButton getBackBtn(){
         return backBtn;
     }
+
+    public JTextField getUsertxt(){
+        return usertxt;
+    }
+
+    public JPasswordField getPasstxt(){
+        return passtxt;
+    }
+
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {

@@ -18,7 +18,7 @@ import javax.swing.SwingUtilities;
 public class MainMenu extends JPanel{
 
     JButton btn = new JButton("Log in");
-    JTextField usertxt, passtxt;
+    private JTextField usertxt, passtxt;
     JLabel username, pass, logolbl, titlelbl;
     GridBagConstraints gbc;
     Dimension size;
@@ -107,6 +107,13 @@ public class MainMenu extends JPanel{
             g.drawImage(bg, 0, 0, getWidth(), getHeight(), this);
         }
     }
+    public JTextField getUsertxt(){
+        return usertxt;
+    }
+    public JTextField getPasstxt(){
+        return passtxt;
+    }
+
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {

@@ -22,7 +22,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 
-public class NewMainFrame extends JFrame implements ActionListener{
+public class MainFrame extends JFrame implements ActionListener{
     public static final int max_loan = 50000;
 
     private CardLayout cardLayout;
@@ -58,7 +58,7 @@ public class NewMainFrame extends JFrame implements ActionListener{
     private String currAccType;
     private int currAccTypeNum;
 
-    public NewMainFrame() {
+    public MainFrame() {
         setTitle("Bank System");
         setBounds(100, 100, 800, 800);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -293,8 +293,8 @@ public class NewMainFrame extends JFrame implements ActionListener{
         String PASS = "";
         String DB_URL = "";
         
-        dbLogIn.usertxt.setText("");
-        dbLogIn.passtxt.setText("");
+        dbLogIn.getUsertxt().setText("");
+        dbLogIn.getPasstxt().setText("");
 
         try (BufferedReader br = new BufferedReader(new FileReader("DefaultCredentials.txt"))) {
             String line;
@@ -364,11 +364,11 @@ public class NewMainFrame extends JFrame implements ActionListener{
 
     //To log in to the user account
     public void logInUserInfo() {
-        String cidStr = userLogIn.idtxt.getText();
-        String pinStr = new String(userLogIn.pintxt.getPassword());
+        String cidStr = userLogIn.getIdtxt().getText();
+        String pinStr = new String(userLogIn.getPintxt().getPassword());
 
-        userLogIn.idtxt.setText("");
-        userLogIn.pintxt.setText("");
+        userLogIn.getIdtxt().setText("");
+        userLogIn.getPintxt().setText("");
 
         if (transactionConnection == null) {
             System.out.println("Database is not connected. Please connect first.");
@@ -376,7 +376,7 @@ public class NewMainFrame extends JFrame implements ActionListener{
         }
 
         try {
-            int accTypeIDX = userLogIn.accountTypeCombo.getSelectedIndex();
+            int accTypeIDX = userLogIn.getAccountTypeCombo().getSelectedIndex();
             currAccTypeNum = accTypeIDX;
             int cid = Integer.parseInt(cidStr);
             int pin = Integer.parseInt(pinStr);
@@ -441,8 +441,8 @@ public class NewMainFrame extends JFrame implements ActionListener{
     public void newUserInfo() {
         try {
             // Validate inputs before proceeding
-            if (newUser.firstNametxt.getText().isEmpty() || newUser.lastNametxt.getText().isEmpty() ||
-                newUser.emailtxt.getText().isEmpty() ) {
+            if (newUser.getFirstNametxt().getText().isEmpty() || newUser.getLastNametxt().getText().isEmpty() ||
+                newUser.getEmailtxt().getText().isEmpty() ) {
                 JOptionPane.showMessageDialog(this, "Please fill in all required fields", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
@@ -454,9 +454,9 @@ public class NewMainFrame extends JFrame implements ActionListener{
                 cardLayout.show(cardPanel, "Access Database");
                 
                 // Clear form fields
-                newUser.firstNametxt.setText("");
-                newUser.lastNametxt.setText("");
-                newUser.emailtxt.setText("");
+                newUser.getFirstNametxt().setText("");
+                newUser.getLastNametxt().setText("");
+                newUser.getEmailtxt().setText("");
                 // newUser.balancetxt.setText("");
                 // newUser.loantxt.setText("");
         
@@ -477,17 +477,17 @@ public class NewMainFrame extends JFrame implements ActionListener{
     //ask uid of user to update
     public String updateUID(){
         String uid;
-        uid = askUID.uidtxt.getText();
-        askUID.uidtxt.setText("");
+        uid = askUID.getUidtxt().getText();
+        askUID.getUidtxt().setText("");
         return uid ;
     }
 
     //ask uid of user to delete
     public String deleteUID(){
         String uid;
-        uid = deleteUser.uidtxt.getText();
+        uid = deleteUser.getUidtxt().getText();
         System.out.println("UID to delete: "+ uid);
-        askUID.uidtxt.setText("");
+        askUID.getUidtxt().setText("");
         cardLayout.show(cardPanel, "Access Database");
         return uid ;
     }
@@ -495,7 +495,7 @@ public class NewMainFrame extends JFrame implements ActionListener{
 
     public void amountOfLoan() {
         try {
-            double amount = Double.parseDouble(loanPanel.input.getText());
+            double amount = Double.parseDouble(loanPanel.getInput().getText());
             if (amount <= 0) {
                 JOptionPane.showMessageDialog(this, "Loan amount must be positive",
                     "Invalid Amount", JOptionPane.ERROR_MESSAGE);
@@ -512,12 +512,12 @@ public class NewMainFrame extends JFrame implements ActionListener{
         }
         
         cardLayout.show(cardPanel, "Transaction");
-        loanPanel.input.setText("");
+        loanPanel.getInput().setText("");
     }
     
     public void amountOfRepay() {
         try {
-            double amount = Double.parseDouble(repayPanel.input.getText());
+            double amount = Double.parseDouble(repayPanel.getInput().getText());
             if (amount <= 0) {
                 JOptionPane.showMessageDialog(this, "Repayment amount must be positive",
                     "Invalid Amount", JOptionPane.ERROR_MESSAGE);
@@ -534,7 +534,7 @@ public class NewMainFrame extends JFrame implements ActionListener{
         }
         
         cardLayout.show(cardPanel, "Transaction");
-        repayPanel.input.setText("");
+        repayPanel.getInput().setText("");
     }
 
     private boolean processLoan(double amount) {
@@ -797,7 +797,7 @@ public class NewMainFrame extends JFrame implements ActionListener{
     // Update the amountOfDeposit method
     public void amountOfDeposit() {
         try {
-            double amount = Double.parseDouble(depositPanel.input.getText());
+            double amount = Double.parseDouble(depositPanel.getInput().getText());
             if (amount <= 0) {
                 JOptionPane.showMessageDialog(this, "Deposit amount must be positive",
                     "Invalid Amount", JOptionPane.ERROR_MESSAGE);
@@ -814,7 +814,7 @@ public class NewMainFrame extends JFrame implements ActionListener{
         }
         
         cardLayout.show(cardPanel, "Transaction");
-        depositPanel.input.setText("");
+        depositPanel.getInput().setText("");
     }
 
 
@@ -1056,7 +1056,7 @@ public class NewMainFrame extends JFrame implements ActionListener{
 
     public void amountOfWithdraw() {
     try {
-        double amount = Double.parseDouble(withdrawPanel.input.getText());
+        double amount = Double.parseDouble(withdrawPanel.getInput().getText());
         if (amount <= 0) {
             JOptionPane.showMessageDialog(this, "Withdrawal amount must be positive",
                 "Invalid Amount", JOptionPane.ERROR_MESSAGE);
@@ -1073,7 +1073,7 @@ public class NewMainFrame extends JFrame implements ActionListener{
     }
     
     cardLayout.show(cardPanel, "Transaction");
-    withdrawPanel.input.setText("");
+    withdrawPanel.getInput().setText("");
 }
 
     private void closeConnections() {
@@ -1346,8 +1346,8 @@ public class NewMainFrame extends JFrame implements ActionListener{
 
     //Prompt if the employee want to update the info and the user id matches something on the database
     if(e.getSource() == askUID.getOkBtn()){
-        String uidStr = askUID.uidtxt.getText();
-        askUID.uidtxt.setText("");
+        String uidStr = askUID.getUidtxt().getText();
+        askUID.getUidtxt().setText("");
         
         try {
             int userId = Integer.parseInt(uidStr);
@@ -1426,7 +1426,7 @@ public class NewMainFrame extends JFrame implements ActionListener{
 
     //main class
     public static void main(String[] args) {
-        new NewMainFrame();
+        new MainFrame();
         System.out.println("Sakses");
     }
 }

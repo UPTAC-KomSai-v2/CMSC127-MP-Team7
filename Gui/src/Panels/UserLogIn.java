@@ -18,12 +18,14 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
+//import sun.awt.www.content.audio.wav;
+
 public class UserLogIn extends JPanel {
     JLabel idlbl, pinlbl, titlelbl, accountTypelbl;
-    public JTextField idtxt;
-    public JPasswordField pintxt;
+    private JTextField idtxt;
+    private JPasswordField pintxt;
     private JButton okBtn, backBtn;
-    public JComboBox<String> accountTypeCombo;
+    private JComboBox<String> accountTypeCombo;
     Dimension size;
     GridBagConstraints gbc;
     Image bg, logo;
@@ -166,6 +168,19 @@ public class UserLogIn extends JPanel {
         g.setColor(Color.WHITE);
         g.fillRect(70, 30, getWidth() - 80, 2);
     }
+
+    public JTextField getIdtxt(){
+        return idtxt;
+    }
+
+    public JPasswordField getPintxt(){
+        return pintxt;
+    }
+
+    public JComboBox<String> getAccountTypeCombo(){
+        return accountTypeCombo;
+    }
+
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {

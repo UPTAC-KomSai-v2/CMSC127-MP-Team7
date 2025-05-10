@@ -31,8 +31,8 @@ import javax.swing.SwingUtilities;
 public class Export extends JPanel {
     JLabel exportlbl, cidlbl, tablelbl, fileTypelbl;
     private JButton okBtn, backBtn;
-    public JTextField cidtxt, moneytxt;
-    public JComboBox<String> fileType, table;
+    private JTextField cidtxt, moneytxt;
+    private JComboBox<String> fileType, table;
     Dimension size;
     GridBagConstraints gbc;
     Image bg;
@@ -232,6 +232,21 @@ public class Export extends JPanel {
             JOptionPane.showMessageDialog(null, "Export failed: " + e.getMessage());
         }
     }
+
+    public JTextField getCidtxt(){
+        return cidtxt;
+    }
+    public JTextField getMoneytxt(){
+        return moneytxt;
+    }
+
+    public JComboBox<String> getFileType(){
+        return fileType;
+    }
+    public JComboBox<String> getTable(){
+        return table;
+    }
+
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {

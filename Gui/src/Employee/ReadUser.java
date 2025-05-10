@@ -31,7 +31,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
 
 public class ReadUser extends JPanel {
-    JTable crd_tbl, deb_tbl;
+    private JTable crd_tbl, deb_tbl;
     private JButton exitBtn;
     GridBagConstraints gbc;
     Dimension size;
@@ -287,6 +287,14 @@ public class ReadUser extends JPanel {
     public JButton getExitBtn(){
         return exitBtn;
     }
+
+    public JTable getCrd_tbl(){
+        return crd_tbl;
+    }
+    public JTable getDeb_tbl(){
+        return deb_tbl;
+    }
+
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
