@@ -23,40 +23,43 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
+import Connectivity.*;
+
 //import com.sun.accessibility.internal.resources.accessibility;
 
 
 public class MainFrame extends JFrame {
-    public static final int max_loan = 50000;
+    private DBConnect DBConnection;
+    private Model model;
+    private static final int max_loan = 50000;
 
     private CardLayout cardLayout;
     private JPanel cardPanel;
     private Connection connection;
-    private Connection transactionConnection = null;
+
     private AccountCreationSelection accountCreationSelection = new AccountCreationSelection();
     private CreateNewCard createNewCard = new CreateNewCard();
-
-    MainMenu menu = new MainMenu();
-    DataBaseLogIn dbLogIn = new DataBaseLogIn();
-    UserLogIn userLogIn = new UserLogIn();
-    AccessDataBase accessDB = new AccessDataBase();
-    Transaction transaction = new Transaction();
-    Credit credit = new Credit();
-    Debit debit = new Debit();
-    CreateNewUser newUser = new CreateNewUser();
-    ReadUser readUser = new ReadUser();
-    AskUID askUID = new AskUID();
-    CreateNewUser updateUser = new CreateNewUser();
-    DeleteUser deleteUser = new DeleteUser();
-    Balance balance = new Balance();
-    Amount depositPanel = new Amount();
-    Amount loanPanel = new Amount();
-    Amount repayPanel = new Amount();
-    Amount withdrawPanel = new Amount();
-    TransactionHistory transactionHistory = new TransactionHistory();
-    TransferMoney transferMoney = new TransferMoney();
-    Import fileImport = new Import();
-    Export fileExport = new Export();
+    private MainMenu menu = new MainMenu();
+    private DataBaseLogIn dbLogIn = new DataBaseLogIn();
+    private UserLogIn userLogIn = new UserLogIn();
+    private AccessDataBase accessDB = new AccessDataBase();
+    private Transaction transaction = new Transaction();
+    private Credit credit = new Credit();
+    private Debit debit = new Debit();
+    private CreateNewUser newUser = new CreateNewUser();
+    private ReadUser readUser = new ReadUser();
+    private AskUID askUID = new AskUID();
+    private CreateNewUser updateUser = new CreateNewUser();
+    private DeleteUser deleteUser = new DeleteUser();
+    private Balance balance = new Balance();
+    private Amount depositPanel = new Amount();
+    private Amount loanPanel = new Amount();
+    private Amount repayPanel = new Amount();
+    private Amount withdrawPanel = new Amount();
+    private TransactionHistory transactionHistory = new TransactionHistory();
+    private TransferMoney transferMoney = new TransferMoney();
+    private Import fileImport = new Import();
+    private Export fileExport = new Export();
 
     private int currCardID;
     private String currAccType;
@@ -531,130 +534,35 @@ public class MainFrame extends JFrame {
         cardLayout.show(cardPanel, "Main");
     }
 
-    //To log in to the database
-    public boolean logDatabaseUserInfo() {
-
-        String USER = "";
-        String PASS = "";
-        String DB_URL = "";
-        
-        dbLogIn.getUsertxt().setText("");
-        dbLogIn.getPasstxt().setText("");
-
-        try (BufferedReader br = new BufferedReader(new FileReader("DefaultCredentials.txt"))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                String[] parts = line.split(":", 2); // Split into key and value
-                if (parts.length < 2) continue; // Skip malformed lines
-
-                String key = parts[0].trim();
-                String value = parts[1].trim();
-
-                switch (key) {
-                    case "DefaultUser":
-                        USER = value;
-                        break;
-                    case "Defaultpass":
-                        PASS= value;
-                        break;
-                    case "DB_URL":
-                        DB_URL = value;
-                        break;
-                    case "Default_DB":
-                        //DB_URL += "/" + value;
-                        break;
-                }
-                System.out.println(USER + DB_URL + PASS);
-            }
-        }
-        catch (FileNotFoundException e) {
-            try {
-                FileWriter fWriter = new FileWriter("DefaultCredentials.txt");
-                fWriter.write("DefaultUser: exampleuser \n Defaultpass: examplepass \n DB_URL: jdbc:mariadb://localhost:3306/bank \n Default_DB: bank");
-                fWriter.close();
-                JOptionPane.showMessageDialog(this, "Check your DefaultCredentials.txt file (somewhere in the root), and input your database credentials", "Error", JOptionPane.ERROR_MESSAGE);
-                System.exit(0);
-            }
-            catch (IOException error) {
-            }
-        }
-        catch (IOException e) {
-            System.out.println("wtf");
-            e.printStackTrace();
-        }
-
-        try {
-            Connection conn = DriverManager.getConnection(DB_URL, USER, PASS);
-            System.out.println("Connected to database successfully!");
-            
-            transactionConnection = conn;
-            connection = conn;
-            newUser.setConnection(conn); 
-            readUser.setConnection(conn);
-            updateUser.setConnection(conn);
-            deleteUser.setConnection(conn);
-            transactionHistory.setConnection(conn);
-            fileImport.setConnection(conn);
-            fileExport.setConnection(conn);
-            // set session isolation level here
-            connection.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
-            return true;
-        } catch (SQLException e) {
-            System.out.println("Database connection failed!");
-            System.out.println("Error: " + e.getMessage());
-            JOptionPane.showMessageDialog(this, "Database connection failed. Check your DefaultCredentials.txt file (wherever it is).\nError MSG: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-            return false;
-        }
-    }
-
     //To log in to the user account
     public void logInUserInfo() {
         String cidStr = userLogIn.getIdtxt().getText();
         String pinStr = new String(userLogIn.getPintxt().getPassword());
 
+        int cid, pin;
+        try{
+            cid = Integer.parseInt(cidStr);
+            pin = Integer.parseInt(pinStr);
+
+        } catch (NumberFormatException e) {
+            System.out.println("User ID and PIN must be numeric.");
+            JOptionPane.showMessageDialog(
+                this, "User ID and PIN must be numeric.",
+                "Login Failed", JOptionPane.ERROR_MESSAGE
+            );
+            return;
+        }
+        int accTypeIDX = userLogIn.getAccountTypeCombo().getSelectedIndex();
+
         userLogIn.getIdtxt().setText("");
         userLogIn.getPintxt().setText("");
 
-        if (transactionConnection == null) {
-            System.out.println("Database is not connected. Please connect first.");
-            return;
-        }
 
         try {
-            int accTypeIDX = userLogIn.getAccountTypeCombo().getSelectedIndex();
-            currAccTypeNum = accTypeIDX;
-            int cid = Integer.parseInt(cidStr);
-            int pin = Integer.parseInt(pinStr);
-
-            String sql = """
-                SELECT 'debit' AS account_type FROM debit_accounts WHERE debit_id = ? AND pin = ?
-            """;
-
-            if (accTypeIDX == 0) {
-                sql = """
-                        SELECT 'debit' AS account_type FROM debit_accounts WHERE debit_id = ? AND pin = ?
-                        """;
-            } else if (accTypeIDX == 1) {
-                sql = """
-                        SELECT 'credit' AS account_type FROM credit_accounts WHERE credit_id = ? AND pin = ?
-                        """;
-            } else {
-                JOptionPane.showMessageDialog(this, "How did you do that?", "Login Error", JOptionPane.ERROR_MESSAGE);
-            }
-
-            PreparedStatement stmt = transactionConnection.prepareStatement(sql);
-            stmt.setInt(1, cid);
-            stmt.setInt(2, pin);
-
-            ResultSet rs = stmt.executeQuery();
-
+            ResultSet rs = model.logInUserInfo(cid, pin, accTypeIDX);
             if (rs.next()) {
-                String accountType = rs.getString("account_type");
-                currAccType = accountType;
-                currCardID = cid;
                 transactionHistory.accType = accTypeIDX;
                 transactionHistory.cid = cid;
-                System.out.println("Login successful. Account type: " + accountType);
                 cardLayout.show(cardPanel, "Transaction");
                 transaction.setAccountType(userLogIn.isDebitSelected());
                 transaction.set_buttons();
@@ -665,14 +573,6 @@ public class MainFrame extends JFrame {
                 );
             }
 
-            rs.close();
-            stmt.close();
-        } catch (NumberFormatException e) {
-            System.out.println("User ID and PIN must be numeric.");
-            JOptionPane.showMessageDialog(
-                this, "User ID and PIN must be numeric.",
-                "Login Failed", JOptionPane.ERROR_MESSAGE
-            );
         } catch (SQLException e) {
             System.out.println("Error during login: " + e.getMessage());
             JOptionPane.showMessageDialog(
@@ -680,6 +580,9 @@ public class MainFrame extends JFrame {
                 "Login Failed", JOptionPane.ERROR_MESSAGE
             );
         }
+
+        userLogIn.getIdtxt().setText("");
+        userLogIn.getPintxt().setText("");
     }
 
     //Create new User
@@ -747,7 +650,7 @@ public class MainFrame extends JFrame {
                 return;
             }
             
-            if (processLoan(amount)) {
+            if (model.processLoan(amount)) {
                 JOptionPane.showMessageDialog(this, "Loan processed successfully!",
                     "Success", JOptionPane.INFORMATION_MESSAGE);
             }
@@ -769,7 +672,7 @@ public class MainFrame extends JFrame {
                 return;
             }
             
-            if (processRepay(amount)) {
+            if (model.processRepay(amount)) {
                 JOptionPane.showMessageDialog(this, "Repayment processed successfully!",
                     "Success", JOptionPane.INFORMATION_MESSAGE);
             }
@@ -782,263 +685,7 @@ public class MainFrame extends JFrame {
         repayPanel.getInput().setText("");
     }
 
-    private boolean processLoan(double amount) {
-        String query = """
-                INSERT INTO single_transactions_credit (transaction_id, credit_id, amount)
-                VALUES (?, ?, ?)
-                """;
-        String updateLoan = """
-                UPDATE credit_loans SET loan = loan - ? WHERE credit_id = ?
-                """;
-        String checkLoan = """
-                SELECT loan FROM credit_loans WHERE credit_id = ?
-                """;
-        
-        try {
-            PreparedStatement stmt = transactionConnection.prepareStatement(checkLoan);
-            stmt.setInt(1, currCardID);
-            ResultSet rs = stmt.executeQuery();
-            
-            double currentLoan = 0;
-            if (rs.next()) {
-                currentLoan = rs.getDouble("loan");
-                if (currentLoan - amount < -max_loan) {
-                    JOptionPane.showMessageDialog(this, 
-                        "Loan amount exceeds maximum allowed. Maximum remaining credit is " + 
-                        (max_loan + currentLoan),
-                        "Loan Error", JOptionPane.ERROR_MESSAGE);
-                    return false;
-                }
-            }
-            rs.close();
-            stmt.close();
-            
-            int transactionID = getSingleTransactionID();
-            
-            connection.setAutoCommit(false);
-            
-            stmt = transactionConnection.prepareStatement(query);
-            stmt.setInt(1, transactionID);
-            stmt.setInt(2, currCardID);
-            stmt.setDouble(3, amount);
-            stmt.executeUpdate();
-            stmt.close();
-            
-            stmt = transactionConnection.prepareStatement(updateLoan);
-            stmt.setDouble(1, amount);
-            stmt.setInt(2, currCardID);
-            stmt.executeUpdate();
-            stmt.close();
-            
-            connection.commit();
-            return true;
-        } catch (SQLException e) {
-            try {
-                connection.rollback();
-            } catch (SQLException ex) {
-                ex.printStackTrace();
-            }
-            JOptionPane.showMessageDialog(this, "Error processing loan: " + e.getMessage(),
-                "Loan Error", JOptionPane.ERROR_MESSAGE);
-            return false;
-        } finally {
-            try {
-                connection.setAutoCommit(true);
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
-    }
 
-    private boolean processRepay(double amount) {
-        String query = """
-                INSERT INTO single_transactions_credit (transaction_id, credit_id, amount)
-                VALUES (?, ?, ?)
-                """;
-        String updateLoan = """
-                UPDATE credit_loans SET loan = loan + ? WHERE credit_id = ?
-                """;
-        String checkLoan = """
-                SELECT loan FROM credit_loans WHERE credit_id = ?
-                """;
-        
-        try {
-            PreparedStatement stmt = transactionConnection.prepareStatement(checkLoan);
-            stmt.setInt(1, currCardID);
-            ResultSet rs = stmt.executeQuery();
-            
-            double currentLoan = 0;
-            if (rs.next()) {
-                currentLoan = rs.getDouble("loan");
-                if (amount > -currentLoan) {
-                    JOptionPane.showMessageDialog(this, 
-                        "Repayment amount cannot exceed current loan of " + (-currentLoan),
-                        "Repayment Error", JOptionPane.ERROR_MESSAGE);
-                    return false;
-                }
-            }
-            rs.close();
-            stmt.close();
-            
-            int transactionID = getSingleTransactionID();
-            
-            // Start transaction
-            connection.setAutoCommit(false);
-            
-            // Record the transaction (negative amount for repayment)
-            stmt = transactionConnection.prepareStatement(query);
-            stmt.setInt(1, transactionID);
-            stmt.setInt(2, currCardID);
-            stmt.setDouble(3, -amount);
-            stmt.executeUpdate();
-            stmt.close();
-            
-            // Update the loan (add because loans are stored as negatives)
-            stmt = transactionConnection.prepareStatement(updateLoan);
-            stmt.setDouble(1, amount);
-            stmt.setInt(2, currCardID);
-            stmt.executeUpdate();
-            stmt.close();
-            
-            connection.commit();
-            return true;
-        } catch (SQLException e) {
-            try {
-                connection.rollback();
-            } catch (SQLException ex) {
-                ex.printStackTrace();
-            }
-            JOptionPane.showMessageDialog(this, "Error processing repayment: " + e.getMessage(),
-                "Repayment Error", JOptionPane.ERROR_MESSAGE);
-            return false;
-        } finally {
-            try {
-                connection.setAutoCommit(true);
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    private boolean processDeposit(double amount) {
-        String query = """
-                INSERT INTO single_transactions_debit (transaction_id, debit_id, amount)
-                VALUES (?, ?, ?)
-                """;
-        String updateBalance = """
-                UPDATE debit_balance SET balance = balance + ? WHERE debit_id = ?
-                """;
-        
-        try {
-            int transactionID = getSingleTransactionID();
-            
-            // Start transaction
-            connection.setAutoCommit(false);
-            
-            // Record the transaction
-            PreparedStatement stmt = transactionConnection.prepareStatement(query);
-            stmt.setInt(1, transactionID);
-            stmt.setInt(2, currCardID);
-            stmt.setDouble(3, amount);
-            stmt.executeUpdate();
-            stmt.close();
-            
-            // Update the balance
-            stmt = transactionConnection.prepareStatement(updateBalance);
-            stmt.setDouble(1, amount);
-            stmt.setInt(2, currCardID);
-            stmt.executeUpdate();
-            stmt.close();
-            
-            connection.commit();
-            return true;
-        } catch (SQLException e) {
-            try {
-                connection.rollback();
-            } catch (SQLException ex) {
-                ex.printStackTrace();
-            }
-            JOptionPane.showMessageDialog(this, "Error processing deposit: " + e.getMessage(),
-                "Deposit Error", JOptionPane.ERROR_MESSAGE);
-            return false;
-        } finally {
-            try {
-                connection.setAutoCommit(true);
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-    
-    private boolean processWithdraw(double amount) {
-        String query = """
-                INSERT INTO single_transactions_debit (transaction_id, debit_id, amount)
-                VALUES (?, ?, ?)
-                """;
-        String updateBalance = """
-                UPDATE debit_balance SET balance = balance - ? WHERE debit_id = ?
-                """;
-        String checkBalance = """
-                SELECT balance FROM debit_balance WHERE debit_id = ?
-                """;
-        
-        try {
-            // First check if there's enough balance
-            PreparedStatement stmt = transactionConnection.prepareStatement(checkBalance);
-            stmt.setInt(1, currCardID);
-            ResultSet rs = stmt.executeQuery();
-            
-            if (rs.next()) {
-                double currentBalance = rs.getDouble("balance");
-                if (currentBalance < amount) {
-                    JOptionPane.showMessageDialog(this, "Insufficient funds for withdrawal",
-                        "Withdrawal Error", JOptionPane.ERROR_MESSAGE);
-                    return false;
-                }
-            }
-            rs.close();
-            stmt.close();
-            
-            int transactionID = getSingleTransactionID();
-            
-            // Start transaction
-            connection.setAutoCommit(false);
-            
-            // Record the transaction
-            stmt = transactionConnection.prepareStatement(query);
-            stmt.setInt(1, transactionID);
-            stmt.setInt(2, currCardID);
-            stmt.setDouble(3, -amount); // Negative amount for withdrawal
-            stmt.executeUpdate();
-            stmt.close();
-            
-            // Update the balance
-            stmt = transactionConnection.prepareStatement(updateBalance);
-            stmt.setDouble(1, amount);
-            stmt.setInt(2, currCardID);
-            stmt.executeUpdate();
-            stmt.close();
-            
-            connection.commit();
-            return true;
-        } catch (SQLException e) {
-            try {
-                connection.rollback();
-            } catch (SQLException ex) {
-                ex.printStackTrace();
-            }
-            JOptionPane.showMessageDialog(this, "Error processing withdrawal: " + e.getMessage(),
-                "Withdrawal Error", JOptionPane.ERROR_MESSAGE);
-            return false;
-        } finally {
-            try {
-                connection.setAutoCommit(true);
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-    
     // Update the amountOfDeposit method
     public void amountOfDeposit() {
         try {
@@ -1049,7 +696,7 @@ public class MainFrame extends JFrame {
                 return;
             }
             
-            if (processDeposit(amount)) {
+            if (model.processDeposit(amount)) {
                 JOptionPane.showMessageDialog(this, "Deposit successful!",
                     "Success", JOptionPane.INFORMATION_MESSAGE);
             }
@@ -1074,7 +721,7 @@ public class MainFrame extends JFrame {
                 """;
         int transactionID = 0;
         try (
-            PreparedStatement stmt = transactionConnection.prepareStatement(query);
+            PreparedStatement stmt = connection.prepareStatement(query);
         ){
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
@@ -1098,7 +745,7 @@ public class MainFrame extends JFrame {
                 """;
         int transactionID = 0;
         try (
-            PreparedStatement stmt = transactionConnection.prepareStatement(query);
+            PreparedStatement stmt = connection.prepareStatement(query);
         ){
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
@@ -1111,146 +758,6 @@ public class MainFrame extends JFrame {
         return transactionID;
     }
 
-    private void updateBalance(int accType, double amount, int cid) {
-        System.out.println("Balance update: " + amount + " for account type: " + accType + " and card ID: " + cid);
-        String updateBalance = """
-                UPDATE debit_balance SET balance = ? WHERE debit_id = ?
-                """;
-        String updateLoan = """
-                UPDATE credit_loans SET loan = ? WHERE credit_id = ?
-                """;
-        
-        try {
-            if (accType == 0) {
-                PreparedStatement stmt = transactionConnection.prepareStatement(updateBalance);
-                stmt.setDouble(1, amount);
-                stmt.setInt(2, cid);
-                stmt.executeUpdate();
-                stmt.close();
-            } else if (accType == 1) {
-                PreparedStatement stmt = transactionConnection.prepareStatement(updateLoan);
-                stmt.setDouble(1, amount);
-                stmt.setInt(2, cid);
-                stmt.executeUpdate();
-                stmt.close();
-            }
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(this, "SQL Error Message:\n" + e.getMessage(), 
-                "Update Error", JOptionPane.ERROR_MESSAGE);
-        }
-    }
-
-    private boolean transferMoney(int accType, int transferType, int transactionID, int cid, double amount) throws SQLException{
-        String debitTransfer = """
-                INSERT INTO double_transactions_debit (transaction_id, debit_id, amount) 
-                VALUES (?, ?, ?)
-                """;
-        String creditTransfer = """
-                INSERT INTO double_transactions_credit (transaction_id, credit_id, amount) 
-                VALUES (?, ?, ?)
-                """;
-        System.out.println("Current Amount: " + getCurrAmount(accType, cid));
-        if (accType == 0) {
-            try {
-                PreparedStatement stmt = transactionConnection.prepareStatement(debitTransfer);
-                stmt.setInt(1, transactionID);
-                stmt.setInt(2, cid);
-                stmt.setDouble(3, amount * transferType);
-                updateBalance(accType, getCurrAmount(accType, cid) + amount * transferType, cid);
-                stmt.executeUpdate();
-                stmt.close();
-            } catch (SQLException e) {
-                JOptionPane.showMessageDialog(this, "SQL Error Message:\n" + e.getMessage(), 
-                    "Transfer Error", JOptionPane.ERROR_MESSAGE);
-                return false;
-            }
-        } else if (accType == 1) {
-            try {
-                PreparedStatement stmt = transactionConnection.prepareStatement(creditTransfer);
-                stmt.setInt(1, transactionID);
-                stmt.setInt(2, cid);
-                stmt.setDouble(3, amount * transferType);
-                updateBalance(accType, getCurrAmount(accType, cid) + amount * transferType, cid);
-                stmt.executeUpdate();
-                stmt.close();
-            } catch (SQLException e) {
-                JOptionPane.showMessageDialog(this, "SQL Error Message:\n" + e.getMessage(), 
-                    "Transfer Error", JOptionPane.ERROR_MESSAGE);
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private double getCurrAmount(int accType, int cid) {
-        if (accType == 0) {
-            String query = """
-                SELECT balance FROM debit_balance WHERE debit_id = ?
-                """;
-            try {
-                PreparedStatement stmt = transactionConnection.prepareStatement(query);
-                stmt.setInt(1, cid);
-                ResultSet rs = stmt.executeQuery();
-                if (rs.next()) {
-                    return rs.getDouble("balance");
-                }
-                rs.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        } else {
-            String query = """
-                SELECT loan FROM credit_loans WHERE credit_id = ?
-                """;
-            try {
-                PreparedStatement stmt = transactionConnection.prepareStatement(query);
-                stmt.setInt(1, cid);
-                ResultSet rs = stmt.executeQuery();
-                if (rs.next()) {
-                    return rs.getDouble("loan");
-                }
-                rs.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
-        return 0.0;
-    }
-
-    private boolean validateTransfer(int accType, int cid, double amount) {
-        System.out.println("Validating transfer...");
-        System.out.println("Current Account Type: " + currAccType + " Current Card ID: " + currCardID);
-        System.out.println("Transfer Account Type: " + accType + " Transfer Card ID: " + cid);
-        if (amount <= 0) {
-            JOptionPane.showMessageDialog(this, "Transfer amount must be positive.", 
-                "Transfer Error", JOptionPane.ERROR_MESSAGE);
-            return false;
-        }
-
-        if (accType == currAccTypeNum && currCardID == cid) {
-            JOptionPane.showMessageDialog(this, "You cannot transfer money to the same account.", 
-                "Transfer Error", JOptionPane.ERROR_MESSAGE);
-            return false;
-        }
-        
-        if (accType == 0) {
-            double balance = getCurrAmount(accType, cid);
-            if (amount > balance) {
-                JOptionPane.showMessageDialog(this, "Insufficient funds for transfer.", 
-                    "Transfer Error", JOptionPane.ERROR_MESSAGE);
-                return false;
-            }
-        } else {
-            double loan = getCurrAmount(accType, cid);
-            if (amount > max_loan + loan) {
-                JOptionPane.showMessageDialog(this, "Insufficient credit for transfer.", 
-                    "Transfer Error", JOptionPane.ERROR_MESSAGE);
-                return false;
-            }
-        }
-        return true;
-    }
-
     public void TransferMoneyInfo(){
         String amount = transferMoney.getMoneytxt().getText();
         String cid = transferMoney.getCidtxt().getText();
@@ -1261,18 +768,18 @@ public class MainFrame extends JFrame {
         int accType = transferMoney.getReceiveAccTypeCBX().getSelectedIndex();
         System.out.println("Card ID: "+cid+" Money: "+ amount + " Account Type: "+ accType);
 
-        if (validateTransfer(accType, Integer.parseInt(cid), Double.parseDouble(amount))) {
+        if (model.validateTransfer(accType, Integer.parseInt(cid), Double.parseDouble(amount))) {
             System.out.println("Transfer is valid. Proceeding with transfer...");
             try {
                 int transaction_id = getDoubleTransactionID();
                 connection.setAutoCommit(false);
                 // Try to reduce the balance of the current account first
                 System.out.println("First transfer");
-                transferMoney(currAccTypeNum, -1, transaction_id, currCardID, Double.parseDouble(amount));
+                model.transferMoney(model.getCurrAccTypeNum(), -1, transaction_id, model.getCurrCardID(), Double.parseDouble(amount));
     
                 // Then try to increase the balance of the receiving account
                 System.out.println("Second transfer");
-                transferMoney(accType, 1, transaction_id, Integer.parseInt(cid), Double.parseDouble(amount));
+                model.transferMoney(accType, 1, transaction_id, Integer.parseInt(cid), Double.parseDouble(amount));
                 
                 JOptionPane.showMessageDialog(this, "Transfer successful!", 
                     "Transfer Success", JOptionPane.INFORMATION_MESSAGE);
@@ -1308,7 +815,7 @@ public class MainFrame extends JFrame {
             return;
         }
         
-        if (processWithdraw(amount)) {
+        if (model.processWithdraw(amount)) {
             JOptionPane.showMessageDialog(this, "Withdrawal successful!",
                 "Success", JOptionPane.INFORMATION_MESSAGE);
         }
@@ -1319,7 +826,7 @@ public class MainFrame extends JFrame {
     
     cardLayout.show(cardPanel, "Transaction");
     withdrawPanel.getInput().setText("");
-}
+    }
 
     private void closeConnections() {
         if (connection != null) {
@@ -1330,86 +837,17 @@ public class MainFrame extends JFrame {
                 System.out.println("Error closing connection: " + e.getMessage());
             }
         }
-        closeTransactionConnection();
-    }
-
-    private void closeTransactionConnection() {
-        if (transactionConnection != null) {
-            try {
-                transactionConnection.close();
-                transactionConnection = null;
-                System.out.println("Transaction database connection closed.");
-            } catch (SQLException e) {
-                System.out.println("Error closing transaction connection: " + e.getMessage());
-            }
-        }
     }
 
     public void getUsername() {
-        String query = """
-                SELECT first_name, last_name FROM bank_users WHERE user_id IN
-                (SELECT user_id FROM debit_accounts WHERE debit_id = ?)
-                """;
-    
-        if (currAccType.equals("debit")) {
-            query = """
-                    SELECT first_name, last_name FROM bank_users WHERE user_id IN
-                    (SELECT user_id FROM debit_accounts WHERE debit_id = ?)
-                """;
-        } else if (currAccType.equals("credit")) {
-            query = """
-                    SELECT first_name, last_name FROM bank_users WHERE user_id IN
-                    (SELECT user_id FROM credit_accounts WHERE credit_id = ?)
-                """;
-        }
-        
-        try {
-            PreparedStatement stmt = transactionConnection.prepareStatement(query);
-            stmt.setInt(1, currCardID);
-
-            ResultSet rs = stmt.executeQuery();
-            String username = "";
-            while (rs.next()) {
-                username = rs.getString("first_name") + " " + rs.getString("last_name");
-            }
-            rs.close();
-
-            balance.setUsername(username, currAccType);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        String username = model.getUsername();
+        balance.setUsername(username, model.getCurrAccType());
     }
 
     public void getBalance() {
-        String query = "";
         try {
-            double bal = 0;
-            if (currAccTypeNum == 1){
-                query = """
-                        SELECT loan FROM credit_loans WHERE credit_id = ?
-                        """;
-                PreparedStatement stmt = transactionConnection.prepareStatement(query);
-                stmt.setInt(1, currCardID);
-
-                ResultSet rs = stmt.executeQuery();
-                while (rs.next()){
-                    bal = rs.getDouble("loan");
-                }
-                rs.close();
-            } else if (currAccTypeNum == 0) {
-                query = """
-                    SELECT balance FROM debit_balance WHERE debit_id = ?
-                    """;
-                PreparedStatement stmt = transactionConnection.prepareStatement(query);
-                stmt.setInt(1, currCardID);
-
-                ResultSet rs = stmt.executeQuery();
-                while (rs.next()){
-                    bal = rs.getDouble("balance");
-                }
-                rs.close();
-            }
-            balance.setBalance(bal, currAccType);
+            double bal = model.getBalance();
+            balance.setBalance(bal, model.getCurrAccType());
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -1421,10 +859,26 @@ public class MainFrame extends JFrame {
         super.dispose();
     }
 
+    private void setConnections(Connection conn){
+        this.connection = conn;
+        System.out.println(connection);
+        newUser.setConnection(conn); 
+        readUser.setConnection(conn);
+        updateUser.setConnection(conn);
+        deleteUser.setConnection(conn);
+        transactionHistory.setConnection(conn);
+        fileImport.setConnection(conn);
+        fileExport.setConnection(conn);
+        model.setConnection(conn);
+    }
+
     //main class
     public static void main(String[] args) {
         MainFrame mf = new MainFrame();
-        mf.logDatabaseUserInfo();
+        mf.DBConnection = new DBConnect();
+        mf.model = new Model();
+        mf.setConnections(mf.DBConnection.getConnection());
+            
         System.out.println("Sakses");
     }
 }
