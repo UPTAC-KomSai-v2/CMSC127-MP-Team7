@@ -32,7 +32,7 @@ import javax.swing.table.DefaultTableModel;
 
 public class ReadUser extends JPanel {
     JTable crd_tbl, deb_tbl;
-    public JButton exitBtn;
+    private JButton exitBtn;
     GridBagConstraints gbc;
     Dimension size;
     Image bg;
@@ -282,6 +282,10 @@ public class ReadUser extends JPanel {
         if (bg != null) {
             g.drawImage(bg, 0, 0, getWidth(), getHeight(), this);
         }
+    }
+
+    public JButton getExitBtn(){
+        return exitBtn;
     }
 
     public static void main(String[] args) {

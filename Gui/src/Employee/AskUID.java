@@ -21,7 +21,7 @@ public class AskUID extends JPanel{
     
     JLabel uidlbl, cidlbl, didlbl, firstNamelbl, lastNamelbl, balancelbl, loanlbl, pinlbl;
     public JTextField uidtxt;
-    public JButton okBtn, exitBtn;
+    private JButton okBtn, exitBtn;
     Dimension size;
     GridBagConstraints gbc;
     Image bg;
@@ -87,6 +87,13 @@ public class AskUID extends JPanel{
 
 
     }
+    public JButton getOkBtn(){
+        return okBtn;
+    }
+    public JButton getExitBtn(){
+        return exitBtn;
+    }
+
 
     @Override
     protected void paintComponent(Graphics g) {

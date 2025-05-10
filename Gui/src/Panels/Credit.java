@@ -19,7 +19,7 @@ public class Credit extends JPanel{
     GridBagConstraints gbc;
     Image bg, logo;
 
-    public JButton depositBtn, loanBtn, repayLoanBtn, exitBtn;
+    private JButton depositBtn, loanBtn, repayLoanBtn, exitBtn;
 
     public Credit (){
         setLayout(new GridBagLayout());
@@ -88,6 +88,19 @@ public class Credit extends JPanel{
         g.fillRect(70, 30, getWidth() - 80, 2);
     }
     
+    public JButton getDepositBtn(){
+        return depositBtn;
+    }
+    public JButton getLoanBtn(){
+        return loanBtn;
+    }
+    public JButton getRepayLoanBtn(){
+        return repayLoanBtn;
+    }
+    public JButton getExitBtn(){
+        return exitBtn;
+    }
+
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
             JFrame frame = new JFrame("Main Menu Test");

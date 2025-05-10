@@ -27,7 +27,7 @@ import javax.swing.table.DefaultTableModel;
 
 public class TransactionHistory extends JPanel {
     JTable sTrnsc_tbl, dTrnsc_tbl;
-    public JButton exitBtn;
+    private JButton exitBtn;
     public int accType;
     public int cid;
     GridBagConstraints gbc;
@@ -445,6 +445,10 @@ public class TransactionHistory extends JPanel {
         if (bg != null) {
             g.drawImage(bg, 0, 0, getWidth(), getHeight(), this);
         }
+    }
+
+    public JButton getExitBtn(){
+        return exitBtn;
     }
 
     public static void main(String[] args) {

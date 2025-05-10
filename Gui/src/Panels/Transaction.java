@@ -15,14 +15,14 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
 public class Transaction extends JPanel{
-    public JButton balanceBtn, transferMoneyBtn, withdrawBtn, historyBtn, depositBtn, loanBtn, payBtn, exitBtn;
+    private JButton balanceBtn, transferMoneyBtn, withdrawBtn, historyBtn, depositBtn, loanBtn, payBtn, exitBtn;
     Dimension size;
     GridBagConstraints gbc;
     Image bg, logo;
     boolean accountType;
 
     public Transaction(){
-        
+
         setLayout(new GridBagLayout());
         gbc = new GridBagConstraints();
         gbc.anchor = GridBagConstraints.CENTER;
@@ -90,7 +90,7 @@ public class Transaction extends JPanel{
         exitBtn.setVerticalAlignment(SwingConstants.CENTER);
 
     }
-    
+
     public void set_buttons(){
         removeAll();
         repaint();
@@ -105,28 +105,28 @@ public class Transaction extends JPanel{
         gbc.gridy++;
 
         if(accountType){
-        System.out.println("shit is running");
-        add(depositBtn, gbc);
-        gbc.gridy++;
+            System.out.println("shit is running");
+            add(depositBtn, gbc);
+            gbc.gridy++;
 
-        add(withdrawBtn, gbc);
-        gbc.gridy++;
+            add(withdrawBtn, gbc);
+            gbc.gridy++;
         }
 
         else if(!accountType){
-        System.out.println("shit is blasting");
-        add(loanBtn, gbc);
-        gbc.gridy++;
+            System.out.println("shit is blasting");
+            add(loanBtn, gbc);
+            gbc.gridy++;
 
-        add(payBtn, gbc);
-        gbc.gridy++;
+            add(payBtn, gbc);
+            gbc.gridy++;
         }
 
         gbc.gridy ++;
         add(exitBtn, gbc);
     }
-    
-  
+
+
 
     @Override
     protected void paintComponent(Graphics g) {
@@ -144,7 +144,32 @@ public class Transaction extends JPanel{
     }
 
 
-     public static void main(String[] args) {
+    public JButton getBalanceBtn(){
+        return balanceBtn;
+    }
+    public JButton getTransferMoneyBtn(){
+        return transferMoneyBtn;
+    }
+    public JButton getWithdrawBtn(){
+        return withdrawBtn;
+    }
+    public JButton getHistoryBtn(){
+        return historyBtn;
+    }
+    public JButton getDepositBtn(){
+        return depositBtn;
+    }
+    public JButton getLoanBtn(){
+        return loanBtn;
+    }
+    public JButton getPayBtn(){
+        return payBtn;
+    }
+    public JButton getExitBtn(){
+        return exitBtn;
+    }
+
+    public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
             JFrame frame = new JFrame("Main Menu Test");
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

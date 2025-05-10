@@ -25,7 +25,7 @@ public class MainMenu extends JPanel{
     Image bg, scaledimg;
     ImageIcon logo, origIcon;
 
-    public JButton accessDatabaseBtn, transactionBtn, closeBtn;
+    private JButton accessDatabaseBtn, transactionBtn, closeBtn;
 
     public MainMenu(){
         setLayout(new GridBagLayout());
@@ -86,6 +86,18 @@ public class MainMenu extends JPanel{
         gbc.gridy = 4;
         this.add(closeBtn, gbc);
 
+    }
+
+    public JButton getAccessDatabaseBtn(){
+        return accessDatabaseBtn;
+    }
+
+    public JButton getTransactionBtn(){
+        return transactionBtn;
+    }
+
+    public JButton getCloseBtn(){
+        return closeBtn;
     }
 
     @Override

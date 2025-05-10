@@ -23,7 +23,7 @@ import javax.swing.SwingUtilities;
 public class DeleteUser extends JPanel {
     JLabel uidlbl;
     public JTextField uidtxt;
-    public JButton okBtn, exitBtn;
+    private JButton okBtn, exitBtn;
     Dimension size;
     GridBagConstraints gbc;
     Image bg;
@@ -89,6 +89,14 @@ public class DeleteUser extends JPanel {
     public void setConnection(Connection connection) {
         this.connection = connection;
     }
+
+    public JButton getOkBtn(){
+        return okBtn;
+    }
+    public JButton getExitBtn(){
+        return exitBtn;
+    }
+
 
     public boolean deleteUserFromDatabase() {
         if (connection == null) {

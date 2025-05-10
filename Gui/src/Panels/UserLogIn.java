@@ -22,7 +22,7 @@ public class UserLogIn extends JPanel {
     JLabel idlbl, pinlbl, titlelbl, accountTypelbl;
     public JTextField idtxt;
     public JPasswordField pintxt;
-    public JButton okBtn, backBtn;
+    private JButton okBtn, backBtn;
     public JComboBox<String> accountTypeCombo;
     Dimension size;
     GridBagConstraints gbc;
@@ -143,6 +143,14 @@ public class UserLogIn extends JPanel {
     public boolean isDebitSelected() {
         return accountTypeCombo.getSelectedIndex() == 0; 
     }
+
+    public JButton getOkBtn(){
+        return okBtn;
+    }
+    public JButton getBackBtn(){
+        return backBtn;
+    }
+
 
     @Override
     protected void paintComponent(Graphics g) {

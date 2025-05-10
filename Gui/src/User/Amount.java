@@ -21,7 +21,7 @@ public class Amount extends JPanel{
     GridBagConstraints gbc;
     Dimension size;
     public JTextField input;
-    public JButton okBtn, backBtn;
+    private JButton okBtn, backBtn;
     Image bg;
 
     public Amount(){
@@ -80,6 +80,14 @@ public class Amount extends JPanel{
         gbc.gridy=3;
         add(backBtn, gbc);
 
+    }
+
+    public JButton getOkBtn(){
+        return okBtn;
+    }
+
+    public JButton getBackBtn(){
+        return backBtn;
     }
 
     @Override

@@ -30,7 +30,7 @@ import javax.swing.SwingUtilities;
 
 public class Export extends JPanel {
     JLabel exportlbl, cidlbl, tablelbl, fileTypelbl;
-    public JButton okBtn, backBtn;
+    private JButton okBtn, backBtn;
     public JTextField cidtxt, moneytxt;
     public JComboBox<String> fileType, table;
     Dimension size;
@@ -182,6 +182,14 @@ public class Export extends JPanel {
     public void setConnection(Connection conn){
         this.conn = conn;
     }
+
+    public JButton getOkBtn(){
+        return okBtn;
+    }
+    public JButton getBackBtn(){
+        return backBtn;
+    }
+
 
     public void exportTableToCSV(Connection conn, String tableName, String filePath) {
         String query = "SELECT * FROM " + tableName;

@@ -30,7 +30,7 @@ import java.util.List;
 
 public class Import extends JPanel {
     JLabel exportlbl, cidlbl, tablelbl, fileTypelbl;
-    public JButton okBtn, backBtn;
+    private JButton okBtn, backBtn;
     public JTextField cidtxt, moneytxt;
     public JComboBox<String> fileType, table;
     Dimension size;
@@ -156,6 +156,13 @@ public class Import extends JPanel {
 
     public void setConnection(Connection conn){
         this.conn = conn;
+    }
+
+    public JButton getOkBtn(){
+        return okBtn;
+    }
+    public JButton getBackBtn(){
+        return backBtn;
     }
 
     @Override
