@@ -586,7 +586,7 @@ public class Model {
         return transactionID;
     }
 
-    private int getDoubleTransactionID() {
+    public int getDoubleTransactionID() {
         String query = """
                 SELECT MAX(transaction_id) AS max_transaction_id
                 FROM (

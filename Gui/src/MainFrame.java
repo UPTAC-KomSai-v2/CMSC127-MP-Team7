@@ -8,13 +8,7 @@ import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -60,11 +54,6 @@ public class MainFrame extends JFrame {
     private TransferMoney transferMoney = new TransferMoney();
     private Import fileImport = new Import();
     private Export fileExport = new Export();
-
-    private int currCardID;
-    private String currAccType;
-    private int currAccTypeNum;
-
     private MainFrame self = this;
 
    ActionListener goToAccessDataBase = new ActionListener() {
@@ -710,54 +699,6 @@ public class MainFrame extends JFrame {
     }
 
 
-    private int getSingleTransactionID() {
-        String query = """
-                SELECT MAX(transaction_id) AS max_transaction_id
-                FROM (
-                    SELECT transaction_id FROM single_transactions_debit
-                    UNION ALL
-                    SELECT transaction_id FROM single_transactions_credit
-                ) AS combined_transactions
-                """;
-        int transactionID = 0;
-        try (
-            PreparedStatement stmt = connection.prepareStatement(query);
-        ){
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                transactionID = rs.getInt("max_transaction_id") + 1;
-            }
-            rs.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return transactionID;
-    }
-
-    private int getDoubleTransactionID() {
-        String query = """
-                SELECT MAX(transaction_id) AS max_transaction_id
-                FROM (
-                    SELECT transaction_id FROM double_transactions_debit
-                    UNION ALL
-                    SELECT transaction_id FROM double_transactions_credit
-                ) AS combined_transactions
-                """;
-        int transactionID = 0;
-        try (
-            PreparedStatement stmt = connection.prepareStatement(query);
-        ){
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                transactionID = rs.getInt("max_transaction_id") + 1;
-            }
-            rs.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return transactionID;
-    }
-
     public void TransferMoneyInfo(){
         String amount = transferMoney.getMoneytxt().getText();
         String cid = transferMoney.getCidtxt().getText();
@@ -771,7 +712,7 @@ public class MainFrame extends JFrame {
         if (model.validateTransfer(accType, Integer.parseInt(cid), Double.parseDouble(amount))) {
             System.out.println("Transfer is valid. Proceeding with transfer...");
             try {
-                int transaction_id = getDoubleTransactionID();
+                int transaction_id = model.getDoubleTransactionID();
                 connection.setAutoCommit(false);
                 // Try to reduce the balance of the current account first
                 System.out.println("First transfer");
