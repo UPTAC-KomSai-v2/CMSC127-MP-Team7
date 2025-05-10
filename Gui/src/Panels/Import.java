@@ -9,10 +9,11 @@ import java.awt.Image;
 import java.awt.Insets;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,6 +31,10 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.json.JSONTokener;
 
 public class Import extends JPanel {
     JLabel exportlbl, cidlbl, tablelbl, fileTypelbl;
@@ -131,7 +136,12 @@ public class Import extends JPanel {
                 File file = fileChooser.getSelectedFile();
                 String selectedTable = (String) table.getSelectedItem();
                 String filePath = file.getAbsolutePath();
-                importCSVToDatabase(conn, filePath, selectedTable);
+                if(fileType.getSelectedItem()=="CSV"){
+                    importCSVToDatabase(conn, filePath, selectedTable);
+                }
+                else{
+                    importJSONToDatabase(conn, filePath, selectedTable);
+                }
             }
         });
 
@@ -162,7 +172,7 @@ public class Import extends JPanel {
             String[] allHeaders = headerLine.split(",");
             List<String> columns = new ArrayList<>();
 
-            Set<String> autoIncrementCols = Set.of("id", "auto_id");
+            Set<String> autoIncrementCols = Set.of("id", "auto_id", "user_id", "credit_id");
 
             for (String col : allHeaders) {
                 if (!autoIncrementCols.contains(col.trim().toLowerCase())) {
@@ -189,9 +199,57 @@ public class Import extends JPanel {
             }
 
             JOptionPane.showMessageDialog(this, "Import successful!");
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            JOptionPane.showMessageDialog(this, "Import failed: " + ex.getMessage());
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(this, "Import failed: " + ex.getMessage());
+            }
+        }
+
+        public void importJSONToDatabase(Connection conn, String jsonFilePath, String tableName) {
+            try (InputStream is = new FileInputStream(jsonFilePath)) {
+                JSONTokener tokener = new JSONTokener(is);
+                JSONArray jsonArray = new JSONArray(tokener);
+
+                if (jsonArray.length() == 0) {
+                    JOptionPane.showMessageDialog(null, "JSON file is empty!");
+                    return;
+                }
+
+                // Get column names from first object
+                // Define auto-increment columns to ignore
+    Set<String> autoIncrementCols = Set.of("id", "auto_id");
+
+    // Get column names from the first object
+    JSONObject firstObj = jsonArray.getJSONObject(0);
+    JSONArray keysArray = firstObj.names();
+    List<String> columns = new ArrayList<>();
+
+    if (keysArray != null) {
+        for (int i = 0; i < keysArray.length(); i++) {
+            String col = keysArray.getString(i);
+            if (!autoIncrementCols.contains(col.toLowerCase())) { // Ignore auto-increment fields
+                columns.add(col);
+            }
+        }
+    }
+
+    String sql = generateInsertQuery(tableName, columns);
+    PreparedStatement stmt = conn.prepareStatement(sql);
+
+    for (int i = 0; i < jsonArray.length(); i++) {
+        JSONObject obj = jsonArray.getJSONObject(i);
+        int paramIndex = 1;
+
+        for (String col : columns) {
+            stmt.setString(paramIndex++, obj.optString(col, null));
+        }
+
+        stmt.executeUpdate();
+    }
+            JOptionPane.showMessageDialog(null, "JSON import successful!");
+        } catch (Exception e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Import failed: " + e.getMessage());
         }
     }
 
@@ -214,4 +272,3 @@ public class Import extends JPanel {
         });
     }
 }
-
