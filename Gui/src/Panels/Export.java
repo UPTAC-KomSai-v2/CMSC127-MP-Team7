@@ -33,7 +33,7 @@ import org.json.JSONObject;
 
 public class Export extends JPanel {
     JLabel exportlbl, cidlbl, tablelbl, fileTypelbl;
-    public JButton okBtn;
+    public JButton okBtn, backBtn;
     public JTextField cidtxt, moneytxt;
     public JComboBox<String> fileType, table;
     Dimension size;
@@ -178,6 +178,21 @@ public class Export extends JPanel {
         gbc.anchor = GridBagConstraints.CENTER;
         gbc.gridy = 4;
         add(okBtn, gbc);
+
+        //add backBtn
+        size = new Dimension(100, 30);
+        backBtn = new JButton("Back");
+        backBtn.setOpaque(true);
+        backBtn.setPreferredSize(size);
+        backBtn.setBackground(Color.white);
+        backBtn.setHorizontalAlignment(SwingConstants.CENTER);
+        backBtn.setVerticalAlignment(SwingConstants.CENTER);
+
+        gbc.gridx = 0;
+        gbc.gridwidth = 2;
+        gbc.anchor = GridBagConstraints.CENTER;
+        gbc.gridy = 5;
+        add(backBtn, gbc);
     }
 
     @Override

@@ -7,6 +7,7 @@ DROP TABLE IF EXISTS credit_loans;
 DROP TABLE IF EXISTS debit_accounts;
 DROP TABLE IF EXISTS credit_accounts;
 DROP TABLE IF EXISTS bank_users;
+DROP TABLE IF EXISTS bank_staff;
 
 
 
@@ -16,6 +17,14 @@ CREATE TABLE `bank_users` (
   `last_name` varchar(100) NOT NULL,
   `email` varchar(100) NOT NULL,
   PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE `bank_staff` (
+  `staff_id` int(11) NOT NULL AUTO_INCREMENT,
+  `first_name` varchar(100) NOT NULL,
+  `last_name` varchar(100) NOT NULL,
+  `email` varchar(100) NOT NULL,
+  PRIMARY KEY (`staff_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE `credit_accounts` (

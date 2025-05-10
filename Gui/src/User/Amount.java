@@ -21,7 +21,7 @@ public class Amount extends JPanel{
     GridBagConstraints gbc;
     Dimension size;
     public JTextField input;
-    public JButton okBtn;
+    public JButton okBtn, backBtn;
     Image bg;
 
     public Amount(){
@@ -54,7 +54,7 @@ public class Amount extends JPanel{
         gbc.gridy=1;
         add(input, gbc);
 
-        size = new Dimension(100, 30);
+        size = new Dimension(80, 30);
         okBtn = new JButton("Ok");
         okBtn.setOpaque(true);
         okBtn.setPreferredSize(size);
@@ -66,6 +66,19 @@ public class Amount extends JPanel{
         gbc.anchor = GridBagConstraints.CENTER;
         gbc.gridy=2;
         add(okBtn, gbc);
+
+        size = new Dimension(80, 30);
+        backBtn = new JButton("Back");
+        backBtn.setOpaque(true);
+        backBtn.setPreferredSize(size);
+        backBtn.setBackground(Color.white);
+        backBtn.setHorizontalAlignment(SwingConstants.CENTER);
+        backBtn.setVerticalAlignment(SwingConstants.CENTER);
+
+        gbc.gridwidth=2;
+        gbc.anchor = GridBagConstraints.CENTER;
+        gbc.gridy=3;
+        add(backBtn, gbc);
 
     }
 
