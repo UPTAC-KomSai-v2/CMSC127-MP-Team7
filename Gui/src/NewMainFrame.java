@@ -1426,7 +1426,7 @@ public class NewMainFrame extends JFrame implements ActionListener{
 
     //main class
     public static void main(String[] args) {
-        new MainFrame();
+        new NewMainFrame();
         System.out.println("Sakses");
     }
 }
