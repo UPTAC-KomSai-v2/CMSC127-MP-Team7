@@ -7,6 +7,7 @@ DROP TABLE IF EXISTS credit_loans;
 DROP TABLE IF EXISTS debit_accounts;
 DROP TABLE IF EXISTS credit_accounts;
 DROP TABLE IF EXISTS bank_users;
+DROP TABLE IF EXISTS bank_staff;
 
 
 
