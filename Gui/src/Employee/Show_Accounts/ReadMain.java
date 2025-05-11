@@ -4,6 +4,7 @@ package Employee.Show_Accounts;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.Connection;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
@@ -18,7 +19,7 @@ public class ReadMain extends JPanel implements ActionListener {
     ShowCredit creditUser = new ShowCredit();
     ShowDebit debitUser = new ShowDebit();
     Empty empty = new Empty();
-    //private Connection connection;
+    private Connection connection;
 
     public ReadMain() {
         bg = new ImageIcon(getClass().getResource("/Files/bg.png")).getImage();
@@ -53,8 +54,16 @@ public class ReadMain extends JPanel implements ActionListener {
         lowerPanel.setBorder(new EmptyBorder(20, 20, 20, 20));
         lowerPanel.setOpaque(false);
 
-        upperPanel = new JPanel();
-        upperPanel.setBackground(new Color(22, 180, 161));
+        upperPanel = new JPanel(new GridBagLayout()) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                if (bg != null) {
+                    g.drawImage(bg, 0, 0, getWidth(), getHeight(), this);
+                }
+            }
+        };
+
         upperPanel.setLayout(new GridBagLayout());
         upperPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
     }
@@ -132,9 +141,11 @@ public class ReadMain extends JPanel implements ActionListener {
         return exitBtn;
     }
 
-    // public void setConnection(Connection connection) {
-    //     this.connection = connection;
-    // }
+    public void setConnection(Connection connection) {
+        this.connection = connection;
+    }
+
+
     
 
     @Override

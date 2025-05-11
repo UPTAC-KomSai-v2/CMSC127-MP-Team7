@@ -1,5 +1,6 @@
 
 import Employee.*;
+import Employee.Show_Accounts.ReadMain;
 import Panels.*;
 import User.*;
 //import sun.awt.resources.awt;
@@ -41,7 +42,7 @@ public class MainFrame extends JFrame {
     private Credit credit = new Credit();
     private Debit debit = new Debit();
     private CreateNewUser newUser = new CreateNewUser();
-    private ReadUser readUser = new ReadUser();
+    private ReadMain readUser = new ReadMain();
     private AskUID askUID = new AskUID();
     private CreateNewUser updateUser = new CreateNewUser();
     private DeleteUser deleteUser = new DeleteUser();
@@ -62,7 +63,14 @@ public class MainFrame extends JFrame {
             cardLayout.show(cardPanel, "Access Database");
         }
     };
-    
+
+    ActionListener goToAdminLogIn = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            cardLayout.show(cardPanel, "Database Log In");
+        }
+    };
+
     ActionListener goToMain = new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -106,7 +114,7 @@ public class MainFrame extends JFrame {
         }
     };
 
-    ActionListener creatingCard = new ActionListener() {
+        ActionListener creatingCard = new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
             if(createNewCard.createCardInDatabase()) {
@@ -122,7 +130,7 @@ public class MainFrame extends JFrame {
                 try {
                     if (connection.isValid(5)) {
                         readUser.setConnection(connection);
-                        readUser.loadUserData();
+                        //readUser.loadUserData();
                         cardLayout.show(cardPanel, "Read User");
                     } else {
                         JOptionPane.showMessageDialog(
@@ -394,13 +402,13 @@ public class MainFrame extends JFrame {
         cardPanel.add(fileImport, "File Imports");
         cardPanel.add(fileExport, "File Exports");
 
-        menu.getAccessDatabaseBtn().addActionListener(goToAccessDataBase);
+        menu.getAccessDatabaseBtn().addActionListener(goToAdminLogIn);
         menu.getTransactionBtn().addActionListener(goToUserLogin);
         menu.getCloseBtn().addActionListener(exitApp);
 
 
         //Panel to access the database: DatabaseLogIn Panel
-        //dbLogIn.getLogInBtn().addActionListener(this);
+        dbLogIn.getLogInBtn().addActionListener(goToAccessDataBase);
 
         //Panel to access transaction: UserLogInPanel
         userLogIn.getOkBtn().addActionListener(userLoggingIn);
