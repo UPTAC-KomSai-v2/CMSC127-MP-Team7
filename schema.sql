@@ -21,6 +21,7 @@ CREATE TABLE `bank_users` (
 
 CREATE TABLE `bank_staff` (
   `staff_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_name` varchar(100) NOT NULL UNIQUE,
   `first_name` varchar(100) NOT NULL,
   `last_name` varchar(100) NOT NULL,
   `email` varchar(100) NOT NULL,
@@ -174,6 +175,19 @@ VALUES
   ('Henry', 'Black', 'henry@example.com'),
   ('Ivy', 'Green', 'ivy@example.com'),
   ('Jack', 'Gray', 'jack@example.com');
+
+INSERT INTO bank_staff (user_name, first_name, last_name, email)
+VALUES
+  ('jsmith', 'John', 'Smith', 'john.smith@bank.com'),
+  ('adoe', 'Alice', 'Doe', 'alice.doe@bank.com'),
+  ('bwilliams', 'Bob', 'Williams', 'bob.williams@bank.com'),
+  ('cjones', 'Carol', 'Jones', 'carol.jones@bank.com'),
+  ('dlee', 'David', 'Lee', 'david.lee@bank.com'),
+  ('eclark', 'Eva', 'Clark', 'eva.clark@bank.com'),
+  ('fmiller', 'Frank', 'Miller', 'frank.miller@bank.com'),
+  ('gwhite', 'Grace', 'White', 'grace.white@bank.com'),
+  ('hblack', 'Henry', 'Black', 'henry.black@bank.com'),
+  ('igreen', 'Ivy', 'Green', 'ivy.green@bank.com');
 
 INSERT INTO credit_accounts (user_id, pin)
 VALUES

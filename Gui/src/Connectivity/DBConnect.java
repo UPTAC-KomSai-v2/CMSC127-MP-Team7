@@ -1,63 +1,79 @@
 package Connectivity;
 
-import java.sql.Statement;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.io.FileInputStream;
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Properties;
+
+import javax.swing.JOptionPane;
 
 public class DBConnect {
-    private static final String CONFIG_FILE = "dbconfig.properties";
-    private Connection conn;
-    private Statement stmnt;
+    Connection conn;
+    String USER = "";
+    String PASS = "";
+    String DB_URL = "";
 
-    public DBConnect() throws SQLException, IOException {
-        this(null); // Call the main constructor with null to use default config
-    }
+    public DBConnect() {
+        try (BufferedReader br = new BufferedReader(new FileReader("DefaultCredentials.txt"))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] parts = line.split(":", 2); // Split into key and value
+                if (parts.length < 2) continue; // Skip malformed lines
 
-    public DBConnect(String customDbUrl) throws SQLException, IOException {
-        // Load properties from file
-        Properties props = new Properties();
-        try (FileInputStream in = new FileInputStream(CONFIG_FILE)) {
-            props.load(in);
+                String key = parts[0].trim();
+                String value = parts[1].trim();
+
+                switch (key) {
+                    case "DefaultUser":
+                        USER = value;
+                        break;
+                    case "Defaultpass":
+                        PASS= value;
+                        break;
+                    case "DB_URL":
+                        DB_URL = value;
+                        break;
+                    case "Default_DB":
+                        //DB_URL += "/" + value;
+                        break;
+                }
+                System.out.println(USER + DB_URL + PASS);
+            }
+        }
+        catch (FileNotFoundException e) {
+            try {
+                FileWriter fWriter = new FileWriter("DefaultCredentials.txt");
+                fWriter.write("DefaultUser: exampleuser \n Defaultpass: examplepass \n DB_URL: jdbc:mariadb://localhost:3306/bank \n Default_DB: bank");
+                fWriter.close();
+                JOptionPane.showMessageDialog(null, "Check your DefaultCredentials.txt file (somewhere in the root), and input your database credentials", "Error", JOptionPane.ERROR_MESSAGE);
+                System.exit(0);
+            }
+            catch (IOException error) {
+            }
+        }
+        catch (IOException e) {
+            System.out.println("wtf");
+            e.printStackTrace();
         }
 
-        String dbUrl = customDbUrl != null ? customDbUrl : props.getProperty("db.url");
-        String dbUser = props.getProperty("db.user");
-        String dbPass = props.getProperty("db.password");
-        String dbName = props.getProperty("db.name", "bank"); // Default to "bank" if not specified
-
-        connect(dbUrl, dbUser, dbPass, dbName);
-    }
-
-    public DBConnect(String user, String pass, String database) throws SQLException, IOException {
-        this(user, pass, database, "jdbc:mysql://localhost:3306");
-    }
-
-    public DBConnect(String user, String pass, String database, String dbUrl) throws SQLException, IOException {
-        connect(dbUrl, user, pass, database);
-    }
-
-    private void connect(String dbUrl, String user, String pass, String database) throws SQLException {
         try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-        } catch (ClassNotFoundException e) {
-            throw new SQLException("MySQL JDBC Driver not found", e);
+            conn = DriverManager.getConnection(DB_URL, USER, PASS);
+            System.out.println("Connected to database successfully!");
+            conn.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
+        } catch (SQLException e) {
+            System.out.println("Database connection failed!");
+            System.out.println("Error: " + e.getMessage());
+            JOptionPane.showMessageDialog(null, "Database connection failed. Check your DefaultCredentials.txt file (wherever it is).\nError MSG: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
-
-        String connectionUrl = dbUrl + (database != null ? "/" + database : "");
-        conn = DriverManager.getConnection(connectionUrl, user, pass);
-        stmnt = conn.createStatement();
     }
-
     public Connection getConnection() {
         return conn;
-    }
-
-    public Statement getStatement() {
-        return stmnt;
     }
 
     public void closeConnection() {
@@ -68,5 +84,12 @@ public class DBConnect {
         } catch (SQLException e) {
             System.err.println("Error closing connection: " + e.getMessage());
         }
+    }
+
+    public ResultSet executeQuery(PreparedStatement pstat){
+        return executeQuery(pstat);
+    }
+    public int executeUpdate(PreparedStatement pstat){
+        return executeUpdate(pstat);
     }
 }

@@ -18,9 +18,9 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 public class DataBaseLogIn extends JPanel{
     JLabel userlbl, passlbl, dtlbl, titlelbl;
-    public JTextField usertxt;
-    public JPasswordField passtxt;
-    public JButton logInBtn, backBtn;
+    private JTextField usertxt;
+    private JPasswordField passtxt;
+    private JButton logInBtn, backBtn;
     Dimension size;
     GridBagConstraints gbc;
     Image bg, logo;
@@ -141,6 +141,22 @@ public class DataBaseLogIn extends JPanel{
         g.setColor(Color.WHITE);
         g.fillRect(70, 30, getWidth() - 80, 2);
     }
+
+    public JButton getLogInBtn(){
+        return logInBtn;
+    }
+    public JButton getBackBtn(){
+        return backBtn;
+    }
+
+    public JTextField getUsertxt(){
+        return usertxt;
+    }
+
+    public JPasswordField getPasstxt(){
+        return passtxt;
+    }
+
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {

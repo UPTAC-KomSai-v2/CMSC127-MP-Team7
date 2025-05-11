@@ -5,8 +5,8 @@ import javax.swing.*;
 import javax.swing.text.*;
 
 public class Balance extends JPanel {
-    public JTextPane balancePane;
-    public JButton exitBtn;
+    private JTextPane balancePane;
+    private JButton exitBtn;
     GridBagConstraints gbc;
     Dimension size;
     Image bg;
@@ -58,6 +58,10 @@ public class Balance extends JPanel {
 
     }
 
+    public JButton getExitBtn(){
+        return exitBtn;
+    }
+
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -84,6 +88,10 @@ public class Balance extends JPanel {
     public void setBalance(double balance, String accType) {
         this.balance = balance;
         updateBalanceText(accType);
+    }
+
+    public JTextPane getBalancePane(){
+        return balancePane;
     }
 
     public static void main(String[] args) {

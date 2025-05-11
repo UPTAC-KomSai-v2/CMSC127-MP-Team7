@@ -20,7 +20,7 @@ public class AccessDataBase extends JPanel{
     Dimension size;
     Image bg, logo;
 
-    public JButton createUserBtn, readUserBtn, updateUserBtn, deleteUserBtn, exportBtn, importBtn, exitBtn;
+    private JButton createUserBtn, readUserBtn, updateUserBtn, deleteUserBtn, exportBtn, importBtn, exitBtn;
 
     public AccessDataBase(){
 
@@ -90,6 +90,34 @@ public class AccessDataBase extends JPanel{
 
         gbc.gridy =7;
         this.add(exitBtn, gbc);
+    }
+
+    public JButton getCreateUserBtn(){
+        return createUserBtn;
+    }
+
+    public JButton getReadUserBtn(){
+        return readUserBtn;
+    }
+    
+    public JButton getUpdateUserBtn(){
+        return updateUserBtn;
+    }
+
+    public JButton getDeleteUserBtn(){
+        return deleteUserBtn;
+    }
+
+    public JButton getExportBtn(){
+        return exportBtn;
+    }
+
+    public JButton getImportBtn(){
+        return importBtn;
+    }
+
+    public JButton getExitBtn(){
+        return exitBtn;
     }
 
     @Override

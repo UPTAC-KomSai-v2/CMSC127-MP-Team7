@@ -20,8 +20,8 @@ import javax.swing.SwingUtilities;
 public class AskUID extends JPanel{
     
     JLabel uidlbl, cidlbl, didlbl, firstNamelbl, lastNamelbl, balancelbl, loanlbl, pinlbl;
-    public JTextField uidtxt;
-    public JButton okBtn, exitBtn;
+    private JTextField uidtxt;
+    private JButton okBtn, exitBtn;
     Dimension size;
     GridBagConstraints gbc;
     Image bg;
@@ -87,6 +87,13 @@ public class AskUID extends JPanel{
 
 
     }
+    public JButton getOkBtn(){
+        return okBtn;
+    }
+    public JButton getExitBtn(){
+        return exitBtn;
+    }
+
 
     @Override
     protected void paintComponent(Graphics g) {
@@ -95,6 +102,10 @@ public class AskUID extends JPanel{
             g.drawImage(bg, 0, 0, getWidth(), getHeight(), this);
         }
     }
+    public JTextField getUidtxt(){
+        return uidtxt;
+    }
+
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {

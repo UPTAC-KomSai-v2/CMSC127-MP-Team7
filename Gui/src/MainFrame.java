@@ -1,17 +1,15 @@
+
 import Employee.*;
+import Employee.Show_Accounts.ReadMain;
 import Panels.*;
 import User.*;
+//import sun.awt.resources.awt;
+
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -20,44 +18,356 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
+import Connectivity.*;
 
-public class MainFrame extends JFrame implements ActionListener{
-    public static final int max_loan = 50000;
+//import com.sun.accessibility.internal.resources.accessibility;
+
+
+public class MainFrame extends JFrame {
+    private DBConnect DBConnection;
+    private Model model;
 
     private CardLayout cardLayout;
     private JPanel cardPanel;
     private Connection connection;
-    // private boolean isTransactionLogin = true;
-    private Connection transactionConnection = null;
+
     private AccountCreationSelection accountCreationSelection = new AccountCreationSelection();
     private CreateNewCard createNewCard = new CreateNewCard();
+    private MainMenu menu = new MainMenu();
+    private DataBaseLogIn dbLogIn = new DataBaseLogIn();
+    private UserLogIn userLogIn = new UserLogIn();
+    private AccessDataBase accessDB = new AccessDataBase();
+    private Transaction transaction = new Transaction();
+    private Credit credit = new Credit();
+    private Debit debit = new Debit();
+    private CreateNewUser newUser = new CreateNewUser();
+    private ReadMain readUser = new ReadMain();
+    private AskUID askUID = new AskUID();
+    private CreateNewUser updateUser = new CreateNewUser();
+    private DeleteUser deleteUser = new DeleteUser();
+    private Balance balance = new Balance();
+    private Amount depositPanel = new Amount();
+    private Amount loanPanel = new Amount();
+    private Amount repayPanel = new Amount();
+    private Amount withdrawPanel = new Amount();
+    private TransactionHistory transactionHistory = new TransactionHistory();
+    private TransferMoney transferMoney = new TransferMoney();
+    private Import fileImport = new Import();
+    private Export fileExport = new Export();
+    private MainFrame self = this;
 
-    MainMenu menu = new MainMenu();
-    DataBaseLogIn dbLogIn = new DataBaseLogIn();
-    UserLogIn userLogIn = new UserLogIn();
-    AccessDataBase accessDB = new AccessDataBase();
-    Transaction transaction = new Transaction();
-    Credit credit = new Credit();
-    Debit debit = new Debit();
-    CreateNewUser newUser = new CreateNewUser();
-    ReadUser readUser = new ReadUser();
-    AskUID askUID = new AskUID();
-    CreateNewUser updateUser = new CreateNewUser();
-    DeleteUser deleteUser = new DeleteUser();
-    Balance balance = new Balance();
-    Amount depositPanel = new Amount();
-    Amount loanPanel = new Amount();
-    Amount repayPanel = new Amount();
-    Amount withdrawPanel = new Amount();
-    TransactionHistory transactionHistory = new TransactionHistory();
-    TransferMoney transferMoney = new TransferMoney();
-    Import fileImport = new Import();
-    Export fileExport = new Export();
+   ActionListener goToAccessDataBase = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            cardLayout.show(cardPanel, "Access Database");
+            if(e.getSource()==readUser.getExitBtn()){
+                readUser.resetView();
+            }
+        }
+    };
 
-    private int currCardID;
-    private String currAccType;
-    private int currAccTypeNum;
+    ActionListener goToAdminLogIn = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            cardLayout.show(cardPanel, "Database Log In");
+        }
+    };
 
+    ActionListener goToMain = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            cardLayout.show(cardPanel, "Main");
+        }
+    };
+
+    ActionListener exitApp = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            System.exit(0);
+        }
+    };
+
+    ActionListener goToTransaction = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            cardLayout.show(cardPanel, "Transaction");
+        }
+    }; 
+
+    ActionListener goToAccountCreationSelect = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            cardLayout.show(cardPanel, "Account Creation Selection");
+        }
+    };
+
+    ActionListener goToCreateNewUser = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            cardLayout.show(cardPanel, "Create New User");
+        }
+    };
+
+    ActionListener goToCreateNewCard = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            createNewCard.setConnection(connection);
+            cardLayout.show(cardPanel, "Create New Card");
+        }
+    };
+
+        ActionListener creatingCard = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            if(createNewCard.createCardInDatabase()) {
+                cardLayout.show(cardPanel, "Access Database");
+            }
+        }
+    };
+
+    ActionListener readUsers = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            if (connection != null) {
+                try {
+                    if (connection.isValid(5)) {
+                        readUser.setConnection(connection);
+                        //readUser.loadUserData();
+                        cardLayout.show(cardPanel, "Read User");
+                    } else {
+                        JOptionPane.showMessageDialog(
+                            self, 
+                            "Database connection is no longer valid. Please reconnect.",
+                            "Connection Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                } catch (SQLException ex) {
+                    JOptionPane.showMessageDialog(
+                        self, 
+                        "Error checking database connection: " + ex.getMessage(),
+                        "Database Error", JOptionPane.ERROR_MESSAGE);
+                    ex.printStackTrace();
+                }
+            } else {
+                JOptionPane.showMessageDialog(
+                    self, 
+                    "Database connection is not established.",
+                    "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    };
+
+    ActionListener askingUID = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            String uidStr = askUID.getUidtxt().getText();
+            askUID.getUidtxt().setText("");
+
+            try {
+                int userId = Integer.parseInt(uidStr);
+
+                // Verify user exists
+                if (connection != null) {
+                    String sql = "SELECT user_id FROM bank_users WHERE user_id = ?";
+                    PreparedStatement stmt = connection.prepareStatement(sql);
+                    stmt.setInt(1, userId);
+                    ResultSet rs = stmt.executeQuery();
+
+                    if (rs.next()) {
+                        // User exists, switch to update mode
+                        updateUser.setUpdateMode(true, userId);
+                        cardLayout.show(cardPanel, "Update User");
+                    } else {
+                        JOptionPane.showMessageDialog(
+                            self,
+                            "User ID not found", 
+                            "Error",
+                            JOptionPane.ERROR_MESSAGE);
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(
+                        self,
+                        "Database connection not established", 
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE);
+                }
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(
+                    self,
+                    "Please enter a valid numeric User ID", 
+                    "Input Error",
+                    JOptionPane.ERROR_MESSAGE);
+            } catch (SQLException ex) {
+                JOptionPane.showMessageDialog(
+                    self,
+                    "Database error: " + ex.getMessage(), 
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    };
+
+    ActionListener goToAskUID = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            cardLayout.show(cardPanel, "Ask UID");
+        }
+    };
+
+    ActionListener goToDeleteUser = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            cardLayout.show(cardPanel, "Delete User");
+        }
+    };
+
+    ActionListener goToBalance = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            self.getUsername();
+            self.getBalance();
+            cardLayout.show(cardPanel, "Balance");
+        }
+    };
+     
+    ActionListener goToDeposit = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+        cardLayout.show(cardPanel, "Deposit Panel");
+        }
+    };
+
+    ActionListener goToLoan = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            cardLayout.show(cardPanel, "Loan Panel");
+        }
+    };
+
+    ActionListener goToRepay = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            cardLayout.show(cardPanel, "Repay Panel");
+        }
+    };
+    
+    ActionListener goToWithdraw = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            cardLayout.show(cardPanel, "Withdraw Panel");
+        }
+    };
+    
+    ActionListener goToTransfer = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            cardLayout.show(cardPanel, "Transfer Money");
+        }
+    };
+    
+    ActionListener goToUserLogin = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            cardLayout.show(cardPanel, "User Log In");
+        }
+    };
+
+    ActionListener creatingNewUser = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            newUserInfo();
+        }
+    };
+
+    ActionListener updatingUser = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            updateUserInfo();
+        }
+    };
+
+    ActionListener deletingUser = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            if (deleteUser.deleteUserFromDatabase()) {
+                JOptionPane.showMessageDialog(
+                    self, "User deleted successfully!", 
+                    "Success", JOptionPane.INFORMATION_MESSAGE
+                );
+            } else {
+                JOptionPane.showMessageDialog(
+                    self, "Failed to delete user.", 
+                    "Error", JOptionPane.ERROR_MESSAGE
+                );
+            }
+            cardLayout.show(cardPanel, "Access Database");
+        }
+    };
+
+    ActionListener userLoggingIn = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            logInUserInfo();
+            transaction.setAccountType(userLogIn.isDebitSelected());
+            transaction.set_buttons();
+        }
+    };
+    
+    ActionListener goToFileExport = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            cardLayout.show(cardPanel, "File Exports");
+        }
+    };
+
+    ActionListener goToFileImport = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            cardLayout.show(cardPanel, "File Imports");
+        }
+    };
+
+    ActionListener goToTransactionHistory = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            transactionHistory.loadUserData();
+            cardLayout.show(cardPanel, "Transaction History");
+        }
+    };
+
+    ActionListener withdrawing = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            amountOfWithdraw();
+        }
+    };
+
+    ActionListener depositing = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            amountOfDeposit();
+        }
+    };
+
+    ActionListener loaning = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            amountOfLoan();
+        }
+    };
+    
+    ActionListener repaying = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            amountOfRepay();
+        }
+    };
+    
+    ActionListener transferingMoney = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            TransferMoneyInfo();
+        }
+    };
     public MainFrame() {
         setTitle("Bank System");
         setBounds(100, 100, 800, 800);
@@ -72,209 +382,148 @@ public class MainFrame extends JFrame implements ActionListener{
 
         //Menu Panel
         cardPanel.add(menu, "Main");
-        menu.accessDatabaseBtn.addActionListener(this);
-        menu.transactionBtn.addActionListener(this);
-        menu.closeBtn.addActionListener(this);
+        cardPanel.add(dbLogIn, "Database Log In");
+        cardPanel.add(userLogIn, "User Log In");
+        cardPanel.add(transaction, "Transaction");
+        cardPanel.add(transactionHistory, "Transaction History");
+        cardPanel.add(accessDB, "Access Database");
+        cardPanel.add(accountCreationSelection, "Account Creation Selection");
+        cardPanel.add(createNewCard, "Create New Card");
+        cardPanel.add(credit, "Credit");
+        cardPanel.add(debit, "Debit");
+        cardPanel.add(newUser, "Create New User");
+        cardPanel.add(readUser, "Read User");
+        cardPanel.add(askUID, "Ask UID");
+        cardPanel.add(updateUser, "Update User");
+        cardPanel.add(deleteUser, "Delete User");
+        cardPanel.add(balance, "Balance");
+        cardPanel.add(depositPanel, "Deposit Panel");
+        cardPanel.add(loanPanel, "Loan Panel");
+        cardPanel.add(repayPanel, "Repay Panel");
+        cardPanel.add(withdrawPanel, "Withdraw Panel");
+        cardPanel.add(transferMoney, "Transfer Money");
+        cardPanel.add(fileImport, "File Imports");
+        cardPanel.add(fileExport, "File Exports");
+
+        menu.getAccessDatabaseBtn().addActionListener(goToAdminLogIn);
+        menu.getTransactionBtn().addActionListener(goToUserLogin);
+        menu.getCloseBtn().addActionListener(exitApp);
 
 
         //Panel to access the database: DatabaseLogIn Panel
-        cardPanel.add(dbLogIn, "Database Log In");
-        dbLogIn.logInBtn.addActionListener(this);
+        dbLogIn.getLogInBtn().addActionListener(goToAccessDataBase);
 
         //Panel to access transaction: UserLogInPanel
-        cardPanel.add(userLogIn, "User Log In");
-        userLogIn.okBtn.addActionListener(this);
+        userLogIn.getOkBtn().addActionListener(userLoggingIn);
 
         //Menu Panel for CRUD operation on database: AccessDataBase Panel
-        cardPanel.add(accessDB, "Access Database");
-        accessDB.exitBtn.addActionListener(this);
-        accessDB.createUserBtn.addActionListener(this);
-        accessDB.readUserBtn.addActionListener(this);
-        accessDB.updateUserBtn.addActionListener(this);
-        accessDB.deleteUserBtn.addActionListener(this);
-        accessDB.importBtn.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent arg0) {
-                cardLayout.show(cardPanel, "File Imports");
-            }
-        });
-
-        accessDB.exportBtn.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent arg0) {
-                cardLayout.show(cardPanel, "File Exports");
-            }
-        });
+        accessDB.getExitBtn().addActionListener(goToMain);
+        accessDB.getCreateUserBtn().addActionListener(goToAccountCreationSelect);
+        accessDB.getReadUserBtn().addActionListener(readUsers);
+        accessDB.getUpdateUserBtn().addActionListener(goToAskUID);
+        accessDB.getDeleteUserBtn().addActionListener(goToDeleteUser);
+        accessDB.getImportBtn().addActionListener(goToFileImport);
+        accessDB.getExportBtn().addActionListener(goToFileExport);
 
         //Menu Panel for User Transactions: Transaction Panel
-        cardPanel.add(transaction, "Transaction");
-        transaction.balanceBtn.addActionListener(this);
-        transaction.transferMoneyBtn.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                cardLayout.show(cardPanel, "Transfer Money");
-            }
-        });
-        transaction.historyBtn.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                transactionHistory.loadUserData();
-                cardLayout.show(cardPanel, "Transaction History");
-            }
-        });
+        transaction.getBalanceBtn().addActionListener(goToBalance);
+        transaction.getTransferMoneyBtn().addActionListener(goToTransfer);
+        transaction.getHistoryBtn().addActionListener(goToTransactionHistory);
 
-        transaction.depositBtn.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                cardLayout.show(cardPanel, "Deposit Panel"); // lord help me with these names
-            }
-        });
-        transaction.withdrawBtn.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                cardLayout.show(cardPanel, "Withdraw Panel");
-            }
-        });
-        transaction.loanBtn.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                cardLayout.show(cardPanel, "Loan Panel");
-            }
-        });
-        transaction.payBtn.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                cardLayout.show(cardPanel, "Repay Panel");
-            }
-        });
-        transaction.exitBtn.addActionListener(this);
+        transaction.getDepositBtn().addActionListener(goToDeposit);
+        transaction.getWithdrawBtn().addActionListener(goToWithdraw);
+        transaction.getLoanBtn().addActionListener(goToLoan);
+        transaction.getPayBtn().addActionListener(goToRepay);
+        transaction.getExitBtn().addActionListener(goToMain);
 
         // Transaction History Stuff
-        cardPanel.add(transactionHistory, "Transaction History");
-        transactionHistory.exitBtn.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                cardLayout.show(cardPanel, "Transaction");
-            }
-        });
+        transactionHistory.getExitBtn().addActionListener(goToTransaction);
 
         // Account Creation Selection
-        cardPanel.add(accountCreationSelection, "Account Creation Selection");
-        accountCreationSelection.getNewUserBtn().addActionListener(this);
-        accountCreationSelection.getNewCardBtn().addActionListener(this);
-        accountCreationSelection.getExitBtn().addActionListener(this);
+        accountCreationSelection.getNewUserBtn().addActionListener(goToCreateNewUser);
+        accountCreationSelection.getNewCardBtn().addActionListener(goToCreateNewCard);
+        accountCreationSelection.getExitBtn().addActionListener(goToAccessDataBase);
 
         // New card creation panel
-        cardPanel.add(createNewCard, "Create New Card");
-        createNewCard.getOkBtn().addActionListener(this);
-        createNewCard.getExitBtn().addActionListener(this);
+        createNewCard.getOkBtn().addActionListener(creatingCard);
+        createNewCard.getExitBtn().addActionListener(goToAccountCreationSelect);
 
 
         //Menu Panel for the actions you can do for your credit account: Deposit Panel
-        cardPanel.add(credit, "Credit");
-        credit.depositBtn.addActionListener(this);
-        credit.loanBtn.addActionListener(this);
-        credit.repayLoanBtn.addActionListener(this);
-        credit.exitBtn.addActionListener(this);
+        credit.getDepositBtn().addActionListener(goToDeposit);
+        credit.getLoanBtn().addActionListener(goToLoan);
+        credit.getRepayLoanBtn().addActionListener(goToRepay);
+        credit.getExitBtn().addActionListener(goToTransaction);
 
         //Main Panel for the actions you can do for your debit account: Debit Panel
-        cardPanel.add(debit, "Debit");
-        debit.withdrawBtn.addActionListener(this);
-        debit.transferMoneyBtn.addActionListener(this);
-        debit.exitBtn.addActionListener(this);
+        debit.getWithdrawBtn().addActionListener(goToWithdraw);
+        debit.getTransferMoneyBtn().addActionListener(goToTransfer);
+        debit.getExitBtn().addActionListener(goToTransaction);
 
         //This panel is for asking details about the new user: CreateNewUserPanel
-        cardPanel.add(newUser, "Create New User");
-        newUser.okBtn.addActionListener(this);
-        newUser.exitBtn.addActionListener(this);
         newUser.setConnection(connection);
+        newUser.getOkBtn().addActionListener(creatingNewUser);
+        newUser.getExitBtn().addActionListener(goToAccessDataBase);
 
         //This panel shows all the user and info's about the user: ReadUser Panel
-        cardPanel.add(readUser, "Read User");
-        readUser.exitBtn.addActionListener(this);
         readUser.setConnection(connection);
+        readUser.getExitBtn().addActionListener(goToAccessDataBase);
 
         //This panel is for asking user Id which is the basis for updating the user info: AskUID Panel
-        cardPanel.add(askUID, "Ask UID");
-        askUID.okBtn.addActionListener(this);
-        askUID.exitBtn.addActionListener(this);
+        askUID.getOkBtn().addActionListener(askingUID);
+        askUID.getExitBtn().addActionListener(goToAccessDataBase);
 
         //This panel is for updating the information of the user: UpdateUser Panel
-        cardPanel.add(updateUser, "Update User");
-        updateUser.okBtn.addActionListener(this);
-        updateUser.exitBtn.addActionListener(this);
         updateUser.setConnection(connection);
+        updateUser.getOkBtn().addActionListener(updatingUser);
+        updateUser.getExitBtn().addActionListener(goToAccessDataBase);
 
         //This panel is for deleting the information of the user: DeleteUser Panel
-        cardPanel.add(deleteUser, "Delete User");
-        deleteUser.okBtn.addActionListener(this);
-        deleteUser.exitBtn.addActionListener(this);
+        deleteUser.getOkBtn().addActionListener(deletingUser);
+        deleteUser.getExitBtn().addActionListener(goToAccessDataBase);
         deleteUser.setConnection(connection);
 
         //This panel display the balance of the user
-        cardPanel.add(balance, "Balance");
-        balance.exitBtn.addActionListener(this);
+        balance.getExitBtn().addActionListener(goToTransaction);
 
 
         //This ask the amount of money to be deposited
-        cardPanel.add(depositPanel, "Deposit Panel");
-        depositPanel.okBtn.addActionListener(this);
-        depositPanel.backBtn.addActionListener(this);
+        depositPanel.getOkBtn().addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                amountOfDeposit();
+            }
+        });
+        depositPanel.getBackBtn().addActionListener(goToTransaction);
        
 
         //This ask the amount of money to be loaned
-        cardPanel.add(loanPanel, "Loan Panel");
-        loanPanel.okBtn.addActionListener(this);
-        loanPanel.backBtn.addActionListener(this);
+        loanPanel.getOkBtn().addActionListener(loaning);
+        loanPanel.getBackBtn().addActionListener(goToTransaction);
 
         //This ask the amount of money to  pay
-        cardPanel.add(repayPanel, "Repay Panel");
-        repayPanel.okBtn.addActionListener(this);
-        repayPanel.backBtn.addActionListener(this);
+        repayPanel.getOkBtn().addActionListener(repaying);
+        repayPanel.getBackBtn().addActionListener(goToTransaction);
 
         
 
         //This ask the amount of money to  withdraw
-        cardPanel.add(withdrawPanel, "Withdraw Panel");
-        withdrawPanel.okBtn.addActionListener(this);
-        withdrawPanel.backBtn.addActionListener(this);
+        withdrawPanel.getOkBtn().addActionListener(withdrawing);
+        withdrawPanel.getBackBtn().addActionListener(goToTransaction);
 
         //This ask the amount of money to  transfer and the user id of the receiver
-        cardPanel.add(transferMoney, "Transfer Money");
-        transferMoney.okBtn.addActionListener(this);
-        transferMoney.exitBtn.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent arg0) {
-                cardLayout.show(cardPanel, "Transaction");
-            } 
-        });
+        transferMoney.getOkBtn().addActionListener(transferingMoney);
+        transferMoney.getExitBtn().addActionListener(goToTransaction);
 
-        cardPanel.add(fileImport, "File Imports");
-        fileImport.okBtn.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent arg0) {
-                // TODO Auto-generated method stub
-            }
-        });
-        fileImport.backBtn.addActionListener(this);
-
-        
-
-        cardPanel.add(fileExport, "File Exports");
-        fileExport.okBtn.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent arg0) {
-                // TODO Auto-generated method stub
-            }
-        });
-        fileExport.backBtn.addActionListener(this);
+        fileImport.getBackBtn().addActionListener(goToAccessDataBase);
+        fileExport.getBackBtn().addActionListener(goToAccessDataBase);
 
 
         // For Database Log In back button
-        dbLogIn.backBtn.addActionListener(this);
+        dbLogIn.getBackBtn().addActionListener(goToMain);
 
         // For User Log In back button
-        userLogIn.backBtn.addActionListener(this);
+        userLogIn.getBackBtn().addActionListener(goToMain);
 
         getContentPane().setLayout(new BorderLayout());
         add(cardPanel, BorderLayout.CENTER);
@@ -285,130 +534,34 @@ public class MainFrame extends JFrame implements ActionListener{
         cardLayout.show(cardPanel, "Main");
     }
 
-    //To log in to the database
-    public boolean logDatabaseUserInfo() {
-
-        String USER = "";
-        String PASS = "";
-        String DB_URL = "";
-        
-        dbLogIn.usertxt.setText("");
-        dbLogIn.passtxt.setText("");
-
-        try (BufferedReader br = new BufferedReader(new FileReader("DefaultCredentials.txt"))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                String[] parts = line.split(":", 2); // Split into key and value
-                if (parts.length < 2) continue; // Skip malformed lines
-
-                String key = parts[0].trim();
-                String value = parts[1].trim();
-
-                switch (key) {
-                    case "DefaultUser":
-                        USER = value;
-                        break;
-                    case "Defaultpass":
-                        PASS= value;
-                        break;
-                    case "DB_URL":
-                        DB_URL = value;
-                        break;
-                    case "Default_DB":
-                        //DB_URL += "/" + value;
-                        break;
-                }
-                System.out.println(USER + DB_URL + PASS);
-            }
-        }
-        catch (FileNotFoundException e) {
-            try {
-                FileWriter fWriter = new FileWriter("DefaultCredentials.txt");
-                fWriter.write("DefaultUser: exampleuser \n Defaultpass: examplepass \n DB_URL: jdbc:mariadb://localhost:3306/bank \n Default_DB: bank");
-                fWriter.close();
-                JOptionPane.showMessageDialog(this, "Check your DefaultCredentials.txt file (somewhere in the root), and input your database credentials", "Error", JOptionPane.ERROR_MESSAGE);
-                System.exit(0);
-            }
-            catch (IOException error) {
-            }
-        }
-        catch (IOException e) {
-            System.out.println("wtf");
-            e.printStackTrace();
-        }
-
-        try {
-            Connection conn = DriverManager.getConnection(DB_URL, USER, PASS);
-            System.out.println("Connected to database successfully!");
-            
-            transactionConnection = conn;
-            connection = conn;
-            newUser.setConnection(conn); 
-            readUser.setConnection(conn);
-            updateUser.setConnection(conn);
-            deleteUser.setConnection(conn);
-            transactionHistory.setConnection(conn);
-            fileImport.setConnection(conn);
-            fileExport.setConnection(conn);
-            // set session isolation level here
-            connection.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
-            return true;
-        } catch (SQLException e) {
-            System.out.println("Database connection failed!");
-            System.out.println("Error: " + e.getMessage());
-            JOptionPane.showMessageDialog(this, "Database connection failed. Check your DefaultCredentials.txt file (wherever it is).\nError MSG: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-            return false;
-        }
-    }
-
     //To log in to the user account
     public void logInUserInfo() {
-        String cidStr = userLogIn.idtxt.getText();
-        String pinStr = new String(userLogIn.pintxt.getPassword());
+        String cidStr = userLogIn.getIdtxt().getText();
+        String pinStr = new String(userLogIn.getPintxt().getPassword());
 
-        userLogIn.idtxt.setText("");
-        userLogIn.pintxt.setText("");
+        int cid, pin;
+        try{
+            cid = Integer.parseInt(cidStr);
+            pin = Integer.parseInt(pinStr);
 
-        if (transactionConnection == null) {
-            System.out.println("Database is not connected. Please connect first.");
+        } catch (NumberFormatException e) {
+            System.out.println("User ID and PIN must be numeric.");
+            JOptionPane.showMessageDialog(
+                this, "User ID and PIN must be numeric.",
+                "Login Failed", JOptionPane.ERROR_MESSAGE
+            );
             return;
         }
+        int accTypeIDX = userLogIn.getAccountTypeCombo().getSelectedIndex();
+
+        userLogIn.getIdtxt().setText("");
+        userLogIn.getPintxt().setText("");
+
 
         try {
-            int accTypeIDX = userLogIn.accountTypeCombo.getSelectedIndex();
-            currAccTypeNum = accTypeIDX;
-            int cid = Integer.parseInt(cidStr);
-            int pin = Integer.parseInt(pinStr);
-
-            String sql = """
-                SELECT 'debit' AS account_type FROM debit_accounts WHERE debit_id = ? AND pin = ?
-            """;
-
-            if (accTypeIDX == 0) {
-                sql = """
-                        SELECT 'debit' AS account_type FROM debit_accounts WHERE debit_id = ? AND pin = ?
-                        """;
-            } else if (accTypeIDX == 1) {
-                sql = """
-                        SELECT 'credit' AS account_type FROM credit_accounts WHERE credit_id = ? AND pin = ?
-                        """;
-            } else {
-                JOptionPane.showMessageDialog(this, "How did you do that?", "Login Error", JOptionPane.ERROR_MESSAGE);
-            }
-
-            PreparedStatement stmt = transactionConnection.prepareStatement(sql);
-            stmt.setInt(1, cid);
-            stmt.setInt(2, pin);
-
-            ResultSet rs = stmt.executeQuery();
-
-            if (rs.next()) {
-                String accountType = rs.getString("account_type");
-                currAccType = accountType;
-                currCardID = cid;
+            if (model.logInUserInfo(cid, pin, accTypeIDX)) {
                 transactionHistory.accType = accTypeIDX;
                 transactionHistory.cid = cid;
-                System.out.println("Login successful. Account type: " + accountType);
                 cardLayout.show(cardPanel, "Transaction");
                 transaction.setAccountType(userLogIn.isDebitSelected());
                 transaction.set_buttons();
@@ -419,14 +572,6 @@ public class MainFrame extends JFrame implements ActionListener{
                 );
             }
 
-            rs.close();
-            stmt.close();
-        } catch (NumberFormatException e) {
-            System.out.println("User ID and PIN must be numeric.");
-            JOptionPane.showMessageDialog(
-                this, "User ID and PIN must be numeric.",
-                "Login Failed", JOptionPane.ERROR_MESSAGE
-            );
         } catch (SQLException e) {
             System.out.println("Error during login: " + e.getMessage());
             JOptionPane.showMessageDialog(
@@ -434,14 +579,17 @@ public class MainFrame extends JFrame implements ActionListener{
                 "Login Failed", JOptionPane.ERROR_MESSAGE
             );
         }
+
+        userLogIn.getIdtxt().setText("");
+        userLogIn.getPintxt().setText("");
     }
 
     //Create new User
     public void newUserInfo() {
         try {
             // Validate inputs before proceeding
-            if (newUser.firstNametxt.getText().isEmpty() || newUser.lastNametxt.getText().isEmpty() ||
-                newUser.emailtxt.getText().isEmpty() ) {
+            if (newUser.getFirstNametxt().getText().isEmpty() || newUser.getLastNametxt().getText().isEmpty() ||
+                newUser.getEmailtxt().getText().isEmpty() ) {
                 JOptionPane.showMessageDialog(this, "Please fill in all required fields", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
@@ -453,9 +601,9 @@ public class MainFrame extends JFrame implements ActionListener{
                 cardLayout.show(cardPanel, "Access Database");
                 
                 // Clear form fields
-                newUser.firstNametxt.setText("");
-                newUser.lastNametxt.setText("");
-                newUser.emailtxt.setText("");
+                newUser.getFirstNametxt().setText("");
+                newUser.getLastNametxt().setText("");
+                newUser.getEmailtxt().setText("");
                 // newUser.balancetxt.setText("");
                 // newUser.loantxt.setText("");
         
@@ -476,17 +624,17 @@ public class MainFrame extends JFrame implements ActionListener{
     //ask uid of user to update
     public String updateUID(){
         String uid;
-        uid = askUID.uidtxt.getText();
-        askUID.uidtxt.setText("");
+        uid = askUID.getUidtxt().getText();
+        askUID.getUidtxt().setText("");
         return uid ;
     }
 
     //ask uid of user to delete
     public String deleteUID(){
         String uid;
-        uid = deleteUser.uidtxt.getText();
+        uid = deleteUser.getUidtxt().getText();
         System.out.println("UID to delete: "+ uid);
-        askUID.uidtxt.setText("");
+        askUID.getUidtxt().setText("");
         cardLayout.show(cardPanel, "Access Database");
         return uid ;
     }
@@ -494,14 +642,14 @@ public class MainFrame extends JFrame implements ActionListener{
 
     public void amountOfLoan() {
         try {
-            double amount = Double.parseDouble(loanPanel.input.getText());
+            double amount = Double.parseDouble(loanPanel.getInput().getText());
             if (amount <= 0) {
                 JOptionPane.showMessageDialog(this, "Loan amount must be positive",
                     "Invalid Amount", JOptionPane.ERROR_MESSAGE);
                 return;
             }
             
-            if (processLoan(amount)) {
+            if (model.processLoan(amount)) {
                 JOptionPane.showMessageDialog(this, "Loan processed successfully!",
                     "Success", JOptionPane.INFORMATION_MESSAGE);
             }
@@ -511,19 +659,19 @@ public class MainFrame extends JFrame implements ActionListener{
         }
         
         cardLayout.show(cardPanel, "Transaction");
-        loanPanel.input.setText("");
+        loanPanel.getInput().setText("");
     }
     
     public void amountOfRepay() {
         try {
-            double amount = Double.parseDouble(repayPanel.input.getText());
+            double amount = Double.parseDouble(repayPanel.getInput().getText());
             if (amount <= 0) {
                 JOptionPane.showMessageDialog(this, "Repayment amount must be positive",
                     "Invalid Amount", JOptionPane.ERROR_MESSAGE);
                 return;
             }
             
-            if (processRepay(amount)) {
+            if (model.processRepay(amount)) {
                 JOptionPane.showMessageDialog(this, "Repayment processed successfully!",
                     "Success", JOptionPane.INFORMATION_MESSAGE);
             }
@@ -533,277 +681,21 @@ public class MainFrame extends JFrame implements ActionListener{
         }
         
         cardLayout.show(cardPanel, "Transaction");
-        repayPanel.input.setText("");
+        repayPanel.getInput().setText("");
     }
 
-    private boolean processLoan(double amount) {
-        String query = """
-                INSERT INTO single_transactions_credit (transaction_id, credit_id, amount)
-                VALUES (?, ?, ?)
-                """;
-        String updateLoan = """
-                UPDATE credit_loans SET loan = loan - ? WHERE credit_id = ?
-                """;
-        String checkLoan = """
-                SELECT loan FROM credit_loans WHERE credit_id = ?
-                """;
-        
-        try {
-            PreparedStatement stmt = transactionConnection.prepareStatement(checkLoan);
-            stmt.setInt(1, currCardID);
-            ResultSet rs = stmt.executeQuery();
-            
-            double currentLoan = 0;
-            if (rs.next()) {
-                currentLoan = rs.getDouble("loan");
-                if (currentLoan - amount < -max_loan) {
-                    JOptionPane.showMessageDialog(this, 
-                        "Loan amount exceeds maximum allowed. Maximum remaining credit is " + 
-                        (max_loan + currentLoan),
-                        "Loan Error", JOptionPane.ERROR_MESSAGE);
-                    return false;
-                }
-            }
-            rs.close();
-            stmt.close();
-            
-            int transactionID = getSingleTransactionID();
-            
-            connection.setAutoCommit(false);
-            
-            stmt = transactionConnection.prepareStatement(query);
-            stmt.setInt(1, transactionID);
-            stmt.setInt(2, currCardID);
-            stmt.setDouble(3, amount);
-            stmt.executeUpdate();
-            stmt.close();
-            
-            stmt = transactionConnection.prepareStatement(updateLoan);
-            stmt.setDouble(1, amount);
-            stmt.setInt(2, currCardID);
-            stmt.executeUpdate();
-            stmt.close();
-            
-            connection.commit();
-            return true;
-        } catch (SQLException e) {
-            try {
-                connection.rollback();
-            } catch (SQLException ex) {
-                ex.printStackTrace();
-            }
-            JOptionPane.showMessageDialog(this, "Error processing loan: " + e.getMessage(),
-                "Loan Error", JOptionPane.ERROR_MESSAGE);
-            return false;
-        } finally {
-            try {
-                connection.setAutoCommit(true);
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
-    }
 
-    private boolean processRepay(double amount) {
-        String query = """
-                INSERT INTO single_transactions_credit (transaction_id, credit_id, amount)
-                VALUES (?, ?, ?)
-                """;
-        String updateLoan = """
-                UPDATE credit_loans SET loan = loan + ? WHERE credit_id = ?
-                """;
-        String checkLoan = """
-                SELECT loan FROM credit_loans WHERE credit_id = ?
-                """;
-        
-        try {
-            PreparedStatement stmt = transactionConnection.prepareStatement(checkLoan);
-            stmt.setInt(1, currCardID);
-            ResultSet rs = stmt.executeQuery();
-            
-            double currentLoan = 0;
-            if (rs.next()) {
-                currentLoan = rs.getDouble("loan");
-                if (amount > -currentLoan) {
-                    JOptionPane.showMessageDialog(this, 
-                        "Repayment amount cannot exceed current loan of " + (-currentLoan),
-                        "Repayment Error", JOptionPane.ERROR_MESSAGE);
-                    return false;
-                }
-            }
-            rs.close();
-            stmt.close();
-            
-            int transactionID = getSingleTransactionID();
-            
-            // Start transaction
-            connection.setAutoCommit(false);
-            
-            // Record the transaction (negative amount for repayment)
-            stmt = transactionConnection.prepareStatement(query);
-            stmt.setInt(1, transactionID);
-            stmt.setInt(2, currCardID);
-            stmt.setDouble(3, -amount);
-            stmt.executeUpdate();
-            stmt.close();
-            
-            // Update the loan (add because loans are stored as negatives)
-            stmt = transactionConnection.prepareStatement(updateLoan);
-            stmt.setDouble(1, amount);
-            stmt.setInt(2, currCardID);
-            stmt.executeUpdate();
-            stmt.close();
-            
-            connection.commit();
-            return true;
-        } catch (SQLException e) {
-            try {
-                connection.rollback();
-            } catch (SQLException ex) {
-                ex.printStackTrace();
-            }
-            JOptionPane.showMessageDialog(this, "Error processing repayment: " + e.getMessage(),
-                "Repayment Error", JOptionPane.ERROR_MESSAGE);
-            return false;
-        } finally {
-            try {
-                connection.setAutoCommit(true);
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    private boolean processDeposit(double amount) {
-        String query = """
-                INSERT INTO single_transactions_debit (transaction_id, debit_id, amount)
-                VALUES (?, ?, ?)
-                """;
-        String updateBalance = """
-                UPDATE debit_balance SET balance = balance + ? WHERE debit_id = ?
-                """;
-        
-        try {
-            int transactionID = getSingleTransactionID();
-            
-            // Start transaction
-            connection.setAutoCommit(false);
-            
-            // Record the transaction
-            PreparedStatement stmt = transactionConnection.prepareStatement(query);
-            stmt.setInt(1, transactionID);
-            stmt.setInt(2, currCardID);
-            stmt.setDouble(3, amount);
-            stmt.executeUpdate();
-            stmt.close();
-            
-            // Update the balance
-            stmt = transactionConnection.prepareStatement(updateBalance);
-            stmt.setDouble(1, amount);
-            stmt.setInt(2, currCardID);
-            stmt.executeUpdate();
-            stmt.close();
-            
-            connection.commit();
-            return true;
-        } catch (SQLException e) {
-            try {
-                connection.rollback();
-            } catch (SQLException ex) {
-                ex.printStackTrace();
-            }
-            JOptionPane.showMessageDialog(this, "Error processing deposit: " + e.getMessage(),
-                "Deposit Error", JOptionPane.ERROR_MESSAGE);
-            return false;
-        } finally {
-            try {
-                connection.setAutoCommit(true);
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-    
-    private boolean processWithdraw(double amount) {
-        String query = """
-                INSERT INTO single_transactions_debit (transaction_id, debit_id, amount)
-                VALUES (?, ?, ?)
-                """;
-        String updateBalance = """
-                UPDATE debit_balance SET balance = balance - ? WHERE debit_id = ?
-                """;
-        String checkBalance = """
-                SELECT balance FROM debit_balance WHERE debit_id = ?
-                """;
-        
-        try {
-            // First check if there's enough balance
-            PreparedStatement stmt = transactionConnection.prepareStatement(checkBalance);
-            stmt.setInt(1, currCardID);
-            ResultSet rs = stmt.executeQuery();
-            
-            if (rs.next()) {
-                double currentBalance = rs.getDouble("balance");
-                if (currentBalance < amount) {
-                    JOptionPane.showMessageDialog(this, "Insufficient funds for withdrawal",
-                        "Withdrawal Error", JOptionPane.ERROR_MESSAGE);
-                    return false;
-                }
-            }
-            rs.close();
-            stmt.close();
-            
-            int transactionID = getSingleTransactionID();
-            
-            // Start transaction
-            connection.setAutoCommit(false);
-            
-            // Record the transaction
-            stmt = transactionConnection.prepareStatement(query);
-            stmt.setInt(1, transactionID);
-            stmt.setInt(2, currCardID);
-            stmt.setDouble(3, -amount); // Negative amount for withdrawal
-            stmt.executeUpdate();
-            stmt.close();
-            
-            // Update the balance
-            stmt = transactionConnection.prepareStatement(updateBalance);
-            stmt.setDouble(1, amount);
-            stmt.setInt(2, currCardID);
-            stmt.executeUpdate();
-            stmt.close();
-            
-            connection.commit();
-            return true;
-        } catch (SQLException e) {
-            try {
-                connection.rollback();
-            } catch (SQLException ex) {
-                ex.printStackTrace();
-            }
-            JOptionPane.showMessageDialog(this, "Error processing withdrawal: " + e.getMessage(),
-                "Withdrawal Error", JOptionPane.ERROR_MESSAGE);
-            return false;
-        } finally {
-            try {
-                connection.setAutoCommit(true);
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-    
     // Update the amountOfDeposit method
     public void amountOfDeposit() {
         try {
-            double amount = Double.parseDouble(depositPanel.input.getText());
+            double amount = Double.parseDouble(depositPanel.getInput().getText());
             if (amount <= 0) {
                 JOptionPane.showMessageDialog(this, "Deposit amount must be positive",
                     "Invalid Amount", JOptionPane.ERROR_MESSAGE);
                 return;
             }
             
-            if (processDeposit(amount)) {
+            if (model.processDeposit(amount)) {
                 JOptionPane.showMessageDialog(this, "Deposit successful!",
                     "Success", JOptionPane.INFORMATION_MESSAGE);
             }
@@ -813,220 +705,32 @@ public class MainFrame extends JFrame implements ActionListener{
         }
         
         cardLayout.show(cardPanel, "Transaction");
-        depositPanel.input.setText("");
+        depositPanel.getInput().setText("");
     }
 
-
-    private int getSingleTransactionID() {
-        String query = """
-                SELECT MAX(transaction_id) AS max_transaction_id
-                FROM (
-                    SELECT transaction_id FROM single_transactions_debit
-                    UNION ALL
-                    SELECT transaction_id FROM single_transactions_credit
-                ) AS combined_transactions
-                """;
-        int transactionID = 0;
-        try (
-            PreparedStatement stmt = transactionConnection.prepareStatement(query);
-        ){
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                transactionID = rs.getInt("max_transaction_id") + 1;
-            }
-            rs.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return transactionID;
-    }
-
-    private int getDoubleTransactionID() {
-        String query = """
-                SELECT MAX(transaction_id) AS max_transaction_id
-                FROM (
-                    SELECT transaction_id FROM double_transactions_debit
-                    UNION ALL
-                    SELECT transaction_id FROM double_transactions_credit
-                ) AS combined_transactions
-                """;
-        int transactionID = 0;
-        try (
-            PreparedStatement stmt = transactionConnection.prepareStatement(query);
-        ){
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                transactionID = rs.getInt("max_transaction_id") + 1;
-            }
-            rs.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return transactionID;
-    }
-
-    private void updateBalance(int accType, double amount, int cid) {
-        System.out.println("Balance update: " + amount + " for account type: " + accType + " and card ID: " + cid);
-        String updateBalance = """
-                UPDATE debit_balance SET balance = ? WHERE debit_id = ?
-                """;
-        String updateLoan = """
-                UPDATE credit_loans SET loan = ? WHERE credit_id = ?
-                """;
-        
-        try {
-            if (accType == 0) {
-                PreparedStatement stmt = transactionConnection.prepareStatement(updateBalance);
-                stmt.setDouble(1, amount);
-                stmt.setInt(2, cid);
-                stmt.executeUpdate();
-                stmt.close();
-            } else if (accType == 1) {
-                PreparedStatement stmt = transactionConnection.prepareStatement(updateLoan);
-                stmt.setDouble(1, amount);
-                stmt.setInt(2, cid);
-                stmt.executeUpdate();
-                stmt.close();
-            }
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(this, "SQL Error Message:\n" + e.getMessage(), 
-                "Update Error", JOptionPane.ERROR_MESSAGE);
-        }
-    }
-
-    private boolean transferMoney(int accType, int transferType, int transactionID, int cid, double amount) throws SQLException{
-        String debitTransfer = """
-                INSERT INTO double_transactions_debit (transaction_id, debit_id, amount) 
-                VALUES (?, ?, ?)
-                """;
-        String creditTransfer = """
-                INSERT INTO double_transactions_credit (transaction_id, credit_id, amount) 
-                VALUES (?, ?, ?)
-                """;
-        System.out.println("Current Amount: " + getCurrAmount(accType, cid));
-        if (accType == 0) {
-            try {
-                PreparedStatement stmt = transactionConnection.prepareStatement(debitTransfer);
-                stmt.setInt(1, transactionID);
-                stmt.setInt(2, cid);
-                stmt.setDouble(3, amount * transferType);
-                updateBalance(accType, getCurrAmount(accType, cid) + amount * transferType, cid);
-                stmt.executeUpdate();
-                stmt.close();
-            } catch (SQLException e) {
-                JOptionPane.showMessageDialog(this, "SQL Error Message:\n" + e.getMessage(), 
-                    "Transfer Error", JOptionPane.ERROR_MESSAGE);
-                return false;
-            }
-        } else if (accType == 1) {
-            try {
-                PreparedStatement stmt = transactionConnection.prepareStatement(creditTransfer);
-                stmt.setInt(1, transactionID);
-                stmt.setInt(2, cid);
-                stmt.setDouble(3, amount * transferType);
-                updateBalance(accType, getCurrAmount(accType, cid) + amount * transferType, cid);
-                stmt.executeUpdate();
-                stmt.close();
-            } catch (SQLException e) {
-                JOptionPane.showMessageDialog(this, "SQL Error Message:\n" + e.getMessage(), 
-                    "Transfer Error", JOptionPane.ERROR_MESSAGE);
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private double getCurrAmount(int accType, int cid) {
-        if (accType == 0) {
-            String query = """
-                SELECT balance FROM debit_balance WHERE debit_id = ?
-                """;
-            try {
-                PreparedStatement stmt = transactionConnection.prepareStatement(query);
-                stmt.setInt(1, cid);
-                ResultSet rs = stmt.executeQuery();
-                if (rs.next()) {
-                    return rs.getDouble("balance");
-                }
-                rs.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        } else {
-            String query = """
-                SELECT loan FROM credit_loans WHERE credit_id = ?
-                """;
-            try {
-                PreparedStatement stmt = transactionConnection.prepareStatement(query);
-                stmt.setInt(1, cid);
-                ResultSet rs = stmt.executeQuery();
-                if (rs.next()) {
-                    return rs.getDouble("loan");
-                }
-                rs.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
-        return 0.0;
-    }
-
-    private boolean validateTransfer(int accType, int cid, double amount) {
-        System.out.println("Validating transfer...");
-        System.out.println("Current Account Type: " + currAccType + " Current Card ID: " + currCardID);
-        System.out.println("Transfer Account Type: " + accType + " Transfer Card ID: " + cid);
-        if (amount <= 0) {
-            JOptionPane.showMessageDialog(this, "Transfer amount must be positive.", 
-                "Transfer Error", JOptionPane.ERROR_MESSAGE);
-            return false;
-        }
-
-        if (accType == currAccTypeNum && currCardID == cid) {
-            JOptionPane.showMessageDialog(this, "You cannot transfer money to the same account.", 
-                "Transfer Error", JOptionPane.ERROR_MESSAGE);
-            return false;
-        }
-        
-        if (accType == 0) {
-            double balance = getCurrAmount(accType, cid);
-            if (amount > balance) {
-                JOptionPane.showMessageDialog(this, "Insufficient funds for transfer.", 
-                    "Transfer Error", JOptionPane.ERROR_MESSAGE);
-                return false;
-            }
-        } else {
-            double loan = getCurrAmount(accType, cid);
-            if (amount > max_loan + loan) {
-                JOptionPane.showMessageDialog(this, "Insufficient credit for transfer.", 
-                    "Transfer Error", JOptionPane.ERROR_MESSAGE);
-                return false;
-            }
-        }
-        return true;
-    }
 
     public void TransferMoneyInfo(){
-        String amount = transferMoney.moneytxt.getText();
-        String cid = transferMoney.cidtxt.getText();
+        String amount = transferMoney.getMoneytxt().getText();
+        String cid = transferMoney.getCidtxt().getText();
         if (amount.isEmpty() || cid.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Please fill in all required fields", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
-        int accType = transferMoney.receiveAccTypeCBX.getSelectedIndex();
+        int accType = transferMoney.getReceiveAccTypeCBX().getSelectedIndex();
         System.out.println("Card ID: "+cid+" Money: "+ amount + " Account Type: "+ accType);
 
-        if (validateTransfer(accType, Integer.parseInt(cid), Double.parseDouble(amount))) {
+        if (model.validateTransfer(accType, Integer.parseInt(cid), Double.parseDouble(amount))) {
             System.out.println("Transfer is valid. Proceeding with transfer...");
             try {
-                int transaction_id = getDoubleTransactionID();
+                int transaction_id = model.getDoubleTransactionID();
                 connection.setAutoCommit(false);
                 // Try to reduce the balance of the current account first
                 System.out.println("First transfer");
-                transferMoney(currAccTypeNum, -1, transaction_id, currCardID, Double.parseDouble(amount));
+                model.transferMoney(model.getCurrAccTypeNum(), -1, transaction_id, model.getCurrCardID(), Double.parseDouble(amount));
     
                 // Then try to increase the balance of the receiving account
                 System.out.println("Second transfer");
-                transferMoney(accType, 1, transaction_id, Integer.parseInt(cid), Double.parseDouble(amount));
+                model.transferMoney(accType, 1, transaction_id, Integer.parseInt(cid), Double.parseDouble(amount));
                 
                 JOptionPane.showMessageDialog(this, "Transfer successful!", 
                     "Transfer Success", JOptionPane.INFORMATION_MESSAGE);
@@ -1049,20 +753,20 @@ public class MainFrame extends JFrame implements ActionListener{
 
         cardLayout.show(cardPanel, "Transaction");
 
-        transferMoney.moneytxt.setText("");
-        transferMoney.cidtxt.setText("");
+        transferMoney.getMoneytxt().setText("");
+        transferMoney.getCidtxt().setText("");
     }
 
     public void amountOfWithdraw() {
     try {
-        double amount = Double.parseDouble(withdrawPanel.input.getText());
+        double amount = Double.parseDouble(withdrawPanel.getInput().getText());
         if (amount <= 0) {
             JOptionPane.showMessageDialog(this, "Withdrawal amount must be positive",
                 "Invalid Amount", JOptionPane.ERROR_MESSAGE);
             return;
         }
         
-        if (processWithdraw(amount)) {
+        if (model.processWithdraw(amount)) {
             JOptionPane.showMessageDialog(this, "Withdrawal successful!",
                 "Success", JOptionPane.INFORMATION_MESSAGE);
         }
@@ -1072,8 +776,8 @@ public class MainFrame extends JFrame implements ActionListener{
     }
     
     cardLayout.show(cardPanel, "Transaction");
-    withdrawPanel.input.setText("");
-}
+    withdrawPanel.getInput().setText("");
+    }
 
     private void closeConnections() {
         if (connection != null) {
@@ -1084,86 +788,17 @@ public class MainFrame extends JFrame implements ActionListener{
                 System.out.println("Error closing connection: " + e.getMessage());
             }
         }
-        closeTransactionConnection();
-    }
-
-    private void closeTransactionConnection() {
-        if (transactionConnection != null) {
-            try {
-                transactionConnection.close();
-                transactionConnection = null;
-                System.out.println("Transaction database connection closed.");
-            } catch (SQLException e) {
-                System.out.println("Error closing transaction connection: " + e.getMessage());
-            }
-        }
     }
 
     public void getUsername() {
-        String query = """
-                SELECT first_name, last_name FROM bank_users WHERE user_id IN
-                (SELECT user_id FROM debit_accounts WHERE debit_id = ?)
-                """;
-    
-        if (currAccType.equals("debit")) {
-            query = """
-                    SELECT first_name, last_name FROM bank_users WHERE user_id IN
-                    (SELECT user_id FROM debit_accounts WHERE debit_id = ?)
-                """;
-        } else if (currAccType.equals("credit")) {
-            query = """
-                    SELECT first_name, last_name FROM bank_users WHERE user_id IN
-                    (SELECT user_id FROM credit_accounts WHERE credit_id = ?)
-                """;
-        }
-        
-        try {
-            PreparedStatement stmt = transactionConnection.prepareStatement(query);
-            stmt.setInt(1, currCardID);
-
-            ResultSet rs = stmt.executeQuery();
-            String username = "";
-            while (rs.next()) {
-                username = rs.getString("first_name") + " " + rs.getString("last_name");
-            }
-            rs.close();
-
-            balance.setUsername(username, currAccType);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        String username = model.getUsername();
+        balance.setUsername(username, model.getCurrAccType());
     }
 
     public void getBalance() {
-        String query = "";
         try {
-            double bal = 0;
-            if (currAccTypeNum == 1){
-                query = """
-                        SELECT loan FROM credit_loans WHERE credit_id = ?
-                        """;
-                PreparedStatement stmt = transactionConnection.prepareStatement(query);
-                stmt.setInt(1, currCardID);
-
-                ResultSet rs = stmt.executeQuery();
-                while (rs.next()){
-                    bal = rs.getDouble("loan");
-                }
-                rs.close();
-            } else if (currAccTypeNum == 0) {
-                query = """
-                    SELECT balance FROM debit_balance WHERE debit_id = ?
-                    """;
-                PreparedStatement stmt = transactionConnection.prepareStatement(query);
-                stmt.setInt(1, currCardID);
-
-                ResultSet rs = stmt.executeQuery();
-                while (rs.next()){
-                    bal = rs.getDouble("balance");
-                }
-                rs.close();
-            }
-            balance.setBalance(bal, currAccType);
+            double bal = model.getBalance();
+            balance.setBalance(bal, model.getCurrAccType());
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -1175,270 +810,26 @@ public class MainFrame extends JFrame implements ActionListener{
         super.dispose();
     }
 
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        //Prompt to go back to main if chosen to exit from the transaction or database access
-        if (e.getSource() == transaction.exitBtn || e.getSource() == accessDB.exitBtn || 
-        e.getSource() == dbLogIn.backBtn || e.getSource() == userLogIn.backBtn) {
-        
-        if (e.getSource() == transaction.exitBtn || e.getSource() == userLogIn.backBtn) {
-            // closeTransactionConnection();
-            cardLayout.show(cardPanel, "Main");
-        } else if (e.getSource() == dbLogIn.backBtn) {
-            // isTransactionLogin = false;
-            cardLayout.show(cardPanel, "Main"); 
-        } else if (e.getSource() == accessDB.exitBtn) {
-            cardLayout.show(cardPanel, "Main"); 
-        }
-    }
-    
-        //Prompt to enter username and password to access database
-        if (e.getSource() == menu.accessDatabaseBtn) {
-            //cardLayout.show(cardPanel, "Database Log In");
-            logDatabaseUserInfo();
-            cardLayout.show(cardPanel, "Access Database");
-        }
-    
-        //Prompt to enter user id and pin to access account
-        if (e.getSource() == menu.transactionBtn) {
-            //cardLayout.show(cardPanel, "Database Log In");
-            logDatabaseUserInfo();
-            cardLayout.show(cardPanel, "User Log In");
-            // isTransactionLogin = true;
-        }
-    
-        //Prompt to CRUD operation if database login in success
-        if(e.getSource() == dbLogIn.logInBtn  ||e.getSource()==newUser.okBtn|| e.getSource() ==newUser.exitBtn|| e.getSource()==readUser.exitBtn || e.getSource() == updateUser.exitBtn || e.getSource() == updateUser.okBtn || e.getSource()==askUID.exitBtn|| e.getSource() == deleteUser.okBtn || e.getSource()==deleteUser.exitBtn){
-            // if(e.getSource() == dbLogIn.logInBtn){
-            //     if(logDatabaseUserInfo()) {
-            //         if(isTransactionLogin) {
-            //             // After successful DB login for transaction, show user login
-            //             cardLayout.show(cardPanel, "User Log In");
-            //             isTransactionLogin = false;
-            //         } else {
-            //             // Regular database access
-            //             cardLayout.show(cardPanel, "Access Database");
-            //         }
-            //     }
-            // }
-    
-            if(e.getSource()==newUser.okBtn){
-                newUserInfo();
-            }
-    
-            if(e.getSource()==updateUser.okBtn){
-                updateUserInfo();
-            }
-    
-            if(e.getSource() ==newUser.exitBtn||e.getSource() ==readUser.exitBtn||e.getSource() ==updateUser.exitBtn||e.getSource()==deleteUser.exitBtn||e.getSource()==askUID.exitBtn||e.getSource()==fileImport){
-                cardLayout.show(cardPanel, "Access Database");
-            }
-    
-            if(e.getSource() == deleteUser.okBtn) {
-                if (deleteUser.deleteUserFromDatabase()) {
-                    JOptionPane.showMessageDialog(
-                        this, "User deleted successfully!", 
-                        "Success", JOptionPane.INFORMATION_MESSAGE
-                    );
-                } else {
-                    JOptionPane.showMessageDialog(
-                        this, "Failed to delete user.", 
-                        "Error", JOptionPane.ERROR_MESSAGE
-                    );
-                }
-                cardLayout.show(cardPanel, "Access Database");
-            }
-        } 
-    
-        if(e.getSource() == userLogIn.okBtn || e.getSource()==debit.exitBtn || e.getSource()== credit.exitBtn || e.getSource()==balance.exitBtn){
-            if(e.getSource() == userLogIn.okBtn){
-                logInUserInfo();
-                transaction.setAccountType(userLogIn.isDebitSelected());
-                transaction.set_buttons();
-            }
-    
-            if (e.getSource()==debit.exitBtn||e.getSource()== credit.exitBtn||e.getSource()==balance.exitBtn) {
-                cardLayout.show(cardPanel, "Transaction");
-            }
-        }
-
-        if( e.getSource()==loanPanel.backBtn || e.getSource()==repayPanel.backBtn|| e.getSource()==depositPanel.backBtn|| e.getSource()==withdrawPanel.backBtn){
-            System.out.println("why are you not working");
-            cardLayout.show(cardPanel, "Transaction");
-        }
-
-
-
-    //Prompt for credit transaction if chosen
-    if(e.getSource() == depositPanel.okBtn ||e.getSource() == loanPanel.okBtn||e.getSource() == repayPanel.okBtn ){
-        if (e.getSource() == loanPanel.okBtn) {
-            amountOfLoan();
-        }else if (e.getSource() == depositPanel.okBtn) {
-            amountOfDeposit();
-        }else if (e.getSource() == repayPanel.okBtn) {
-            amountOfRepay();
-        }else{
-            cardLayout.show(cardPanel, "Credit");
-        }
-    }
-
-    //Prompt for debit transaction if chosen
-    if(e.getSource() == withdrawPanel.okBtn||e.getSource()==transferMoney.okBtn){
-        if(e.getSource() == withdrawPanel.okBtn){
-            amountOfWithdraw();
-        }else if(e.getSource()==transferMoney.okBtn){
-            TransferMoneyInfo();
-        }else{
-            cardLayout.show(cardPanel, "Debit");
-        }
-        
-    }
-
-    //Prompt the employee to input details if create account is clicked
-    if(e.getSource() == accessDB.createUserBtn) {
-        cardLayout.show(cardPanel, "Account Creation Selection");
-    }
-
-    if(e.getSource() == accountCreationSelection.getNewUserBtn()) {
-        cardLayout.show(cardPanel, "Create New User");
-    }
-
-    if(e.getSource() == accountCreationSelection.getNewCardBtn()) {
-        createNewCard.setConnection(connection);
-        cardLayout.show(cardPanel, "Create New Card");
-    }
-
-    if(e.getSource() == accountCreationSelection.getExitBtn()||e.getSource()==fileExport.backBtn||e.getSource()==fileImport.backBtn) {
-        cardLayout.show(cardPanel, "Access Database");
-    }
-
-    if(e.getSource() == createNewCard.getOkBtn()) {
-        if(createNewCard.createCardInDatabase()) {
-            cardLayout.show(cardPanel, "Access Database");
-        }
-    }
-
-    if(e.getSource() == createNewCard.getExitBtn() ) {
-        cardLayout.show(cardPanel, "Account Creation Selection");
-    }
-
-
-    //Prompt if the employee clicked the read user button
-    if(e.getSource() == accessDB.readUserBtn){
-        System.out.println("Read User button clicked");
-        
-        if (connection != null) {
-            try {
-                if (connection.isValid(5)) {
-                    readUser.setConnection(connection);
-                    readUser.loadUserData();
-                    cardLayout.show(cardPanel, "Read User");
-                } else {
-                    JOptionPane.showMessageDialog(this, 
-                        "Database connection is no longer valid. Please reconnect.",
-                        "Connection Error", JOptionPane.ERROR_MESSAGE);
-                }
-            } catch (SQLException ex) {
-                JOptionPane.showMessageDialog(this, 
-                    "Error checking database connection: " + ex.getMessage(),
-                    "Database Error", JOptionPane.ERROR_MESSAGE);
-                ex.printStackTrace();
-            }
-        } else {
-            JOptionPane.showMessageDialog(this, 
-                "Database connection is not established.",
-                "Error", JOptionPane.ERROR_MESSAGE);
-        }
-    }
-
-    //Prompt if the employee clicked the update user button
-    if(e.getSource() == accessDB.updateUserBtn){
-        cardLayout.show(cardPanel, "Ask UID");
-    }
-
-    //Prompt if the employee want to update the info and the user id matches something on the database
-    if(e.getSource() == askUID.okBtn){
-        String uidStr = askUID.uidtxt.getText();
-        askUID.uidtxt.setText("");
-        
-        try {
-            int userId = Integer.parseInt(uidStr);
-            
-            // Verify user exists
-            if (connection != null) {
-                String sql = "SELECT user_id FROM bank_users WHERE user_id = ?";
-                PreparedStatement stmt = connection.prepareStatement(sql);
-                stmt.setInt(1, userId);
-                ResultSet rs = stmt.executeQuery();
-                
-                if (rs.next()) {
-                    // User exists, switch to update mode
-                    updateUser.setUpdateMode(true, userId);
-                    cardLayout.show(cardPanel, "Update User");
-                } else {
-                    JOptionPane.showMessageDialog(this, "User ID not found", 
-                        "Error", JOptionPane.ERROR_MESSAGE);
-                }
-            } else {
-                JOptionPane.showMessageDialog(this, "Database connection not established", 
-                    "Error", JOptionPane.ERROR_MESSAGE);
-            }
-        } catch (NumberFormatException ex) {
-            JOptionPane.showMessageDialog(this, "Please enter a valid numeric User ID", 
-                "Input Error", JOptionPane.ERROR_MESSAGE);
-        } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(this, "Database error: " + ex.getMessage(), 
-                "Error", JOptionPane.ERROR_MESSAGE);
-        }
-    }
-
-    //Prompt if the employee want to delete a user from the database
-    if(e.getSource() == accessDB.deleteUserBtn){
-        cardLayout.show(cardPanel, "Delete User");
-    }
-
-    if(e.getSource()==transaction.balanceBtn){
-        this.getUsername();
-        this.getBalance();
-        cardLayout.show(cardPanel, "Balance");
-    }
-
-    //This ask the amount of money to be deposited: Amount Panel
-    if(e.getSource() == credit.depositBtn){
-        cardLayout.show(cardPanel, "Deposit Panel");
-    }
-
-    //This ask the amount of money to be loaned: Amount Panel
-    if(e.getSource() == credit.loanBtn){
-        cardLayout.show(cardPanel, "Loan Panel");
-    }
-
-    //This ask the amount of money to repay: Amount Panel
-    if(e.getSource() == credit.repayLoanBtn){
-        cardLayout.show(cardPanel, "Repay Panel");
-    }
-
-    //This ask the amount of money to withdraw: Amount Panel
-    if(e.getSource() == debit.withdrawBtn){
-        cardLayout.show(cardPanel, "Withdraw Panel");
-    }
-
-    //This ask the amount of money to transfer and the uid of the receiver: TransferMoney Panel
-    if(e.getSource() == debit.transferMoneyBtn){
-        cardLayout.show(cardPanel, "Transfer Money");
-    }
-
-
-    //To close the program
-    if(e.getSource()==menu.closeBtn){
-        System.out.println("Exitingg..");
-        System.exit(0);
-    }
+    private void setConnections(Connection conn){
+        this.connection = conn;
+        System.out.println(connection);
+        newUser.setConnection(conn); 
+        readUser.setConnection(conn);
+        updateUser.setConnection(conn);
+        deleteUser.setConnection(conn);
+        transactionHistory.setConnection(conn);
+        fileImport.setConnection(conn);
+        fileExport.setConnection(conn);
+        model.setConnection(conn);
     }
 
     //main class
     public static void main(String[] args) {
-        new MainFrame();
+        MainFrame mf = new MainFrame();
+        mf.DBConnection = new DBConnect();
+        mf.model = new Model();
+        mf.setConnections(mf.DBConnection.getConnection());
+            
         System.out.println("Sakses");
     }
 }

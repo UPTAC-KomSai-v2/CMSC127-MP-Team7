@@ -15,7 +15,7 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
 public class Debit extends JPanel{
-    public JButton transferMoneyBtn, withdrawBtn, exitBtn;
+    private JButton transferMoneyBtn, withdrawBtn, exitBtn;
     Dimension size;
     GridBagConstraints gbc;
     Image bg, logo;
@@ -75,6 +75,16 @@ public class Debit extends JPanel{
         }
         g.setColor(Color.WHITE);
         g.fillRect(70, 30, getWidth() - 80, 2);
+    }
+
+    public JButton getTransferMoneyBtn(){
+        return transferMoneyBtn;
+    }
+    public JButton getWithdrawBtn(){
+        return withdrawBtn;
+    }
+    public JButton getExitBtn(){
+        return exitBtn;
     }
 
     public static void main(String[] args) {

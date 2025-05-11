@@ -11,7 +11,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.Statement;
@@ -33,9 +32,9 @@ import org.json.JSONObject;
 
 public class Export extends JPanel {
     JLabel exportlbl, cidlbl, tablelbl, fileTypelbl;
-    public JButton okBtn, backBtn;
-    public JTextField cidtxt, moneytxt;
-    public JComboBox<String> fileType, table;
+    private JButton okBtn, backBtn;
+    private JTextField cidtxt, moneytxt;
+    private JComboBox<String> fileType, table;
     Dimension size;
     GridBagConstraints gbc;
     Image bg;
@@ -206,6 +205,14 @@ public class Export extends JPanel {
     public void setConnection(Connection conn){
         this.conn = conn;
     }
+
+    public JButton getOkBtn(){
+        return okBtn;
+    }
+    public JButton getBackBtn(){
+        return backBtn;
+    }
+
 
     public void exportTableToCSV(Connection conn, String tableName, String filePath) {
         String query = "SELECT * FROM " + tableName;

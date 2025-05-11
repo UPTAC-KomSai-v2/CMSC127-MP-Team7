@@ -27,7 +27,11 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 
 import org.json.JSONArray;
@@ -36,9 +40,9 @@ import org.json.JSONTokener;
 
 public class Import extends JPanel {
     JLabel exportlbl, cidlbl, tablelbl, fileTypelbl;
-    public JButton okBtn, backBtn;
-    public JTextField cidtxt, moneytxt;
-    public JComboBox<String> fileType, table;
+    private JButton okBtn, backBtn;
+    private JTextField cidtxt, moneytxt;
+    private JComboBox<String> fileType, table;
     Dimension size;
     GridBagConstraints gbc;
     Image bg;
@@ -169,6 +173,13 @@ public class Import extends JPanel {
         this.conn = conn;
     }
 
+    public JButton getOkBtn(){
+        return okBtn;
+    }
+    public JButton getBackBtn(){
+        return backBtn;
+    }
+
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -271,6 +282,20 @@ public class Import extends JPanel {
         String valPart = columns.stream().map(c -> "?").collect(Collectors.joining(", "));
         return "INSERT INTO " + tableName + " (" + colPart + ") VALUES (" + valPart + ")";
     }
+    public JTextField getCidtxt(){
+        return cidtxt;
+    }
+    public JTextField getMoneytxt(){
+        return moneytxt;
+    }
+
+    public JComboBox<String> getFileType(){
+        return fileType;
+    }
+    public JComboBox<String> getTable(){
+        return table;
+    }
+
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {

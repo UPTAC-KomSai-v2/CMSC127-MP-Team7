@@ -20,8 +20,8 @@ public class Amount extends JPanel{
     JLabel money;
     GridBagConstraints gbc;
     Dimension size;
-    public JTextField input;
-    public JButton okBtn, backBtn;
+    private JTextField input;
+    private JButton okBtn, backBtn;
     Image bg;
 
     public Amount(){
@@ -82,6 +82,14 @@ public class Amount extends JPanel{
 
     }
 
+    public JButton getOkBtn(){
+        return okBtn;
+    }
+
+    public JButton getBackBtn(){
+        return backBtn;
+    }
+
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -90,7 +98,12 @@ public class Amount extends JPanel{
         }
     }
 
-        public static void main(String[] args) {
+    public JTextField getInput(){
+        return input;
+    }
+
+
+    public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
             JFrame frame = new JFrame("User Balance");
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

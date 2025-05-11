@@ -19,9 +19,9 @@ import javax.swing.SwingUtilities;
 
 public class TransferMoney extends JPanel {
     JLabel transferToLbl, cidlbl, moneylbl, receiveAccTypeLbl;
-    public JButton okBtn, exitBtn;
-    public JTextField cidtxt, moneytxt;
-    public JComboBox<String> receiveAccTypeCBX;
+    private JButton okBtn, exitBtn;
+    private JTextField cidtxt, moneytxt;
+    private JComboBox<String> receiveAccTypeCBX;
     Dimension size;
     GridBagConstraints gbc;
     Image bg;
@@ -140,6 +140,24 @@ public class TransferMoney extends JPanel {
         gbc.anchor = GridBagConstraints.EAST;
         add(exitBtn, gbc);
     }
+    public JButton getOkBtn(){
+        return okBtn;
+    }
+    public JButton getExitBtn(){
+        return exitBtn;
+    }
+
+    public JTextField getCidtxt(){
+        return cidtxt;
+    }
+    public JTextField getMoneytxt(){
+        return moneytxt;
+    }
+
+    public JComboBox<String> getReceiveAccTypeCBX(){
+        return receiveAccTypeCBX;
+    }
+
 
     @Override
     protected void paintComponent(Graphics g) {

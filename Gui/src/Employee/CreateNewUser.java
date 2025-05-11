@@ -20,8 +20,8 @@ import javax.swing.JTextField;
 
 public class CreateNewUser extends JPanel {
     JLabel firstNamelbl, lastNamelbl, emaillbl;
-    public JTextField firstNametxt, lastNametxt, emailtxt;
-    public JButton okBtn, exitBtn;
+    private JTextField firstNametxt, lastNametxt, emailtxt;
+    private JButton okBtn, exitBtn;
     Dimension size;
     GridBagConstraints gbc;
     Image bg;
@@ -133,6 +133,13 @@ public class CreateNewUser extends JPanel {
         this.connection = connection;
     }
     
+    public JButton getOkBtn(){
+        return okBtn;
+    }
+    public JButton getExitBtn(){
+        return exitBtn;
+    }
+
     public void clearFields() {
         firstNametxt.setText("");
         lastNametxt.setText("");
@@ -267,6 +274,16 @@ public class CreateNewUser extends JPanel {
             return false;
         }
     }
+    public JTextField getFirstNametxt(){
+        return firstNametxt;
+    }
+    public JTextField getLastNametxt(){
+        return lastNametxt;
+    }
+    public JTextField getEmailtxt(){
+        return emailtxt;
+    }
+
     
     @Override
     protected void paintComponent(Graphics g) {
