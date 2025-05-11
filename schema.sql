@@ -21,6 +21,7 @@ CREATE TABLE `bank_users` (
 
 CREATE TABLE `bank_staff` (
   `staff_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_name` varchar(100) NOT NULL UNIQUE,
   `first_name` varchar(100) NOT NULL,
   `last_name` varchar(100) NOT NULL,
   `email` varchar(100) NOT NULL,
