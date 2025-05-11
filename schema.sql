@@ -176,6 +176,19 @@ VALUES
   ('Ivy', 'Green', 'ivy@example.com'),
   ('Jack', 'Gray', 'jack@example.com');
 
+INSERT INTO bank_staff (user_name, first_name, last_name, email)
+VALUES
+  ('jsmith', 'John', 'Smith', 'john.smith@bank.com'),
+  ('adoe', 'Alice', 'Doe', 'alice.doe@bank.com'),
+  ('bwilliams', 'Bob', 'Williams', 'bob.williams@bank.com'),
+  ('cjones', 'Carol', 'Jones', 'carol.jones@bank.com'),
+  ('dlee', 'David', 'Lee', 'david.lee@bank.com'),
+  ('eclark', 'Eva', 'Clark', 'eva.clark@bank.com'),
+  ('fmiller', 'Frank', 'Miller', 'frank.miller@bank.com'),
+  ('gwhite', 'Grace', 'White', 'grace.white@bank.com'),
+  ('hblack', 'Henry', 'Black', 'henry.black@bank.com'),
+  ('igreen', 'Ivy', 'Green', 'ivy.green@bank.com');
+
 INSERT INTO credit_accounts (user_id, pin)
 VALUES
   (1, 1234),
