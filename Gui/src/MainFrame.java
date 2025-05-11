@@ -26,7 +26,6 @@ import Connectivity.*;
 public class MainFrame extends JFrame {
     private DBConnect DBConnection;
     private Model model;
-    private static final int max_loan = 50000;
 
     private CardLayout cardLayout;
     private JPanel cardPanel;
