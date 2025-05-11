@@ -19,14 +19,16 @@ public class Model {
         this.connection = connection;
     }
 
-    public ResultSet logInUserInfo(int cid, int pin, int accTypeIDX) throws SQLException{
+    public boolean logInUserInfo(int cid, int pin, int accTypeIDX) throws SQLException{
         if (connection == null) {
             System.out.println("Database is not connected. Please connect first.");
-            return null;
+            return false;
         }
 
         currAccTypeNum = accTypeIDX;
-
+        System.out.println("Account Type Index: " + accTypeIDX);
+        System.out.println("Card ID: " + cid);
+        System.out.println("Pin: " + pin);
         String sql = """
         SELECT 'debit' AS account_type FROM debit_accounts WHERE debit_id = ? AND pin = ?
         """;
@@ -53,10 +55,9 @@ public class Model {
             currAccType = accountType;
             currCardID = cid;
             System.out.println("Login successful. Account type: " + accountType);
-            rs.previous();
         }
         pstmt.close();
-        return rs;
+        return true;
     }
 
     public boolean processLoan(double amount) {

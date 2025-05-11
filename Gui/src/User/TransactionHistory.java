@@ -359,7 +359,7 @@ public class TransactionHistory extends JPanel {
             String doubleTransactionQuery_Credit = """
                 SELECT transaction_id, amount 
                 FROM double_transactions_credit 
-                WHERE credit_id = ? > 0
+                WHERE credit_id = ? AND amount > 0
                 """;
             try (
                 PreparedStatement dstmt = connection.prepareStatement(doubleTransactionQuery_Credit);

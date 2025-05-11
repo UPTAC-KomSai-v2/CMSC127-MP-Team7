@@ -330,6 +330,7 @@ public class MainFrame extends JFrame {
     ActionListener goToTransactionHistory = new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
+            transactionHistory.loadUserData();
             cardLayout.show(cardPanel, "Transaction History");
         }
     };
@@ -559,8 +560,7 @@ public class MainFrame extends JFrame {
 
 
         try {
-            ResultSet rs = model.logInUserInfo(cid, pin, accTypeIDX);
-            if (rs.next()) {
+            if (model.logInUserInfo(cid, pin, accTypeIDX)) {
                 transactionHistory.accType = accTypeIDX;
                 transactionHistory.cid = cid;
                 cardLayout.show(cardPanel, "Transaction");
