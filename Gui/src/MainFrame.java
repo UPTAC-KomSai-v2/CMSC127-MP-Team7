@@ -61,6 +61,9 @@ public class MainFrame extends JFrame {
         @Override
         public void actionPerformed(ActionEvent e) {
             cardLayout.show(cardPanel, "Access Database");
+            if(e.getSource()==readUser.getExitBtn()){
+                readUser.resetView();
+            }
         }
     };
 
