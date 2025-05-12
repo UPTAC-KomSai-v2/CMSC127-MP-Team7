@@ -821,6 +821,7 @@ public class MainFrame extends JFrame {
         fileImport.setConnection(conn);
         fileExport.setConnection(conn);
         model.setConnection(conn);
+        
     }
 
     //main class
@@ -829,7 +830,6 @@ public class MainFrame extends JFrame {
         mf.DBConnection = new DBConnect();
         mf.model = new Model();
         mf.setConnections(mf.DBConnection.getConnection());
-            
         System.out.println("Sakses");
     }
 }
