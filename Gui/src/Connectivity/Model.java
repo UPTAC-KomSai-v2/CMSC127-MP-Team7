@@ -176,7 +176,7 @@ public class Model {
             stmt = connection.prepareStatement(query);
             stmt.setInt(1, transactionID);
             stmt.setInt(2, currCardID);
-            stmt.setDouble(3, -amount);
+            stmt.setDouble(3, amount);
             stmt.executeUpdate();
             stmt.close();
             
