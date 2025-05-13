@@ -164,31 +164,31 @@ $$
 DELIMITER ;
 
 
-INSERT INTO bank_users (first_name, last_name, email, pin)
+INSERT INTO bank_users (first_name, last_name, email)
 VALUES
-  ('Alice', 'Smith', 'alice@example.com', 1234),
-  ('Bob', 'Johnson', 'bob@example.com', 1234),
-  ('Carol', 'Lee', 'carol@example.com', 1234),
-  ('David', 'Kim', 'david@example.com', 1234),
-  ('Eva', 'Brown', 'eva@example.com', 1234),
-  ('Frank', 'White', 'frank@example.com', 1234),
-  ('Grace', 'Young', 'grace@example.com', 1234),
-  ('Henry', 'Black', 'henry@example.com', 1234),
-  ('Ivy', 'Green', 'ivy@example.com', 1234),
-  ('Jack', 'Gray', 'jack@example.com', 1234);
+  ('Alice', 'Smith', 'alice@example.com' ),
+  ('Bob', 'Johnson', 'bob@example.com' ),
+  ('Carol', 'Lee', 'carol@example.com' ),
+  ('David', 'Kim', 'david@example.com' ),
+  ('Eva', 'Brown', 'eva@example.com' ),
+  ('Frank', 'White', 'frank@example.com' ),
+  ('Grace', 'Young', 'grace@example.com' ),
+  ('Henry', 'Black', 'henry@example.com' ),
+  ('Ivy', 'Green', 'ivy@example.com' ),
+  ('Jack', 'Gray', 'jack@example.com' );
 
-INSERT INTO bank_staff (user_name, first_name, last_name, email)
+INSERT INTO bank_staff (user_name, first_name, last_name, email, pin)
 VALUES
-  ('jsmith', 'John', 'Smith', 'john.smith@bank.com'),
-  ('adoe', 'Alice', 'Doe', 'alice.doe@bank.com'),
-  ('bwilliams', 'Bob', 'Williams', 'bob.williams@bank.com'),
-  ('cjones', 'Carol', 'Jones', 'carol.jones@bank.com'),
-  ('dlee', 'David', 'Lee', 'david.lee@bank.com'),
-  ('eclark', 'Eva', 'Clark', 'eva.clark@bank.com'),
-  ('fmiller', 'Frank', 'Miller', 'frank.miller@bank.com'),
-  ('gwhite', 'Grace', 'White', 'grace.white@bank.com'),
-  ('hblack', 'Henry', 'Black', 'henry.black@bank.com'),
-  ('igreen', 'Ivy', 'Green', 'ivy.green@bank.com');
+  ('jsmith', 'John', 'Smith', 'john.smith@bank.com', 1234),
+  ('adoe', 'Alice', 'Doe', 'alice.doe@bank.com', 1234),
+  ('bwilliams', 'Bob', 'Williams', 'bob.williams@bank.com', 1234),
+  ('cjones', 'Carol', 'Jones', 'carol.jones@bank.com', 1234),
+  ('dlee', 'David', 'Lee', 'david.lee@bank.com', 1234),
+  ('eclark', 'Eva', 'Clark', 'eva.clark@bank.com', 1234),
+  ('fmiller', 'Frank', 'Miller', 'frank.miller@bank.com', 1234),
+  ('gwhite', 'Grace', 'White', 'grace.white@bank.com', 1234),
+  ('hblack', 'Henry', 'Black', 'henry.black@bank.com', 1234),
+  ('igreen', 'Ivy', 'Green', 'ivy.green@bank.com', 1234);
 
 INSERT INTO credit_accounts (user_id, pin)
 VALUES
