@@ -390,6 +390,7 @@ public class Model {
                 stmt.executeUpdate();
                 stmt.close();
             } catch (SQLException e) {
+                connection.rollback();
                 JOptionPane.showMessageDialog(
                     null,
                     "SQL Error Message:\n" + e.getMessage(), 
