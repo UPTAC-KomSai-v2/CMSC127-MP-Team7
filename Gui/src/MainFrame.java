@@ -373,7 +373,13 @@ public class MainFrame extends JFrame {
     ActionListener transferingMoney = new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
-            TransferMoneyInfo();
+            try{
+                TransferMoneyInfo();
+            }
+            catch(NumberFormatException error){
+                JOptionPane.showMessageDialog(self, "Please use numeric input:\n" + error.getMessage(), 
+                    "Transfer Error", JOptionPane.ERROR_MESSAGE);
+            }
         }
     };
     public MainFrame() {
@@ -753,6 +759,7 @@ public void logAdminInfo() {
 
 
     public void TransferMoneyInfo(){
+        
         String amount = transferMoney.getMoneytxt().getText();
         String cid = transferMoney.getCidtxt().getText();
         if (amount.isEmpty() || cid.isEmpty()) {
