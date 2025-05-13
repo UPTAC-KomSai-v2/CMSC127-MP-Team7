@@ -214,7 +214,7 @@ public class TransactionHistory extends JPanel {
                     if (rs2.next()) {
                         String[] row = {
                             String.valueOf(tr_id),
-                            String.valueOf(doubleTransaction.getDouble("amount") * -1),
+                            String.valueOf(doubleTransaction.getDouble("amount")),
                             rs2.getString("debit_id"),
                             rs2.getString("account_type")
                         };
@@ -222,7 +222,7 @@ public class TransactionHistory extends JPanel {
                     } else if (rs3.next()) {
                         String[] row = {
                             String.valueOf(tr_id),
-                            String.valueOf(doubleTransaction.getDouble("amount") * -1),
+                            String.valueOf(doubleTransaction.getDouble("amount")),
                             rs3.getString("credit_id"),
                             rs3.getString("account_type")
                         };
@@ -231,7 +231,6 @@ public class TransactionHistory extends JPanel {
                     rs2.close();
                     rs3.close();
                 }
-                dTrnsc_tbl.setModel(dTableModel);
                 dstmt.close();
                 dstmt2.close();
                 dstmt3.close();
@@ -263,7 +262,7 @@ public class TransactionHistory extends JPanel {
                     if (rs2.next()) {
                         String[] row = {
                             String.valueOf(tr_id),
-                            String.valueOf(doubleTransaction.getDouble("amount") * -1),
+                            String.valueOf(doubleTransaction.getDouble("amount")),
                             rs2.getString("debit_id"),
                             rs2.getString("account_type")
                         };
@@ -271,7 +270,7 @@ public class TransactionHistory extends JPanel {
                     } else if (rs3.next()) {
                         String[] row = {
                             String.valueOf(tr_id),
-                            String.valueOf(doubleTransaction.getDouble("amount") * -1),
+                            String.valueOf(doubleTransaction.getDouble("amount")),
                             rs3.getString("credit_id"),
                             rs3.getString("account_type")
                         };
@@ -280,7 +279,6 @@ public class TransactionHistory extends JPanel {
                     rs2.close();
                     rs3.close();
                 }
-                dTrnsc_tbl.setModel(dTableModel);
                 dstmt.close();
                 dstmt2.close();
                 dstmt3.close();
@@ -343,7 +341,6 @@ public class TransactionHistory extends JPanel {
                     rs2.close();
                     rs3.close();
                 }
-                dTrnsc_tbl.setModel(dTableModel);
                 dstmt.close();
                 dstmt2.close();
                 dstmt3.close();
@@ -392,7 +389,6 @@ public class TransactionHistory extends JPanel {
                     rs2.close();
                     rs3.close();
                 }
-                dTrnsc_tbl.setModel(dTableModel);
                 dstmt.close();
                 dstmt2.close();
                 dstmt3.close();
