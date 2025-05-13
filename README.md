@@ -39,6 +39,16 @@ java -jar CMSC127-MP-Team7.java
 Or just running it as an application on your pc using the Java Runtime Environment.
 Remember to use Java 21 or higher otherwise it will not run.
 
-### With ????
+### Using the JAR File
 
-(insert other guide here)
+Just run the JAR file using the JRE 21+ or JDK 21+. You can also run it in the command line or terminal using these commands:
+
+```
+java -jar <insert JAR filename here>
+```
+
+## App Guide
+
+This is a banking app.
+
+
