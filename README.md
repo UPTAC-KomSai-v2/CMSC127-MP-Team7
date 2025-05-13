@@ -20,7 +20,7 @@ mysql -p -u <username> <database> < schema.sql
 
 Then replace the values in the DefaultCredentials.txt for automatically logging into the database.
 
-## How to run/build
+## How to Run / Build
 
 ### With VSCode
 
@@ -46,6 +46,10 @@ Just run the JAR file using the JRE 21+ or JDK 21+. You can also run it in the c
 ```
 java -jar <insert JAR filename here>
 ```
+
+### Using the EXE File
+
+Just run the file. It should be called `BankingAppV1.0.exe`
 
 ## App Manual
 
