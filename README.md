@@ -76,7 +76,7 @@ The main menu features the buttons **Access Database**, **Transaction**, and **C
 : Deletes a specified user given their id, before the delete is implemented, it would display the information of the user.
 
 **Import/Export**
-: Brings you to a menu where you would select a file type between JSON or CSV
+: Brings you to a menu where you would select a file type between JSON or CSV to import or export to a specific table in the database.
 
 **Log Out**
 : Brings you back to the main menu, logging you out of the admin options
