@@ -55,9 +55,11 @@ public class Model {
             currAccType = accountType;
             currCardID = cid;
             System.out.println("Login successful. Account type: " + accountType);
+            pstmt.close();
+            return true;
         }
         pstmt.close();
-        return true;
+        return false;
     }
 
     public boolean processLoan(double amount) {

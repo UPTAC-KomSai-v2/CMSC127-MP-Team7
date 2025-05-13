@@ -11,6 +11,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -28,6 +31,8 @@ public class CreateNewUser extends JPanel {
     private Connection connection;
     private boolean isUpdateMode = false;
     private int currentUserId = -1;
+    public static final Pattern VALID_EMAIL_ADDRESS_REGEX = Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE);
+    public static final Pattern VALID_NAME_REGEX = Pattern.compile("^[a-zA-Z]*$", Pattern.CASE_INSENSITIVE);
 
     public CreateNewUser() {
         setLayout(new GridBagLayout());
@@ -146,6 +151,16 @@ public class CreateNewUser extends JPanel {
         emailtxt.setText("");
     }
 
+    public static boolean validateEmail(String emailStr) {
+        Matcher matcher = VALID_EMAIL_ADDRESS_REGEX.matcher(emailStr);
+        return matcher.matches();
+    }
+
+    public static boolean validateName(String nameStr) {
+        Matcher matcher = VALID_NAME_REGEX.matcher(nameStr);
+        return matcher.matches();
+    }
+
     public boolean createUserInDatabase() {
         if (connection == null) {
             JOptionPane.showMessageDialog(this, "Database connection is not established", 
@@ -167,6 +182,10 @@ public class CreateNewUser extends JPanel {
             String lastName = lastNametxt.getText().trim();
             String email = emailtxt.getText().trim();
             
+
+            if(!validateEmail(email) || !validateName(firstName) || !validateName(lastName)){
+                throw new SQLException("Please check if name or email is valid.");
+            }
             String sql = "INSERT INTO bank_users (first_name, last_name, email) VALUES (?, ?, ?)";
             PreparedStatement stmt = connection.prepareStatement(sql);
             stmt.setString(1, firstName);
