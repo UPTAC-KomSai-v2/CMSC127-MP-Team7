@@ -51,4 +51,37 @@ java -jar <insert JAR filename here>
 
 This is a banking app.
 
+The main menu features the buttons "Access Data Base", "Transaction", and "Close" button.
+
+Access Data base - > Brings you to the admin login page where in order to acces the admin options you need to input the correct username and password
+
+Transaction - > Brings you to the account login page where you input the details of your account and if its correct your credentials will be used for input and outputs for the database.
+
+Create new Account - > brings you to a menu where you can either create a new user or a new credit/debit card. For the new card, you would need to input the id of a user to attach the new account to.
+
+Show all accounts - > brings you to a menu where you can view all of the users, credit accounts, and debit accounts.
+
+Update account - > brings you to a menu where you are required to put the id of a user to update. Before bringing you to the change menu, the information of the account will be displayed in case you get the wrong id
+
+Delete account - > deletes a specified user given their id, before the delete is implemented, it would display the information of the user.
+
+Import/Export - > brings you to a menu where you would select a file type between JSON or CSV
+
+Log Out - > brings you back to the main menu, logging you out of the admin options
+
+When being brought to the user account:
+
+Balance - > displays account balance
+
+Transfer - > asks for another accounts details and transfers funds to the other account
+
+History - > displays all transactions made using the account
+
+Deposit - > deposits funds into the account
+
+Withdraw - > withdraws money from the account
+
+Log out - > brings you back to the main menu
+
+
 
