@@ -35,6 +35,7 @@ public class TransactionHistory extends JPanel {
     Image bg;
     private String[] sTrnsctCols = {"Transaction ID", "Transfer Amount"};
     private String[] dTrnsctCols = {"Transaction ID", "Transfer Amount", "Recepient/Sender ID", "Account Type"};
+    DefaultTableModel dTableModel;
     private Connection connection;
     private DefaultTableModel sTrnsctTblMdl, dTrnsctTblMdl;
     private JLabel label1, label2;
@@ -204,7 +205,6 @@ public class TransactionHistory extends JPanel {
             ){
                 dstmt.setInt(1, cid);
                 ResultSet doubleTransaction = dstmt.executeQuery();
-                DefaultTableModel dTableModel = createTableModel(dTrnsctCols);
                 while(doubleTransaction.next()) {
                     int tr_id = doubleTransaction.getInt("transaction_id");
                     dstmt2.setInt(1, tr_id);
@@ -254,7 +254,6 @@ public class TransactionHistory extends JPanel {
             ){
                 dstmt.setInt(1, cid);
                 ResultSet doubleTransaction = dstmt.executeQuery();
-                DefaultTableModel dTableModel = createTableModel(dTrnsctCols);
                 while(doubleTransaction.next()) {
                     int tr_id = doubleTransaction.getInt("transaction_id");
                     dstmt2.setInt(1, tr_id);
@@ -318,7 +317,6 @@ public class TransactionHistory extends JPanel {
             ){
                 dstmt.setInt(1, cid);
                 ResultSet doubleTransaction = dstmt.executeQuery();
-                DefaultTableModel dTableModel = createTableModel(dTrnsctCols);
                 while(doubleTransaction.next()) {
                     int tr_id = doubleTransaction.getInt("transaction_id");
                     dstmt2.setInt(1, tr_id);
@@ -368,7 +366,6 @@ public class TransactionHistory extends JPanel {
             ){
                 dstmt.setInt(1, cid);
                 ResultSet doubleTransaction = dstmt.executeQuery();
-                DefaultTableModel dTableModel = createTableModel(dTrnsctCols);
                 while(doubleTransaction.next()) {
                     int tr_id = doubleTransaction.getInt("transaction_id");
                     dstmt2.setInt(1, tr_id);
@@ -423,8 +420,10 @@ public class TransactionHistory extends JPanel {
                 getSingleTransactionHistory();
                 
                 // Get Double Transaction Data
+                dTableModel = createTableModel(dTrnsctCols);
                 getOutgoingDoubleTransactionHistory();
                 getIncomingDoubleTransactionHistory();
+                dTrnsc_tbl.setModel(dTableModel);
                 
             } else {
                 JOptionPane.showMessageDialog(this, 

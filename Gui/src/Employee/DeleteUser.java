@@ -9,6 +9,7 @@ import java.awt.Image;
 import java.awt.Insets;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -81,9 +82,14 @@ public class DeleteUser extends JPanel {
         exitBtn.setBackground(Color.white);
         exitBtn.setHorizontalAlignment(SwingConstants.CENTER);
         exitBtn.setVerticalAlignment(SwingConstants.CENTER);
+        exitBtn.addActionListener(e -> clearFields());
 
         gbc.gridy = 2;
         add(exitBtn, gbc);
+    }
+
+    private void clearFields() {
+        uidtxt.setText("");
     }
 
     public void setConnection(Connection connection) {
@@ -97,6 +103,24 @@ public class DeleteUser extends JPanel {
         return exitBtn;
     }
 
+    private String getUserInfo(int userId) throws SQLException {
+        String sql = "SELECT first_name, last_name, email FROM bank_users WHERE user_id = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, userId);
+            ResultSet rs = stmt.executeQuery();
+            
+            if (rs.next()) {
+                String firstName = rs.getString("first_name");
+                String lastName = rs.getString("last_name");
+                String email = rs.getString("email");
+                
+                return String.format(
+                    "User ID: %d%nName: %s %s%nEmail: %s", 
+                    userId, firstName, lastName, email);
+            }
+            return null;
+        }
+    }
 
     public boolean deleteUserFromDatabase() {
         if (connection == null) {
@@ -117,14 +141,26 @@ public class DeleteUser extends JPanel {
         try {
             int userId = Integer.parseInt(userIdStr);
             
-            // Confirm deletion
+            String userInfo = getUserInfo(userId);
+            if (userInfo == null) {
+                JOptionPane.showMessageDialog(this, 
+                    "No user found with ID: " + userId, 
+                    "Error", JOptionPane.ERROR_MESSAGE);
+                return false;
+            }
+            
+            String message = "User to be deleted:\n\n" + userInfo + 
+                           "\n\nAre you sure you want to delete this user?";
+            
             int confirm = JOptionPane.showConfirmDialog(
                 this, 
-                "Are you sure you want to delete user with ID: " + userId + "?",
+                message,
                 "Confirm Deletion",
-                JOptionPane.YES_NO_OPTION);
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.WARNING_MESSAGE);
             
             if (confirm != JOptionPane.YES_OPTION) {
+                clearFields();
                 return false;
             }
 
@@ -137,12 +173,13 @@ public class DeleteUser extends JPanel {
                     JOptionPane.showMessageDialog(this, 
                         "User deleted successfully!", 
                         "Success", JOptionPane.INFORMATION_MESSAGE);
-                    uidtxt.setText("");
+                    clearFields();
                     return true;
                 } else {
                     JOptionPane.showMessageDialog(this, 
                         "No user found with ID: " + userId, 
                         "Error", JOptionPane.ERROR_MESSAGE);
+                    clearFields();
                     return false;
                 }
             }
@@ -167,10 +204,10 @@ public class DeleteUser extends JPanel {
             g.drawImage(bg, 0, 0, getWidth(), getHeight(), this);
         }
     }
+    
     public JTextField getUidtxt(){
         return uidtxt;
     }
-
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {

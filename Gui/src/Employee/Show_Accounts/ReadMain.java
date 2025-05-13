@@ -1,6 +1,5 @@
 package Employee.Show_Accounts;
 
-
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -9,24 +8,28 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
 public class ReadMain extends JPanel implements ActionListener {
-    JPanel upperPanel, lowerPanel, holderPanel;
-    GridBagConstraints gbc;
-    Dimension size;
-    Image bg;
-    private JButton showAllAccBtn, showUserCredAccBtn, showDebitAccbtn, exitBtn;
-    CardLayout cardLayout = new CardLayout();
-    ShowAllUsers readUser = new ShowAllUsers();
-    ShowCredit creditUser = new ShowCredit();
-    ShowDebit debitUser = new ShowDebit();
-    Empty empty = new Empty();
+    private static final String SHOW_ALL = "Show All Accounts";
+    private static final String SHOW_CREDIT = "Show Credit";
+    private static final String SHOW_DEBIT = "Show Debit";
+
+    private JPanel upperPanel, lowerPanel, holderPanel;
+    private GridBagConstraints gbc;
+    private Dimension size;
+    private Image bg;
+    private JButton showAllAccBtn, showUserCredAccBtn, showDebitAccBtn, exitBtn;
+    private CardLayout cardLayout = new CardLayout();
+    private ShowAllUsers readUser = new ShowAllUsers();
+    private ShowCredit creditUser = new ShowCredit();
+    private ShowDebit debitUser = new ShowDebit();
+    private Empty empty = new Empty();
     private Connection connection;
 
     public ReadMain() {
-        bg = new ImageIcon(getClass().getResource("/Files/bg.png")).getImage();
+        bg = new ImageIcon(getClass().getResource("/Files/bg2.png")).getImage();
         setBorder(BorderFactory.createLineBorder(new Color(0, 0, 0, 50), 2));
         setLayout(new GridBagLayout());
 
-        createPanel();
+        createPanels();
         createButtons();
 
         gbc = new GridBagConstraints();
@@ -45,7 +48,7 @@ public class ReadMain extends JPanel implements ActionListener {
         layoutButtons();
     }
 
-    public void createPanel() {
+    private void createPanels() {
         holderPanel = new JPanel();
         holderPanel.setOpaque(false);
 
@@ -63,70 +66,62 @@ public class ReadMain extends JPanel implements ActionListener {
                 }
             }
         };
-
         upperPanel.setLayout(new GridBagLayout());
         upperPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
     }
 
-    public void createButtons() {
+    private void createButtons() {
         size = new Dimension(150, 40);
 
-        showAllAccBtn = styleButton("All Accounts");
-        showAllAccBtn.addActionListener(this);
-
-        showUserCredAccBtn = styleButton("Credit Account");
-        showUserCredAccBtn.addActionListener(this);
-
-        showDebitAccbtn = styleButton("Debit Account");
-        showDebitAccbtn.addActionListener(this);
-
-        exitBtn = styleButton("Back");
-        exitBtn.addActionListener(this);
+        showAllAccBtn = createButton(SHOW_ALL);
+        showUserCredAccBtn = createButton(SHOW_CREDIT);
+        showDebitAccBtn = createButton(SHOW_DEBIT);
+        exitBtn = createButton("Back");
     }
 
-    private JButton styleButton(String text) {
-        JButton btn = new JButton(text);
-        btn.setPreferredSize(size);
-        btn.setFocusPainted(false);
-        btn.setForeground(Color.black);
-        btn.setBackground(Color.WHITE);
-        btn.setBorder(BorderFactory.createLineBorder(new Color(22, 180, 161), 2));
-        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        btn.setContentAreaFilled(false);
-        btn.setOpaque(true);
-        return btn;
+    private JButton createButton(String text) {
+        JButton button = new JButton(text);
+        button.setPreferredSize(size);
+        button.setFocusPainted(false);
+        button.setForeground(Color.black);
+        button.setBackground(Color.WHITE);
+        button.setBorder(BorderFactory.createLineBorder(new Color(22, 180, 161), 2));
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        button.setContentAreaFilled(false);
+        button.setOpaque(true);
+        button.addActionListener(this);
+        return button;
     }
 
-    public void layoutButtons() {
+    private void layoutButtons() {
         holderPanel.setLayout(new GridBagLayout());
         GridBagConstraints buttonGbc = new GridBagConstraints();
         buttonGbc.gridy = 0;
         buttonGbc.insets = new Insets(0, 10, 0, 10);
 
-        buttonGbc.gridx = 0;
-        holderPanel.add(showAllAccBtn, buttonGbc);
-
-        buttonGbc.gridx = 1;
-        holderPanel.add(showUserCredAccBtn, buttonGbc);
-
-        buttonGbc.gridx = 2;
-        holderPanel.add(showDebitAccbtn, buttonGbc);
-
-        buttonGbc.gridx = 3;
-        holderPanel.add(exitBtn, buttonGbc);
+        addButtonToPanel(holderPanel, buttonGbc, 0, showAllAccBtn);
+        addButtonToPanel(holderPanel, buttonGbc, 1, showUserCredAccBtn);
+        addButtonToPanel(holderPanel, buttonGbc, 2, showDebitAccBtn);
+        addButtonToPanel(holderPanel, buttonGbc, 3, exitBtn);
 
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.anchor = GridBagConstraints.CENTER;
         upperPanel.add(holderPanel, gbc);
+
         card();
     }
 
-    public void card() {
-        lowerPanel.add(readUser, "Show All Accounts");
-        lowerPanel.add(creditUser, "Show Credit");
-        lowerPanel.add(debitUser, "Show Debit");
+    private void addButtonToPanel(JPanel panel, GridBagConstraints gbc, int xPos, JButton button) {
+        gbc.gridx = xPos;
+        panel.add(button, gbc);
+    }
+
+    private void card() {
+        lowerPanel.add(readUser, SHOW_ALL);
+        lowerPanel.add(creditUser, SHOW_CREDIT);
+        lowerPanel.add(debitUser, SHOW_DEBIT);
         lowerPanel.add(empty, "Empty");
         cardLayout.show(lowerPanel, "Empty");
     }
@@ -143,10 +138,10 @@ public class ReadMain extends JPanel implements ActionListener {
 
     public void setConnection(Connection connection) {
         this.connection = connection;
+        creditUser.setConnection(connection);
+        debitUser.setConnection(connection);
+        readUser.setConnection(connection);
     }
-
-
-    
 
     @Override
     protected void paintComponent(Graphics g) {
@@ -159,13 +154,14 @@ public class ReadMain extends JPanel implements ActionListener {
         g.fillRect(70, 30, getWidth() - 140, 2);
     }
 
+    @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == showAllAccBtn) {
-            cardLayout.show(lowerPanel, "Show All Accounts");
+            cardLayout.show(lowerPanel, SHOW_ALL);
         } else if (e.getSource() == showUserCredAccBtn) {
-            cardLayout.show(lowerPanel, "Show Credit");
-        } else if (e.getSource() == showDebitAccbtn) {
-            cardLayout.show(lowerPanel, "Show Debit");
+            cardLayout.show(lowerPanel, SHOW_CREDIT);
+        } else if (e.getSource() == showDebitAccBtn) {
+            cardLayout.show(lowerPanel, SHOW_DEBIT);
         }
     }
 

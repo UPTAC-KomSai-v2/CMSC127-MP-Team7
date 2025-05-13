@@ -25,6 +25,7 @@ CREATE TABLE `bank_staff` (
   `first_name` varchar(100) NOT NULL,
   `last_name` varchar(100) NOT NULL,
   `email` varchar(100) NOT NULL,
+  `pin` int(11) NOT NULL,
   PRIMARY KEY (`staff_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -163,18 +164,18 @@ $$
 DELIMITER ;
 
 
-INSERT INTO bank_users (first_name, last_name, email)
+INSERT INTO bank_users (first_name, last_name, email, pin)
 VALUES
-  ('Alice', 'Smith', 'alice@example.com'),
-  ('Bob', 'Johnson', 'bob@example.com'),
-  ('Carol', 'Lee', 'carol@example.com'),
-  ('David', 'Kim', 'david@example.com'),
-  ('Eva', 'Brown', 'eva@example.com'),
-  ('Frank', 'White', 'frank@example.com'),
-  ('Grace', 'Young', 'grace@example.com'),
-  ('Henry', 'Black', 'henry@example.com'),
-  ('Ivy', 'Green', 'ivy@example.com'),
-  ('Jack', 'Gray', 'jack@example.com');
+  ('Alice', 'Smith', 'alice@example.com', 1234),
+  ('Bob', 'Johnson', 'bob@example.com', 1234),
+  ('Carol', 'Lee', 'carol@example.com', 1234),
+  ('David', 'Kim', 'david@example.com', 1234),
+  ('Eva', 'Brown', 'eva@example.com', 1234),
+  ('Frank', 'White', 'frank@example.com', 1234),
+  ('Grace', 'Young', 'grace@example.com', 1234),
+  ('Henry', 'Black', 'henry@example.com', 1234),
+  ('Ivy', 'Green', 'ivy@example.com', 1234),
+  ('Jack', 'Gray', 'jack@example.com', 1234);
 
 INSERT INTO bank_staff (user_name, first_name, last_name, email)
 VALUES

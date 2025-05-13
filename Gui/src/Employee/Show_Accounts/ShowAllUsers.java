@@ -1,31 +1,34 @@
 package Employee.Show_Accounts;
 
 import java.awt.*;
+import java.sql.*;
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 
 public class ShowAllUsers extends JPanel {
 
-    String[] columnNames = {"User ID", "First Name", "Last Name", "Email"};
-    
-    //Change this with the query nala
-    Object[][] data = {
-        {"U001", "Alice", "Smith", "alice.smith@example.com"},
-        {"U002", "Bob", "Johnson", "bob.johnson@example.com"},
-        {"U003", "Charlie", "Brown", "charlie.brown@example.com"},
-        {"U004", "Diana", "Evans", "diana.evans@example.com"}
-    };
-    DefaultTableModel model;
-    JTable table;
+    private static final String[] USER_COLUMNS = {"User ID", "First Name", "Last Name", "Email"};
+    private DefaultTableModel model;
+    private JTable table;
+    private Connection connection;
 
     public ShowAllUsers() {
         setLayout(new BorderLayout(10, 10));
+        setupTable();
+    }
 
-        model = new DefaultTableModel(data, columnNames);
+    private void setupTable() {
+        model = new DefaultTableModel(USER_COLUMNS, 0);
         table = new JTable(model);
+        configureTableAppearance();
 
-        // For stitik
+        JScrollPane scrollPane = new JScrollPane(table);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+        add(scrollPane, BorderLayout.CENTER);
+    }
+
+    private void configureTableAppearance() {
         table.setRowHeight(28);
         table.getTableHeader().setBackground(new Color(22, 180, 161));
         table.getTableHeader().setForeground(Color.WHITE);
@@ -38,28 +41,38 @@ public class ShowAllUsers extends JPanel {
             table.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
         }
 
-        table.getColumnModel().getColumn(0).setPreferredWidth(80);   
-        table.getColumnModel().getColumn(3).setPreferredWidth(250);  
-
-        // Scroll pane 
-        JScrollPane scrollPane = new JScrollPane(table);
-        scrollPane.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
-
-        add(scrollPane, BorderLayout.CENTER);
+        table.getColumnModel().getColumn(0).setPreferredWidth(80);
+        table.getColumnModel().getColumn(3).setPreferredWidth(250);
     }
 
-        //Delete this nala if tapos na mag test case
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            JFrame frame = new JFrame("All Users");
-            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            frame.setSize(850, 600);
-            frame.setLocationRelativeTo(null);
+    public void setConnection(Connection conn) {
+        this.connection = conn;
+        if (connection != null) {
+            loadUserData();
+        }
+    }
 
-            ShowAllUsers panel = new ShowAllUsers();
-            frame.setContentPane(panel);
+    //check query if tama
+    private void loadUserData() {
+        model.setRowCount(0);
 
-            frame.setVisible(true);
-        });
+        String query = "SELECT user_id, first_name, last_name, email FROM bank_users";
+
+        try (PreparedStatement stmt = connection.prepareStatement(query);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                Object[] row = {
+                        rs.getString("user_id"),
+                        rs.getString("first_name"),
+                        rs.getString("last_name"),
+                        rs.getString("email")
+                };
+                model.addRow(row);
+            }
+
+        } catch (SQLException e) {
+            System.out.println();
+        }
     }
 }
