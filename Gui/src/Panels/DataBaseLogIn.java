@@ -7,6 +7,10 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Image;
 import java.awt.Insets;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -24,6 +28,7 @@ public class DataBaseLogIn extends JPanel{
     Dimension size;
     GridBagConstraints gbc;
     Image bg, logo;
+    private Connection connection;
 
     public String user = new String();
     public char [] pass = new char[30];
@@ -125,6 +130,34 @@ public class DataBaseLogIn extends JPanel{
         gbc.gridy=4;
         gbc.anchor=GridBagConstraints.CENTER;
         this.add(backBtn, gbc);
+    }
+
+    public void resetView() {
+        revalidate();
+        repaint();
+    }
+
+public boolean logIn(String username, int pin) {
+    String sql = "SELECT * FROM bank_staff WHERE user_name = ? AND pin = ?";
+
+    try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+        pstmt.setString(1, username);
+        pstmt.setInt(2, pin); 
+        
+        try (ResultSet rs = pstmt.executeQuery()) {
+            return rs.next();
+        }
+
+    } catch (SQLException ex) {
+        ex.printStackTrace();
+        return false;
+    }
+}
+
+
+
+    public void setConnection(Connection connection) {
+        this.connection = connection;
     }
 
     @Override

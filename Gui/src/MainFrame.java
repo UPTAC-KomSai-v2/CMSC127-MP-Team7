@@ -73,6 +73,15 @@ public class MainFrame extends JFrame {
         }
     };
 
+    ActionListener adminLogIn = new ActionListener(){
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            if(e.getSource()==dbLogIn.getLogInBtn()){
+                logAdminInfo();
+            }
+        }
+    };
+
     ActionListener goToMain = new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -406,12 +415,13 @@ public class MainFrame extends JFrame {
         cardPanel.add(fileExport, "File Exports");
 
         menu.getAccessDatabaseBtn().addActionListener(goToAdminLogIn);
+        dbLogIn.getLogInBtn().addActionListener(adminLogIn);
         menu.getTransactionBtn().addActionListener(goToUserLogin);
         menu.getCloseBtn().addActionListener(exitApp);
 
 
         //Panel to access the database: DatabaseLogIn Panel
-        dbLogIn.getLogInBtn().addActionListener(goToAccessDataBase);
+        //dbLogIn.getLogInBtn().addActionListener(goToAccessDataBase);
 
         //Panel to access transaction: UserLogInPanel
         userLogIn.getOkBtn().addActionListener(userLoggingIn);
@@ -545,9 +555,10 @@ public class MainFrame extends JFrame {
             pin = Integer.parseInt(pinStr);
 
         } catch (NumberFormatException e) {
-            System.out.println("User ID and PIN must be numeric.");
+            System.out.println("Login failed: User ID and PIN must be numeric, and all required fields must be filled.");
+
             JOptionPane.showMessageDialog(
-                this, "User ID and PIN must be numeric.",
+                this, "User ID and PIN must be numeric, and all required fields must be filled.",
                 "Login Failed", JOptionPane.ERROR_MESSAGE
             );
             return;
@@ -583,6 +594,39 @@ public class MainFrame extends JFrame {
         userLogIn.getIdtxt().setText("");
         userLogIn.getPintxt().setText("");
     }
+
+public void logAdminInfo() {
+    String cidStr = dbLogIn.getUsertxt().getText();
+    String pinStr = new String(dbLogIn.getPasstxt().getPassword());
+
+    int pin;
+    try {
+        pin = Integer.parseInt(pinStr);
+    } catch (NumberFormatException e) {
+        JOptionPane.showMessageDialog(
+            this, "PIN must be numeric, and all required fields must be filled.",
+            "Login Failed", JOptionPane.ERROR_MESSAGE
+        );
+        return; 
+    }
+
+    //for logging in, adto ha DataBaseLogIn Panel and query
+    boolean loginSuccessful = dbLogIn.logIn(cidStr, pin);
+    if (loginSuccessful) {
+        userLogIn.getIdtxt().setText("");
+        userLogIn.getPintxt().setText("");
+        dbLogIn.resetView();
+        cardLayout.show(cardPanel, "Access Database");
+    } else {
+        JOptionPane.showMessageDialog(
+            this, "Login failed. Please check that the USERNAME and PIN are all typed correctly.",
+            "Login Failed", JOptionPane.ERROR_MESSAGE
+        );
+    }
+    dbLogIn.getPasstxt().setText("");
+    dbLogIn.getUsertxt().setText("");
+    dbLogIn.resetView();
+}
 
     //Create new User
     public void newUserInfo() {
@@ -821,6 +865,7 @@ public class MainFrame extends JFrame {
         fileImport.setConnection(conn);
         fileExport.setConnection(conn);
         model.setConnection(conn);
+        dbLogIn.setConnection(connection);
         
     }
 
