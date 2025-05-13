@@ -777,12 +777,17 @@ public void logAdminInfo() {
                 
                 JOptionPane.showMessageDialog(this, "Transfer successful!", 
                     "Transfer Success", JOptionPane.INFORMATION_MESSAGE);
-            } catch (SQLException e) {
+                connection.commit();
+            } catch (Exception e) {
+                System.out.println("its noasdf");
                 try {
+                    System.out.println("rolldback");
                     connection.rollback();
                 } catch (SQLException e1) {
                     e1.printStackTrace();
+                    System.out.println("awtf");
                 }
+                System.out.println("dafaq");
                 JOptionPane.showMessageDialog(this, "SQL Error Message:\n" + e.getMessage(), 
                     "Transfer Error", JOptionPane.ERROR_MESSAGE);
             } finally {

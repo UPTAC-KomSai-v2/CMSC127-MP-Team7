@@ -338,7 +338,7 @@ public class Model {
         }
     }
 
-    private void updateBalance(int accType, double amount, int cid) {
+    private void updateBalance(int accType, double amount, int cid) throws SQLException {
         System.out.println("Balance update: " + amount + " for account type: " + accType + " and card ID: " + cid);
         String updateBalance = """
                 UPDATE debit_balance SET balance = ? WHERE debit_id = ?
@@ -347,7 +347,6 @@ public class Model {
                 UPDATE credit_loans SET loan = ? WHERE credit_id = ?
                 """;
         
-        try {
             if (accType == 0) {
                 PreparedStatement stmt = connection.prepareStatement(updateBalance);
                 stmt.setDouble(1, amount);
@@ -361,13 +360,6 @@ public class Model {
                 stmt.executeUpdate();
                 stmt.close();
             }
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(
-                null, 
-                "SQL Error Message:\n" + e.getMessage(), 
-                "Update Error", 
-                JOptionPane.ERROR_MESSAGE);
-        }
     }
 
     public boolean transferMoney(int accType, int transferType, int transactionID, int cid, double amount) throws SQLException{
@@ -381,7 +373,6 @@ public class Model {
                 """;
         System.out.println("Current Amount: " + getCurrAmount(accType, cid));
         if (accType == 0) {
-            try {
                 PreparedStatement stmt = connection.prepareStatement(debitTransfer);
                 stmt.setInt(1, transactionID);
                 stmt.setInt(2, cid);
@@ -389,17 +380,10 @@ public class Model {
                 updateBalance(accType, getCurrAmount(accType, cid) + amount * transferType, cid);
                 stmt.executeUpdate();
                 stmt.close();
-            } catch (SQLException e) {
-                connection.rollback();
-                JOptionPane.showMessageDialog(
-                    null,
-                    "SQL Error Message:\n" + e.getMessage(), 
-                    "Transfer Error",
-                    JOptionPane.ERROR_MESSAGE);
-                return false;
-            }
         } else if (accType == 1) {
-            try {
+                if(getBalance() + amount >0){
+                throw new SQLException("transfer exceeds receipient loan");
+            }
                 PreparedStatement stmt = connection.prepareStatement(creditTransfer);
                 stmt.setInt(1, transactionID);
                 stmt.setInt(2, cid);
@@ -407,14 +391,6 @@ public class Model {
                 updateBalance(accType, getCurrAmount(accType, cid) + amount * transferType, cid);
                 stmt.executeUpdate();
                 stmt.close();
-            } catch (SQLException e) {
-                JOptionPane.showMessageDialog(
-                    null,
-                    "SQL Error Message:\n" + e.getMessage(), 
-                    "Transfer Error",
-                    JOptionPane.ERROR_MESSAGE);
-                return false;
-            }
         }
         return true;
     }
