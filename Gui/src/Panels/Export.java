@@ -27,9 +27,6 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-
 public class Export extends JPanel {
     JLabel exportlbl, cidlbl, tablelbl, fileTypelbl;
     private JButton okBtn, backBtn;
@@ -149,27 +146,6 @@ public class Export extends JPanel {
                 }
             }
         }
-        else{
-            JFileChooser chooser = new JFileChooser();
-            chooser.setDialogTitle("Save JSON");
-            int userSelection = chooser.showSaveDialog(null);
-            
-            if (userSelection == JFileChooser.APPROVE_OPTION) {
-                File fileToSave = chooser.getSelectedFile();
-                String filePath = fileToSave.getAbsolutePath();
-                if (!filePath.toLowerCase().endsWith(".json")) {
-                    filePath += ".json";
-                }
-            
-                try {
-                    exportTableToJSON(conn, selectedTable, filePath);
-                    JOptionPane.showMessageDialog(this, "Export successful!");
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                    JOptionPane.showMessageDialog(this, "Export failed: " + ex.getMessage());
-                }
-            }
-        }
     });
 
         gbc.gridx = 0;
@@ -256,34 +232,20 @@ public class Export extends JPanel {
         }
     }
 
-    public void exportTableToJSON(Connection conn, String tableName, String filePath) {
-        String query = "SELECT * FROM " + tableName;
-
-        try (Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery(query);
-            BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
-
-            ResultSetMetaData meta = rs.getMetaData();
-            int columnCount = meta.getColumnCount();
-
-            JSONArray jsonArray = new JSONArray();
-
-            while (rs.next()) {
-                JSONObject obj = new JSONObject();
-                for (int i = 1; i <= columnCount; i++) {
-                    obj.put(meta.getColumnName(i), rs.getObject(i));
-                }
-                jsonArray.put(obj);
-            }
-
-            writer.write(jsonArray.toString(4)); // Pretty print with indentation
-            writer.flush();
-            JOptionPane.showMessageDialog(null, "Exported table '" + tableName + "' to JSON: " + filePath);
-        } catch (Exception e) {
-            e.printStackTrace();
-            JOptionPane.showMessageDialog(null, "Export failed: " + e.getMessage());
-        }
+    public JTextField getCidtxt(){
+        return cidtxt;
     }
+    public JTextField getMoneytxt(){
+        return moneytxt;
+    }
+
+    public JComboBox<String> getFileType(){
+        return fileType;
+    }
+    public JComboBox<String> getTable(){
+        return table;
+    }
+
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
