@@ -165,13 +165,13 @@ public boolean createCardInDatabase() {
             return false;
         }
 
-        int userId = Integer.parseInt(selectedUser.split(" - ")[0]);
-        String cardType = (String) cardTypeComboBox.getSelectedItem();
-        int amount = Integer.parseInt(balanceTxt.getText());
-        int pin = Integer.parseInt(pinTxt.getText());
 
         connection.setAutoCommit(false);
         try {
+                int userId = Integer.parseInt(selectedUser.split(" - ")[0]);
+                String cardType = (String) cardTypeComboBox.getSelectedItem();
+                int amount = Integer.parseInt(balanceTxt.getText());
+                int pin = Integer.parseInt(pinTxt.getText());
             if ("Credit".equals(cardType)) {
                 String creditSql = "INSERT INTO credit_accounts (user_id, pin) VALUES (?, ?)";
                 PreparedStatement creditStmt = connection.prepareStatement(creditSql, PreparedStatement.RETURN_GENERATED_KEYS);
@@ -220,9 +220,14 @@ public boolean createCardInDatabase() {
             JOptionPane.showMessageDialog(this, cardType + " card created successfully!", 
                 "Success", JOptionPane.INFORMATION_MESSAGE);
             return true;
-        } catch (SQLException | NumberFormatException e) {
+        } catch (SQLException e) {
             connection.rollback();
             JOptionPane.showMessageDialog(this, "Error creating card: " + e.getMessage(), 
+                "Database Error", JOptionPane.ERROR_MESSAGE);
+            return false;
+        } catch (NumberFormatException e) {
+            connection.rollback();
+            JOptionPane.showMessageDialog(this, "input integers in pin and amount: " + e.getMessage(), 
                 "Database Error", JOptionPane.ERROR_MESSAGE);
             return false;
         } finally {
