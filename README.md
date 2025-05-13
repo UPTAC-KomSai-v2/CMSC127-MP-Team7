@@ -47,41 +47,61 @@ Just run the JAR file using the JRE 21+ or JDK 21+. You can also run it in the c
 java -jar <insert JAR filename here>
 ```
 
-## App Guide
+## App Manual
 
 This is a banking app.
 
-The main menu features the buttons "Access Data Base", "Transaction", and "Close" button.
+### Main Menu
 
-Access Data base - > Brings you to the admin login page where in order to acces the admin options you need to input the correct username and password
+The main menu features the buttons **Access Database**, **Transaction**, and **Close** button.
 
-Transaction - > Brings you to the account login page where you input the details of your account and if its correct your credentials will be used for input and outputs for the database.
+**Access Database**
+: Brings you to the admin login page where in order to acces the admin options you need to input the correct username and password
 
-Create new Account - > brings you to a menu where you can either create a new user or a new credit/debit card. For the new card, you would need to input the id of a user to attach the new account to.
+**Transaction**
+: Brings you to the account login page where you input the details of your account and if its correct your credentials will be used for input and outputs for the database.
 
-Show all accounts - > brings you to a menu where you can view all of the users, credit accounts, and debit accounts.
+### Access Database (Admin User Page)
 
-Update account - > brings you to a menu where you are required to put the id of a user to update. Before bringing you to the change menu, the information of the account will be displayed in case you get the wrong id
+**Create new Account**
+: Brings you to a menu where you can either create a new user or a new credit/debit card. For the new card, you would need to input the id of a user to attach the new account to.
 
-Delete account - > deletes a specified user given their id, before the delete is implemented, it would display the information of the user.
+**Show All Accounts**
+: Brings you to a menu where you can view all of the users, credit accounts, and debit accounts.
 
-Import/Export - > brings you to a menu where you would select a file type between JSON or CSV
+**Update Account**
+: Brings you to a menu where you are required to put the id of a user to update. Before bringing you to the change menu, the information of the account will be displayed in case you get the wrong id
 
-Log Out - > brings you back to the main menu, logging you out of the admin options
+**Delete Account**
+: Deletes a specified user given their id, before the delete is implemented, it would display the information of the user.
 
-When being brought to the user account:
+**Import/Export**
+: Brings you to a menu where you would select a file type between JSON or CSV
 
-Balance - > displays account balance
+**Log Out**
+: Brings you back to the main menu, logging you out of the admin options
 
-Transfer - > asks for another accounts details and transfers funds to the other account
+### User Account Page
 
-History - > displays all transactions made using the account
+**Balance**
+: Displays account balance
 
-Deposit - > deposits funds into the account
+**Transfer**
+: Asks for another accounts details and transfers funds to the other account
 
-Withdraw - > withdraws money from the account
+**History**
+: Displays all transactions made using the account
 
-Log out - > brings you back to the main menu
+**Deposit**
+: Deposits funds into the account
 
+**Withdraw**
+: Withdraws money from the account
 
+**Log Out**
+: Brings you back to the main menu
+
+### Close
+
+Closes the app.
 
