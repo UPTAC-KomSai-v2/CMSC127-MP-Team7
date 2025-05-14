@@ -1,0 +1,7 @@
+(To access an database na section ig input adi temporarily kay ig c-change pa inen hit backend) "User" Pass: "Pass"
+(To access an user na section ig input adi temporarily kay ig c-change pa inen hit backend) "User" Pass: "Pass"
+
+Employee folder contains the class for executing the CRUD (Create, Read, Update and Delete) functionalities.
+Files folder contains pictures needed for the GUI
+Panel Folder contains the panels that are commonly prompt to the user for viewing purposes. This are for user interaction.
+The User Folder contains the classes for executing the Transaction of the user or its interaction to its account.

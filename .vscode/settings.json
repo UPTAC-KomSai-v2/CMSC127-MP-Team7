@@ -1,0 +1,7 @@
+{
+    "java.project.referencedLibraries": [
+        "lib/**/*.jar",
+        "Gui/lib/**/*.jar",
+        "c:\\Users\\thisi\\Downloads\\java-json.jar"
+    ]
+}
