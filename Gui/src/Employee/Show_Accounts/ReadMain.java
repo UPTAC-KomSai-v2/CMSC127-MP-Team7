@@ -22,6 +22,7 @@ public class ReadMain extends JPanel implements ActionListener {
     private ShowCredit creditUser = new ShowCredit();
     private ShowDebit debitUser = new ShowDebit();
     private Empty empty = new Empty();
+    @SuppressWarnings("unused")
     private Connection connection;
 
     public ReadMain() {

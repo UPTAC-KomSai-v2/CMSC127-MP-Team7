@@ -79,6 +79,7 @@ public class Model {
             stmt.setInt(1, currCardID);
             ResultSet rs = stmt.executeQuery();
             
+            // Check if the loan amount exceeds the maximum allowed
             double currentLoan = 0;
             if (rs.next()) {
                 currentLoan = rs.getDouble("loan");
@@ -98,13 +99,15 @@ public class Model {
             
             connection.setAutoCommit(false);
             
+            // Record the transaction
             stmt = connection.prepareStatement(query);
             stmt.setInt(1, transactionID);
             stmt.setInt(2, currCardID);
-            stmt.setDouble(3, amount);
+            stmt.setDouble(3, amount * -1);
             stmt.executeUpdate();
             stmt.close();
             
+            // Update the account balance.
             stmt = connection.prepareStatement(updateLoan);
             stmt.setDouble(1, amount);
             stmt.setInt(2, currCardID);
